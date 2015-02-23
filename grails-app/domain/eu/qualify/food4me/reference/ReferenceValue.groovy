@@ -1,7 +1,9 @@
 package eu.qualify.food4me.reference
 
-import eu.qualify.food4me.Property
+import java.util.List;
 
+import eu.qualify.food4me.Property;
+import eu.qualify.food4me.measurements.Status;
 
 /**
  * Reference value for a given property
@@ -17,6 +19,12 @@ class ReferenceValue {
 	 * Resulting status of this rule
 	 */
 	String status
+	
+	/**
+	 * Status color. This color describes the severity of the
+	 * status. Red is more severe than Amber and Green is OK
+	 */
+	Status.Color color
 	
 	/**
 	 * Number of conditions applicable to this reference

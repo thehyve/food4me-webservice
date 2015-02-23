@@ -37,54 +37,54 @@ class ReferenceValueSpec extends Specification {
 			fibre.save(failOnError: true)
 
 		// Initialize a few simple references
-		def proteinVeryLow = new ReferenceValue(subject: protein, status: Status.STATUS_VERY_LOW )
-			proteinVeryLow.addToConditions( new ReferenceCondition( subject: protein, high: 0.52 ) )
+		def proteinVeryLow = new ReferenceValue(subject: protein, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+			proteinVeryLow.addToConditions( subject: protein, high: 0.52 )
 			proteinVeryLow.save(failOnError: true)
 			
-		def proteinLow = new ReferenceValue(subject: protein, status: Status.STATUS_LOW )
+		def proteinLow = new ReferenceValue(subject: protein, status: Status.STATUS_LOW, color: Status.Color.AMBER )
 			proteinLow.addToConditions( new ReferenceCondition( subject: protein, low: 0.52, high: 0.66 ) )
 			proteinLow.save(failOnError: true)
 
-		def proteinOK = new ReferenceValue(subject: protein, status: Status.STATUS_OK )
+		def proteinOK = new ReferenceValue(subject: protein, status: Status.STATUS_OK, color: Status.Color.GREEN )
 			proteinOK.addToConditions( new ReferenceCondition( subject: protein, low: 0.66, high: 2.4 ) )
 			proteinOK.save(failOnError: true)
 
-		def proteinHigh = new ReferenceValue(subject: protein, status: Status.STATUS_HIGH )
+		def proteinHigh = new ReferenceValue(subject: protein, status: Status.STATUS_HIGH, color: Status.Color.RED )
 			proteinHigh.addToConditions( new ReferenceCondition( subject: protein, low: 2.4 ) )
 			proteinHigh.save(failOnError: true)
 			
-		def carbohydrateVeryLow = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_VERY_LOW )
+		def carbohydrateVeryLow = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
 			carbohydrateVeryLow.addToConditions( new ReferenceCondition( subject: carbohydrate, high: 40 ) )
 			carbohydrateVeryLow.save(failOnError: true)
 			
-		def carbohydrateLow = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_LOW )
+		def carbohydrateLow = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_LOW, color: Status.Color.AMBER )
 			carbohydrateLow.addToConditions( new ReferenceCondition( subject: carbohydrate, low: 40, high: 45 ) )
 			carbohydrateLow.save(failOnError: true)
 
-		def carbohydrateOK = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_OK )
+		def carbohydrateOK = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_OK, color: Status.Color.GREEN )
 			carbohydrateOK.addToConditions( new ReferenceCondition( subject: carbohydrate, low: 45, high: 65 ) )
 			carbohydrateOK.save(failOnError: true)
 
-		def carbohydrateHigh = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_HIGH )
+		def carbohydrateHigh = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER )
 			carbohydrateHigh.addToConditions( new ReferenceCondition( subject: carbohydrate, low: 65, high: 70 ) )
 			carbohydrateHigh.save(failOnError: true)
 			
-		def carbohydrateVeryHigh = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_VERY_HIGH )
+		def carbohydrateVeryHigh = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED )
 			carbohydrateVeryHigh.addToConditions( new ReferenceCondition( subject: carbohydrate, low: 70 ) )
 			carbohydrateVeryHigh.save(failOnError: true)
 
-		def fibreVeryLow1 = new ReferenceValue(subject: fibre, status: Status.STATUS_VERY_LOW )
+
+		def fibreVeryLow1 = new ReferenceValue(subject: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
 			fibreVeryLow1.addToConditions( new ReferenceCondition( subject: fibre, high: 28 ) )
 			fibreVeryLow1.addToConditions( new ReferenceCondition( subject: gender, value: "male") )
 			fibreVeryLow1.addToConditions( new ReferenceCondition( subject: age, low: 17, high: 50 ) )
 			fibreVeryLow1.save(failOnError: true)
 			
-		def fibreLow1 = new ReferenceValue(subject: fibre, status: Status.STATUS_LOW )
+		def fibreLow1 = new ReferenceValue(subject: fibre, status: Status.STATUS_LOW, color: Status.Color.AMBER )
 			fibreLow1.addToConditions( new ReferenceCondition( subject: fibre, low: 28, high: 38 ) )
 			fibreLow1.addToConditions( new ReferenceCondition( subject: gender, value: "male") )
 			fibreLow1.addToConditions( new ReferenceCondition( subject: age, low: 17, high: 50 ) )
 			fibreLow1.save(failOnError: true)
-
     }
 
     def cleanup() {

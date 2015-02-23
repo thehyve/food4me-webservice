@@ -1,6 +1,8 @@
 package eu.qualify.food4me.reference
 
-import eu.qualify.food4me.Property
+import java.math.BigDecimal;
+
+import eu.qualify.food4me.Property;
 
 class ReferenceCondition {
 	/**

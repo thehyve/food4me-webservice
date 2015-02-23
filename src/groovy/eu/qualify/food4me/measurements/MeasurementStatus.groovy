@@ -9,11 +9,19 @@ class MeasurementStatus {
 		status = [:]
 	}
 	
-	public getStatus(Measurable e) {
+	public Status getStatus(Measurable e) {
 		return status[e]
 	}
 	
-	public addStatus(Measurable e, Status s) {
+	public void addStatus(Measurable e, Status s) {
 		status[e] = s
+	}
+	
+	/**
+	 * Retrieves all statusses from this object
+	 * @return
+	 */
+	public Collection<Status> getAll() {
+		return status.values()
 	}
 }
