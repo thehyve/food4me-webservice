@@ -12,5 +12,5 @@ interface AdvisableDeterminer {
 	 * @param measurementStatus
 	 * @return
 	 */
-	List<Advisable> determineAdvisables(Measurements measurements, MeasurementStatus measurementStatus)
+	List<Advisable> determineAdvisables(MeasurementStatus measurementStatus, Measurements measurements)
 }

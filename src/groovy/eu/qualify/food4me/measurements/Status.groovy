@@ -10,9 +10,11 @@ class Status {
 	static final String STATUS_VERY_HIGH = "Very high"
 	static final String STATUS_UNKNOWN = "Unknown"
 
-	String status = STATUS_UNKNOWN
 	MeasuredValue value
 	Measurable entity
+	
+	String status = STATUS_UNKNOWN
+	Color color
 	
 	/**
 	 * Color that is used to show on screen and determine the severity

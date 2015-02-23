@@ -34,15 +34,23 @@ class ComputeStatusService implements StatusComputer {
 	
 	public Status getStatus( NutrientIntake nutrientIntake, Measurements measurements ) {
 		MeasuredValue total = nutrientIntake.total
-		new Status( entity: nutrientIntake.property, value: total, getStatusText( measurement.property, measurements ) ) 
+		
+		def status = determineStatus( nutrientIntake.property, measurements )
+		status?.value = value
+		status
 	}
 
 	public Status getStatus( Measurement measurement, Measurements measurements ) {
 		MeasuredValue value = measurement.value
-		new Status( entity: measurement.property, value: value, status: getStatusText( measurement.property, measurements ) )
+		
+		def status = determineStatus( measurement.property, measurements )
+		status?.value = value
+		return status
 	}
 	
-	protected String getStatusText( Property property, Measurements measurements ) {
+	protected Status determineStatus( Property property, Measurements measurements ) {
+		def status = new Status( entity: property )
+
 		// First determine the conditions applicable for the given property
 		// Most probably that includes the property value itself, but it could 
 		// be dependent on age or gender as well
@@ -51,12 +59,12 @@ class ComputeStatusService implements StatusComputer {
 		// If no properties are found, no reference values are known. Returning immediately
 		if( !properties ) {
 			log.warn "No references apply for any value of ${property}. Please check the database"
-			println "No references apply for any value of ${property}. Please check the database"
-			return Status.STATUS_UNKNOWN
+			status.status = Status.STATUS_UNKNOWN
+			return status
 		}
 		
 		// Create a query that includes all values and retrieve the id and status 
-		def hql = "SELECT reference.id, reference.status FROM ReferenceValue as reference INNER JOIN reference.conditions as condition"
+		def hql = "SELECT reference.id, reference.status, reference.color FROM ReferenceValue as reference INNER JOIN reference.conditions as condition"
 		hql += " WHERE reference.subject = :referenceProperty "
 		
 		def (whereClause, hqlParams) = generateWhereClause( properties, measurements )
@@ -64,28 +72,26 @@ class ComputeStatusService implements StatusComputer {
 			hql += " AND ( " + whereClause.join( " OR " ) + " )"
 		}
 			
-		hql += " GROUP BY reference.id, reference.status HAVING COUNT(*) = reference.numConditions"
+		hql += " GROUP BY reference.id, reference.status, reference.color HAVING COUNT(*) = reference.numConditions"
 		
 		hqlParams[ "referenceProperty" ] = property
-		
-		println "Executing HQL: " + hql
 		
 		def statuses = ReferenceValue.executeQuery( hql, hqlParams )
 		
 		if( statuses.size() == 0 ) {
 			log.warn "No references apply for ${property}. Retrieval parameters are " + hqlParams
-			println "No references apply for ${property}. Retrieval parameters are " + hqlParams
-			return Status.STATUS_UNKNOWN
+			status.status = Status.STATUS_UNKNOWN
+			return status
 		}
 			
 		if( statuses.size() > 1 ) { 
 			log.warn "Multiple references apply for ${property}. Retrieval parameters are " + hqlParams
-			println "Multiple references apply for ${property}. Retrieval parameters are " + hqlParams
-			
 		}
 		
 		// Return the first status found
-		statuses[0][1]
+		status.status = statuses[0][1]
+		status.color = statuses[0][2]
+		return status
 	}
 	
 	protected def generateWhereClause( List<Property> properties, Measurements measurements ) {

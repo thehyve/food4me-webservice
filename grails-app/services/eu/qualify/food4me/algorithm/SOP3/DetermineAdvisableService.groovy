@@ -6,6 +6,7 @@ import eu.qualify.food4me.interfaces.AdvisableDeterminer
 import eu.qualify.food4me.interfaces.Measurable
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
+import eu.qualify.food4me.measurements.Status
 import grails.transaction.Transactional
 
 @Transactional
@@ -17,10 +18,10 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 		Property.findByEntity( "Saturated fat" ),
 		Property.findByEntity( "Total fat" ),
 		Property.findByEntity( "Folate" )
-	]}
+	].findAll() }()
 	
 	@Override
-	public List<Advisable> determineAdvisables(Measurements measurements, MeasurementStatus measurementStatus) {
+	public List<Advisable> determineAdvisables(MeasurementStatus measurementStatus, Measurements measurements ) {
 		List<Advisable> advisables = []
 		
 		// Get the highest priority property from each of the groups
@@ -37,32 +38,43 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 		// If non-gene-risk nutrients have a higher colour priority (red) than 
 		// gene-risk nutrients, you prioritise 2 red non-gene-risk nutrients 
 		// then a third advice will be based on a gene-risk nutrient
-		if( !advisables.findAll { isGeneProperty( it ) } ) {
-			replaceLastItem
-			// Retrieve all statusses that have to do with gene risk properties
-			// TODO: Improve performance
-			def geneRiskStatusses = measurementStatus.all.findAll { isGeneRiskProperty( it.measurable ) }
-			
-			// Find a geneRiskProperty with the highest severity
-			if( geneRiskStatusses ) {
-				def sortedStatusses = geneRiskStatusses.sort { a, b ->
-					if( a.color == b.color ) {
-						geneRiskProperties.indexOf( a.measurable ) <=> geneRiskProperties.indexOf( b.measurable )
-					} else {
-						a.color <=> b.color
-					}
-				}
-				
-				// Replace the last item with the highest priority gene risk property (if there are three items)
-				// or add the item otherwise
-				if( advisables.size() >= 3 )
-					advisables.pop()
-					
-				advisables << sortedStatusses[0].measurable
-			}
+		if( !advisables.findAll { isGeneRiskProperty( it ) } ) {
+			addGeneRiskPropertyToAdvisables( advisables, measurementStatus )
 		}
 		
 		advisables
+	}
+	
+	/**
+	 * Adds a 'gene-risk' advisable to the list of advisables. If there are initially 3
+	 * or more advisables, the last one is replaced. 
+	 * @param advisables
+	 */
+	protected void addGeneRiskPropertyToAdvisables( List<Advisable> advisables, MeasurementStatus measurementStatus ) {
+		// Retrieve all statusses that have to do with gene risk properties
+		// TODO: Improve performance
+		def geneRiskStatusses = measurementStatus.all.findAll { isGeneRiskProperty( it.entity ) }
+		
+		// Find a geneRiskProperty with the highest severity
+		if( geneRiskStatusses ) {
+			def sortedStatusses = geneRiskStatusses.sort { a, b ->
+				if( a.color == b.color ) {
+					// With equal color/severity, order by index within the list ascending
+					geneRiskProperties.indexOf( a.measurable ) <=> geneRiskProperties.indexOf( b.measurable )
+				} else {
+					// Order on color/severity descending
+					b.color <=> a.color
+				}
+			}
+			
+			// Replace the last item with the highest priority gene risk property (if there are three items)
+			// or add the item otherwise
+			if( advisables.size() >= 3 )
+				advisables.pop()
+				
+			advisables << sortedStatusses[0].entity
+		}
+
 	}
 		
 	/**
@@ -71,7 +83,7 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 	 * @return
 	 */
 	protected boolean isGeneRiskProperty(Measurable p) {
-		p in geneRiskProperties
+		geneRiskProperties.contains(p)
 	}
 	
 	/**
@@ -84,8 +96,8 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 		// Retrieve the properties within this group
 		def groupProperties = getGroupProperties( group )	
 		
-		// First filter the list based on the given group
-		def filteredList = measurementStatus.all.findAll { it.measurable in groupProperties }
+		// First filter the list based on the given group and the status is not OK
+		def filteredList = measurementStatus.all.findAll { it.status != Status.STATUS_OK && it.entity in groupProperties }
 		
 		if( !filteredList )
 			return null
@@ -94,14 +106,16 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 		// on the position in the list of group properties
 		def sortedList = filteredList.sort { a, b ->
 			if( a.color == b.color ) {
-				groupProperties.indexOf( a.measurable ) <=> groupProperties.indexOf( b.measurable )
+				// With equal color/severity, order by index within the group ascending
+				groupProperties.indexOf( a.entity ) <=> groupProperties.indexOf( b.entity )
 			} else {
-				a.color <=> b.color
+				// Order on color/severity descending
+				b.color <=> a.color
 			}
 		}
-		
+
 		// Return the first item from this groups properties
-		sortedList[0].measurable
+		sortedList[0].entity
 	}
 	
 	/**
