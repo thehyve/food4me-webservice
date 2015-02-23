@@ -85,10 +85,20 @@ grails.hibernate.pass.readonly = false
 // configure passing read-only to OSIV session by default, requires "singleSession = false" OSIV mode
 grails.hibernate.osiv.readonly = false
 
+// Settings to handle database migrations. 
+grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
+grails.plugin.databasemigration.autoMigrateScripts = [ 'RunApp', 'TestApp' ]
 environments {
     development {
         grails.logging.jul.usebridge = true
+		
+		grails.plugin.databasemigration.dropOnStart = false
+		grails.plugin.databasemigration.updateOnStart = true
     }
+	test {
+		grails.plugin.databasemigration.dropOnStart = true
+		grails.plugin.databasemigration.updateOnStart = true
+	}
     production {
         grails.logging.jul.usebridge = false
         // TODO: grails.serverURL = "http://www.changeme.com"
