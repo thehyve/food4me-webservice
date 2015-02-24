@@ -41,6 +41,10 @@ class Advice {
     static constraints = {
     }
 	
+	static mapping = {
+		text type: 'text'
+	}
+	
 	public String toString() {
 		return "Advice " + code + " on " + subject
 	}
