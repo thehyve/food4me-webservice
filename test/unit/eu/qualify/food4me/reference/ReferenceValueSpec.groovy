@@ -38,7 +38,7 @@ class ReferenceValueSpec extends Specification {
 
 		// Initialize a few simple references
 		def proteinVeryLow = new ReferenceValue(subject: protein, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
-			proteinVeryLow.addToConditions( subject: protein, high: 0.52 )
+			proteinVeryLow.addToConditions( new ReferenceCondition( subject: protein, high: 0.52 ) )
 			proteinVeryLow.save(failOnError: true)
 			
 		def proteinLow = new ReferenceValue(subject: protein, status: Status.STATUS_LOW, color: Status.Color.AMBER )

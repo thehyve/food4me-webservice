@@ -37,6 +37,14 @@ class Property implements Measurable, Advisable {
     }
 	
 	public String toString() {
-		return "Property " + entity + " (" + externalId + ")"
+		String description = "" + entity
+		
+		if( propertyGroup && propertyGroup != PROPERTY_GROUP_GENERIC ) 
+			description += " " + propertyGroup 
+		
+		if( externalId )
+			description += " (" + externalId + ")"
+			
+		description
 	}
 }

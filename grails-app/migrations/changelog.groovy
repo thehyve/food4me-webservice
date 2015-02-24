@@ -124,4 +124,12 @@ databaseChangeLog = {
 	
 	// Please note, creating the trigger is currently only supported on postgres
 	include file: 'trigger-on-reference-conditions.groovy'
+
+	include file: 'initial-advices.groovy'
+	
+	// Please note, creating the trigger is currently only supported on postgres
+	include file: 'trigger-on-advice-conditions.groovy'
+
+
+	include file: 'add-modifier-to-advice-condition.groovy'
 }

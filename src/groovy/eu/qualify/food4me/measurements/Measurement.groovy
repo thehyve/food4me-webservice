@@ -1,11 +1,11 @@
 package eu.qualify.food4me.measurements
 
-import eu.qualify.food4me.Property
+import eu.qualify.food4me.interfaces.Measurable
 import groovy.transform.Canonical
 
 
 @Canonical
 class Measurement {
-	Property property
+	Measurable property
 	MeasuredValue value
 }

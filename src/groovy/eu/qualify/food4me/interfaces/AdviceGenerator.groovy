@@ -1,6 +1,6 @@
 package eu.qualify.food4me.interfaces
 
-import eu.qualify.food4me.Advice
+import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
 

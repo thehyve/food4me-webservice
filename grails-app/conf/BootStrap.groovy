@@ -1,5 +1,8 @@
+import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
+import eu.qualify.food4me.decisiontree.Advice
+import eu.qualify.food4me.decisiontree.AdviceCondition
 import eu.qualify.food4me.measurements.Status
 import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
@@ -10,11 +13,13 @@ class BootStrap {
     def init = { servletContext ->
 		if( Environment.getCurrent().name in [ "env", "test" ] ) {
 			println "Bootstrapping environment " + Environment.getCurrent().name
+			initializeGenericData()
 			initializeReferences()
+			initializeAdvices()
 		}
     }
 	
-	def initializeReferences() {
+	def initializeGenericData() {
 		// Initialize units
 		def years = Unit.findByCode( "yr" ) ?: new Unit( name: "years", externalId: "258707000", code: "yr" )
 			years.save(failOnError: true)
@@ -28,7 +33,10 @@ class BootStrap {
 			mmolPerL.save(failOnError: true)
 		def percentageEnergyIntake = Unit.findByCode( "% energy intake" ) ?: new Unit( name: "% of total energy intake", externalId: "288493004", code: "% energy intake" )
 			percentageEnergyIntake.save(failOnError: true)
+		def percentage = Unit.findByCode( "%" ) ?: new Unit( name: "%", externalId: "415067009", code: "%" )
+			percentage.save(failOnError: true)
 
+			
 		// Initialize properties needed
 		def age = Property.findByEntity( "Age" ) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_GENERIC, entity: "Age", externalId: "397669002", unit: years)
 			age.save(failOnError: true)
@@ -47,7 +55,34 @@ class BootStrap {
 			cholesterol.save(failOnError: true)
 		def vitaminA = Property.findByEntity( "Vitamin A" ) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_NUTRIENT, entity: "Vitamin A", externalId: "82622003", unit: micrograms)
 			vitaminA.save(failOnError: true)
+			
+		def geneFADS1 = Property.findByEntity("FADS1") ?: new Property(propertyGroup: Property.PROPERTY_GROUP_SNP, entity: "FADS1", externalId: "rs174546")
+			geneFADS1.save(failOnError: true)
+			
+		def omega3Intake = Property.findByEntityAndPropertyGroup("Omega-3", Property.PROPERTY_GROUP_NUTRIENT) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_NUTRIENT, entity: "Omega-3", externalId: "226332006", unit: percentageEnergyIntake)
+			omega3Intake.save(failOnError: true)
+			
+		def omega3Biomarker = Property.findByEntityAndPropertyGroup("Omega-3", Property.PROPERTY_GROUP_BIOMARKER) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_BIOMARKER, entity: "Omega-3", externalId: "226365003", unit: percentage)
+			omega3Biomarker.save(failOnError: true)
+    }
+	
+	def initializeReferences() {
+		// Initialize properties needed
+		def protein = Property.findByEntity( "Protein" )
+		def carbohydrate = Property.findByEntity( "Carbohydrate" )
+		def fibre = Property.findByEntity( "Fibre" )
+		def folate = Property.findByEntity( "Folate" )
+		def cholesterol = Property.findByEntity( "Cholesterol" )
+		def vitaminA = Property.findByEntity( "Vitamin A" )
 
+		def omega3Intake = Property.findByEntityAndPropertyGroup("Omega-3", Property.PROPERTY_GROUP_NUTRIENT)
+		def omega3Biomarker = Property.findByEntityAndPropertyGroup("Omega-3", Property.PROPERTY_GROUP_BIOMARKER)
+
+		def age = Property.findByEntity( "Age" )
+		def gender = Property.findByEntity( "Gender" )
+
+		def geneFADS1 = Property.findByEntity("FADS1")
+						
 		// Initialize a few simple references
 		if( ReferenceValue.count == 0 ) {
 			def proteinVeryLow = new ReferenceValue(subject: protein, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
@@ -225,10 +260,79 @@ class BootStrap {
 				vitaminAHigh2.addToConditions( new ReferenceCondition( subject: vitaminA, low: 3000 ) )
 				vitaminAHigh2.addToConditions( new ReferenceCondition( subject: gender, value: "female" ) )
 				vitaminAHigh2.save(failOnError: true)
+				
+			def geneFADS1Risk = new ReferenceValue(subject: geneFADS1, status: Status.STATUS_RISK, color: Status.Color.RED )
+				geneFADS1Risk.addToConditions( new ReferenceCondition( subject: geneFADS1, value: "CC" ) )
+				geneFADS1Risk.save(failOnError: true)
+				
+			def geneFADS1NonRisk1 = new ReferenceValue(subject: geneFADS1, status: Status.STATUS_NON_RISK, color: Status.Color.GREEN )
+				geneFADS1NonRisk1.addToConditions( new ReferenceCondition( subject: geneFADS1, value: "TT" ) )
+				geneFADS1NonRisk1.save(failOnError: true)
+				
+			def geneFADS1NonRisk2 = new ReferenceValue(subject: geneFADS1, status: Status.STATUS_NON_RISK, color: Status.Color.GREEN )
+				geneFADS1NonRisk2.addToConditions( new ReferenceCondition( subject: geneFADS1, value: "TC" ) )
+				geneFADS1NonRisk2.save(failOnError: true)
 
+			// Omega3 intake
+			def omega3IntakeOK = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_OK, color: Status.Color.GREEN )
+				omega3IntakeOK.addToConditions( new ReferenceCondition( subject: omega3Intake, low: 0.6 ) )
+				omega3IntakeOK.save(failOnError: true)
+
+			def omega3IntakeLow = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_LOW, color: Status.Color.AMBER )
+				omega3IntakeLow.addToConditions( new ReferenceCondition( subject: omega3Intake, low: 0.2, high: 0.6 ) )
+				omega3IntakeLow.save(failOnError: true)
+
+			def omega3IntakeVeryLow = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+				omega3IntakeVeryLow.addToConditions( new ReferenceCondition( subject: omega3Intake, high: 0.2 ) )
+				omega3IntakeVeryLow.save(failOnError: true)
+
+			// Omega3 biomarker
+			def omega3BiomarkerOK = new ReferenceValue(subject: omega3Biomarker, status: Status.STATUS_OK, color: Status.Color.GREEN )
+				omega3BiomarkerOK.addToConditions( new ReferenceCondition( subject: omega3Biomarker, low: 8 ) )
+				omega3BiomarkerOK.save(failOnError: true)
+
+			def omega3BiomarkerIntermediate = new ReferenceValue(subject: omega3Intake, status: "Intermediate", color: Status.Color.AMBER )
+				omega3BiomarkerIntermediate.addToConditions( new ReferenceCondition( subject: omega3Biomarker, low: 4, high: 8 ) )
+				omega3BiomarkerIntermediate.save(failOnError: true)
+
+			def omega3BiomarkerLow = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_LOW, color: Status.Color.RED )
+				omega3BiomarkerLow.addToConditions( new ReferenceCondition( subject: omega3Biomarker, high: 4 ) )
+				omega3BiomarkerLow.save(failOnError: true)
 		}
 	}
 	
+	def initializeAdvices() {
+		def omega3Intake = Property.findByEntityAndPropertyGroup("Omega-3", Property.PROPERTY_GROUP_NUTRIENT)
+		def omega3Biomarker = Property.findByEntityAndPropertyGroup("Omega-3", Property.PROPERTY_GROUP_BIOMARKER)
+		def geneFADS1 = Property.findByEntity("FADS1")
+		
+		if( Advice.countBySubject( omega3Intake ) == 0 ) {
+			def advicesOnOmega3Intake = []
+			
+			def index = 1
+			[ Status.STATUS_RISK, Status.STATUS_NON_RISK ].each { fads1Status ->
+				[ Status.STATUS_LOW, "Intermediate", Status.STATUS_OK ].each { omega3BiomarkerStatus ->
+					[ Status.STATUS_LOW, Status.STATUS_OK ].each { omega3IntakeTotalStatus ->
+						[ Status.STATUS_LOW, Status.STATUS_OK ].each { omega3IntakeDietaryStatus ->
+							advicesOnOmega3Intake << new Advice(subject: omega3Intake, code: sprintf( "L3.4.%03d", index ), text: sprintf( "Advice with code L3.4.%03d", index ) )
+								.addToConditions( new AdviceCondition( subject: geneFADS1, status: fads1Status ) )
+								.addToConditions( new AdviceCondition( subject: omega3Biomarker, status: omega3BiomarkerStatus ) )
+								.addToConditions( new AdviceCondition( subject: omega3Intake, status: omega3IntakeTotalStatus ) )
+								.addToConditions( new AdviceCondition( subject: omega3Intake, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY, status: omega3IntakeDietaryStatus ) )
+								
+							index++
+						}
+					}
+				}
+			}
+				
+			// Save all advices
+			advicesOnOmega3Intake.each {
+				it.save(failOnError: true)
+			}
+		}
+
+	}
     def destroy = {
     }
 }
