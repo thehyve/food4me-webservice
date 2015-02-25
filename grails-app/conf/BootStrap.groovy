@@ -11,19 +11,27 @@ import grails.util.Environment
 class BootStrap {
 
     def init = { servletContext ->
-		if( Environment.getCurrent().name in [ "env", "test" ] ) {
+		if( Environment.getCurrent().name == "dev" ) {
 			println "Bootstrapping environment " + Environment.getCurrent().name
 			initializeGenericData()
 			initializeReferences()
 			initializeAdvices()
 		}
+		
+		if( Environment.getCurrent().name == "test" ) {
+			println "Bootstrapping environment " + Environment.getCurrent().name
+			initializeGenericData()
+			initializeReferences()
+			initializeOmega3AdviceL3_4()
+		}
+
     }
 	
 	def initializeGenericData() {
 		// Initialize units
 		def years = Unit.findByCode( "yr" ) ?: new Unit( name: "years", externalId: "258707000", code: "yr" )
 			years.save(failOnError: true)
-		def gPerKgBodyWeight = Unit.findByCode( "g/kg bw" ) ?: new Unit( name: "g/kg body weight", externalId: "228919004", code: "g/kg bw" )
+		def gPerKgBodyWeight = Unit.findByCode( "g/kg bw" ) ?: new Unit( name: "gram per kilogram body weight", externalId: "228919004", code: "g/kg bw" )
 			gPerKgBodyWeight.save(failOnError: true)
 		def grams = Unit.findByCode( "g" ) ?: new Unit( name: "gram", externalId: "258682000", code: "g" )
 			grams.save(failOnError: true)
@@ -33,10 +41,13 @@ class BootStrap {
 			mmolPerL.save(failOnError: true)
 		def percentageEnergyIntake = Unit.findByCode( "% energy intake" ) ?: new Unit( name: "% of total energy intake", externalId: "288493004", code: "% energy intake" )
 			percentageEnergyIntake.save(failOnError: true)
-		def percentage = Unit.findByCode( "%" ) ?: new Unit( name: "%", externalId: "415067009", code: "%" )
+		def percentage = Unit.findByCode( "%" ) ?: new Unit( name: "percent", externalId: "415067009", code: "%" )
 			percentage.save(failOnError: true)
+		def kgPerm2 = Unit.findByCode( "kg/m2" ) ?: new Unit( name: "kilogram per square meter", externalId: "258896009", code: "kg/m2" )
+			kgPerm2.save(failOnError: true)
+		def cm = Unit.findByCode( "cm" ) ?: new Unit( name: "centimeter", externalId: "258672001", code: "cm" )
+			cm.save(failOnError: true)
 
-			
 		// Initialize properties needed
 		def age = Property.findByEntity( "Age" ) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_GENERIC, entity: "Age", externalId: "397669002", unit: years)
 			age.save(failOnError: true)
@@ -53,17 +64,27 @@ class BootStrap {
 
 		def cholesterol = Property.findByEntity( "Cholesterol" ) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_BIOMARKER, entity: "Cholesterol", externalId: "84698008", unit: mmolPerL)
 			cholesterol.save(failOnError: true)
+		def glucose = Property.findByEntity( "Glucose" ) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_BIOMARKER, entity: "Glucose", externalId: "67079006", unit: mmolPerL)
+			glucose.save(failOnError: true)
 		def vitaminA = Property.findByEntity( "Vitamin A" ) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_NUTRIENT, entity: "Vitamin A", externalId: "82622003", unit: micrograms)
 			vitaminA.save(failOnError: true)
 			
 		def geneFADS1 = Property.findByEntity("FADS1") ?: new Property(propertyGroup: Property.PROPERTY_GROUP_SNP, entity: "FADS1", externalId: "rs174546")
 			geneFADS1.save(failOnError: true)
-			
+		def geneFTO = Property.findByEntity("FTO") ?: new Property(propertyGroup: Property.PROPERTY_GROUP_SNP, entity: "FTO", externalId: "rs9939609")
+			geneFTO.save(failOnError: true)
+
 		def omega3Intake = Property.findByEntityAndPropertyGroup("Omega-3", Property.PROPERTY_GROUP_NUTRIENT) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_NUTRIENT, entity: "Omega-3", externalId: "226332006", unit: percentageEnergyIntake)
 			omega3Intake.save(failOnError: true)
-			
 		def omega3Biomarker = Property.findByEntityAndPropertyGroup("Omega-3", Property.PROPERTY_GROUP_BIOMARKER) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_BIOMARKER, entity: "Omega-3", externalId: "226365003", unit: percentage)
 			omega3Biomarker.save(failOnError: true)
+			
+		def bmi = Property.findByEntity( "Body Mass Index" ) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_PHYSICAL, entity: "Body Mass Index", externalId: "60621009", unit: kgPerm2)
+			bmi.save(failOnError: true)
+		def waistCircumference = Property.findByEntity( "Waist circumference" ) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_PHYSICAL, entity: "Waist circumference", externalId: "276361009", unit: cm)
+			waistCircumference.save(failOnError: true)
+		def physicalActivity = Property.findByEntity( "Physical activity" ) ?: new Property(propertyGroup: Property.PROPERTY_GROUP_PHYSICAL, entity: "Physical activity", externalId: "68130003")
+			physicalActivity.save(failOnError: true)
     }
 	
 	def initializeReferences() {
@@ -301,11 +322,57 @@ class BootStrap {
 		}
 	}
 	
+	
 	def initializeAdvices() {
+		initializeBMIAdviceL3_1()
+		initializeOmega3AdviceL3_4()
+	}
+	
+	def initializeBMIAdviceL3_1() {
+		def geneFTO = Property.findByEntity("FTO")
+		def cholesterol = Property.findByEntity( "Cholesterol" )
+		def glucose = Property.findByEntity( "Glucose" )
+		def bmi = Property.findByEntity( "Body Mass Index" )
+		def waistCircumference = Property.findByEntity( "Waist circumference" )
+		def physicalActivity = Property.findByEntity( "Physical activity" )
+
+		if( Advice.countBySubject( bmi ) == 0 ) {
+			def advicesOnBMI = []
+			
+			def index = 1
+			[ Status.STATUS_RISK, Status.STATUS_NON_RISK ].each { ftoStatus ->
+				[ Status.STATUS_LOW, Status.STATUS_OK, Status.STATUS_HIGH ].each { bmiStatus ->
+					[ Status.STATUS_OK, Status.STATUS_HIGH ].each { waistCircumferenceStatus ->
+						[ "Sedentary", "Lightly active", "Active" ].each { physicalActivityValue ->
+							[ Status.STATUS_LOW, Status.STATUS_OK, Status.STATUS_HIGH ].each { glucoseStatus ->
+								[ Status.STATUS_LOW, Status.STATUS_OK, Status.STATUS_HIGH ].each { cholesterolStatus ->
+									advicesOnBMI << new Advice(subject: bmi, code: sprintf( "L3.1.%03d", index ), text: sprintf( "Advice with code L3.1.%03d", index ) )
+										.addToConditions( new AdviceCondition( subject: geneFTO, status: ftoStatus ) )
+										.addToConditions( new AdviceCondition( subject: bmi, status: bmiStatus ) )
+										.addToConditions( new AdviceCondition( subject: waistCircumference, status: waistCircumferenceStatus ) )
+										.addToConditions( new AdviceCondition( subject: physicalActivity, value: physicalActivityValue ) )
+										.addToConditions( new AdviceCondition( subject: glucose, status: glucoseStatus ) )
+										.addToConditions( new AdviceCondition( subject: cholesterol, status: cholesterolStatus ) )
+
+									index++
+								}
+							}
+						}
+					}
+				}
+			}
+				
+			// Save all advices on BMI
+			advicesOnBMI.each {
+				it.save(failOnError: true)
+			}
+		}
+	}
+	def initializeOmega3AdviceL3_4() {
+		def geneFADS1 = Property.findByEntity("FADS1")
 		def omega3Intake = Property.findByEntityAndPropertyGroup("Omega-3", Property.PROPERTY_GROUP_NUTRIENT)
 		def omega3Biomarker = Property.findByEntityAndPropertyGroup("Omega-3", Property.PROPERTY_GROUP_BIOMARKER)
-		def geneFADS1 = Property.findByEntity("FADS1")
-		
+
 		if( Advice.countBySubject( omega3Intake ) == 0 ) {
 			def advicesOnOmega3Intake = []
 			
@@ -331,8 +398,10 @@ class BootStrap {
 				it.save(failOnError: true)
 			}
 		}
-
 	}
-    def destroy = {
+	
+	def initialize
+    
+	def destroy = {
     }
 }
