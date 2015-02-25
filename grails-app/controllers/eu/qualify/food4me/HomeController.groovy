@@ -5,9 +5,12 @@ import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
 
 class HomeController {
-
+	def importService
+	
     def index() { 
-
+		importService.loadUnits()
+		importService.loadProperties()
+		
 		render "Food4me"
 		
 	}
