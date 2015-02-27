@@ -10,8 +10,8 @@ class HomeController {
     def index() { 
 		importService.loadUnits()
 		importService.loadProperties()
+		importService.loadReferences()
 		
 		render "Food4me"
-		
 	}
 }

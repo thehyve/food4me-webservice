@@ -49,5 +49,9 @@ class Status {
 		Integer getId(){
 			value
 		}
+		
+		static Color fromString(String value) {
+			value.toUpperCase() as Color
+		}
 	}
 }
