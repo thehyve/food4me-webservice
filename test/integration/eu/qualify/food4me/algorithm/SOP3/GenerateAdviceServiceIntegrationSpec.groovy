@@ -2,6 +2,7 @@ package eu.qualify.food4me.algorithm.SOP3
 
 import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
+import eu.qualify.food4me.exampledata.IntegrationTestHelper;
 import eu.qualify.food4me.interfaces.Advisable
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
@@ -16,7 +17,9 @@ class GenerateAdviceServiceIntegrationSpec extends IntegrationSpec {
 	
 	// Setup is done in bootstrap
 	def setup() {
-		
+		// Make sure the database is empty
+		IntegrationTestHelper.cleanUp()
+		IntegrationTestHelper.bootStrap()
 	}
 
 	def cleanup() {

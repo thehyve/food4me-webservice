@@ -19,108 +19,307 @@ class ImportService {
 	String separatorChar = "\t"
 	
 	def loadAll( String directory = null ) {
-		loadUnits( directory )
-		loadProperties( directory )
+		loadUnitsFromDirectory( directory )
+		loadPropertiesFromDirectory( directory )
+		loadReferencesFromDirectory( directory )
 	}
 	
+	/**
+	 * Loads units from a CSV inputstream
+	 * @param inputStream
+	 * @return
+	 */
+	def loadUnits( InputStream inputStream ) {
+		def units = []
+		def alreadyImportedIds = []
+		
+		inputStream.toCsvReader([skipLines: 1, separatorChar: separatorChar]).eachLine { line ->
+			if( !line || line.size() < 3 ) {
+				log.warn "Skipping line as it has not enough columns: " + line?.size()
+				return
+			}
+			
+			if( !line[0] ) {
+				log.trace "Skipping empty line"
+				return
+			}
+			
+			// Check if a unit with this externalId already exists
+			def externalId = line[2]
+			if( Unit.countByExternalId( externalId ) > 0 || externalId in alreadyImportedIds) {
+				log.info( "Skip importing unit " + line[0] + " / " + externalId + " because it already exists" )
+			} else {
+				units << new Unit( name: line[0], externalId: externalId, code: line[1] )
+				log.trace( "Importing unit " + line[0] + " / " + externalId )
+				alreadyImportedIds << externalId
+			}
+				 
+			if( units.size() >= batchSize ) {
+				saveBatch( Unit, units )
+				units.clear()
+			}
+		}
+		
+		// Save all remaining units
+		saveBatch( Unit, units )
+
+	}
+	
+	/**
+	 * Loads properties into the database from a CSV inputstream
+	 * @return
+	 */
+	def loadProperties( InputStream inputStream ) {
+		def properties = []
+		def alreadyImportedIds = []
+		
+		inputStream.toCsvReader([skipLines: 1, separatorChar: separatorChar]).eachLine { line ->
+			if( !line || line.size() < 3 ) {
+				log.warn "Skipping line as it has not enough columns: " + line?.size()
+				return
+			}
+			
+			if( !line[0] ) {
+				log.trace "Skipping empty line"
+				return
+			}
+			
+			// If no external ID is given, the property cannot be added
+			def externalId = line[2]
+			if( !externalId ) {
+				log.warn "Skipping line with property " + line[0] + " as it has no external identifier"
+				return
+			}
+			
+			// Check if a property with this externalId already exists
+			if( Property.countByExternalId( externalId ) > 0 || externalId in alreadyImportedIds ) {
+				log.info( "Skip importing property " + line[0] + " (" + externalId + ") because it already exists" )
+			} else {
+				// Find the unit to use for this property
+				def unitCode = line.size() >= 4 ? line[3] : null
+				def unit
+				
+				if( unitCode ) {
+					unit = Unit.findByCode( unitCode )
+					if( !unit ) {
+						log.warn "Unit " + unitCode + " for property " + line[0] + " can not be found. Consider importing units first."
+						return;
+					}
+				}
+				
+				properties << new Property( entity: line[0], propertyGroup: line[1], externalId: externalId, unit: unit )
+				alreadyImportedIds << externalId
+				log.trace( "Importing property " + line[0] + " / " + line[1] )
+			}
+				 
+			if( properties.size() >= batchSize ) {
+				saveBatch( Property, properties )
+				properties.clear()
+			}
+		}
+		
+		// Save all remaining units
+		saveBatch( Property, properties )
+	}
+	
+	/**
+	 * Loads generic references into the database from a CSV inputstream
+	 * @return
+	 */
+	def loadGenericReferences( InputStream inputStream ) {
+		// Retrieve objects for age and gender, as they are needed for storing referenceValues
+		def ageProperty = Property.findByEntity( "Age" )
+		def genderProperty = Property.findByEntity( "Gender" )
+		
+		def references = []
+		
+		// The first 2 lines contain the headers
+		inputStream.toCsvReader([skipLines: 2, separatorChar: separatorChar]).eachLine { line ->
+			if( !line || line.size() < 5 ) {
+				log.warn "Skipping line as it has not enough columns: " + line?.size()
+				return
+			}
+			
+			if( !line[0] ) {
+				log.trace "Skipping empty line"
+				return
+			}
+			
+			// Find the property that this reference refers to
+			def property = Property.findByEntityAndPropertyGroup( line[0], line[1] )
+			
+			if( !property ) {
+				log.warn "Cannot find entity " + line[0] + " / " + line[1] + " when importing reference. Skipping this line"
+				return
+			}
+			
+			// Check whether an age and/or gender are given (in columns 4, 5, 6)
+			// TODO generalize this method to support more and other conditions
+			def age = null
+			def gender = null
+			if( line[3] || line[4] ) {
+				age = [ line[3] ?: null, line[4] ?: null ]
+			}
+			gender = line[5] ?: null
+			
+			// Check whether we have the properties for the requested conditions
+			if( age && !ageProperty ) {
+				log.error "Trying to add a reference condition on age for property " + property + " but the age property doesn't exist"
+				return
+			}
+			if( gender && !genderProperty ) {
+				log.error "Trying to add a reference condition on age for property " + property + " but the age property doesn't exist"
+				return
+			}
+			
+			// Loop through the possible references. Each reference has 2 columns:
+			//		color and upper boundary. The upper boundary is also used as
+			//		the lower boundary of the next
+			def statusses = [ Status.STATUS_VERY_LOW, Status.STATUS_LOW, Status.STATUS_OK, Status.STATUS_HIGH, Status.STATUS_VERY_HIGH ]
+			def currentLowerBoundary = null
+			def currentColumnIndex = 6
+			def color
+			
+			statusses.each { status ->
+				// If no status color is given for this status, we skip this status
+				if( line.size() <= currentColumnIndex || !line[ currentColumnIndex ] ) {
+					log.trace "Status " + status + " not found for property " + property
+					currentColumnIndex += 2
+					return
+				}
+				
+				// TODO: check for duplicates
+				color = line[ currentColumnIndex ]
+				def higherBoundary = line.size() > currentColumnIndex + 1 ? line[ currentColumnIndex + 1 ] : null
+				
+				def reference = new ReferenceValue(subject: property, status: status, color: Status.Color.fromString( color ) )
+				
+				if( age ) {
+					reference.addToConditions( new ReferenceCondition( subject: ageProperty, low: age[0], high: age[1] ) )
+				}
+
+				if( gender ) {
+					reference.addToConditions( new ReferenceCondition( subject: genderProperty, value: gender ) )
+				}
+				
+				// Add the condition on the property itself
+				reference.addToConditions( new ReferenceCondition( subject: property, low: currentLowerBoundary, high: higherBoundary ) )
+
+				log.trace( "Importing reference for " + property + " / " + status + " with " + reference.conditions?.size() + " conditions"  )
+				references << reference
+				
+				// Prepare for next iteration
+				currentLowerBoundary = higherBoundary
+				currentColumnIndex += 2
+			}
+			
+			if( references.size() >= batchSize ) {
+				saveBatch( ReferenceValue, references )
+				references.clear()
+			}
+		}
+		
+		// Save all remaining references
+		saveBatch( ReferenceValue, references )
+	}
+	
+	/**
+	 * Loads SNP references into the database from a CSV inputstream
+	 * @return
+	 */
+	def loadSNPReferences( InputStream inputStream ) {
+		def references = []
+		
+		// The first 2 lines
+		def lineNo = 1
+		def columnStatus = [:]
+		inputStream.toCsvReader([separatorChar: separatorChar]).eachLine { line ->
+			if( !line || line.size() < 2 ) {
+				log.warn "Skipping line as it has not enough columns: " + line?.size()
+				return
+			}
+			
+			// Parse the header line, to see where the risk-alleles and non-risk alleles are
+			if( lineNo++ == 1 ) {
+				def columnNo = 1
+				def currentStatus = ""
+				while( columnNo < line.size() ) {
+					if( line[ columnNo ] )
+						currentStatus = line[ columnNo ]
+					
+					columnStatus[columnNo] = currentStatus
+					columnNo++
+				}
+				
+				lineNo++
+				return
+			}
+			
+			if( !line[0] ) {
+				log.trace "Skipping empty line"
+				return
+			}
+			
+			// Find the SNP that this reference refers to
+			def snp = Property.findByEntityAndPropertyGroup( line[0], Property.PROPERTY_GROUP_SNP )
+			
+			if( !snp ) {
+				log.warn "Cannot find SNP " + line[0] + " when importing reference. Skipping this line"
+				return
+			}
+			
+			// Loop through all columns, and store a reference for the allele
+			def columnNo = 1
+			while( columnNo < line.size() ) {
+				if( line[ columnNo ] ) {
+					def status = columnStatus[columnNo]
+					
+					// Color is not relevant for SNPs, but we store a color anyhow
+					def color = ( status == "Risk allele" ) ? Status.Color.RED : Status.Color.GREEN
+					
+					log.info "Storing SNP " + line[0] + " / " + line[ columnNo ] + " as " + status
+					
+					def reference = new ReferenceValue(subject: snp, status: status, color: color )
+					reference.addToConditions( new ReferenceCondition( subject: snp, value: line[ columnNo ] ) )
+					references << reference
+				}
+				
+				columnNo++
+			}
+			
+			if( references.size() >= batchSize ) {
+				saveBatch( ReferenceValue, references )
+				references.clear()
+			}
+		}
+		
+		// Save all remaining references
+		saveBatch( ReferenceValue, references )
+	}
+
 	/**
 	 * Loads units into the database from the file units*.txt in the given directory
 	 * @return
 	 */
-    def loadUnits( String directory = null ) {
+	def loadUnitsFromDirectory( String directory = null ) {
 		log.info "Start loading units " + ( directory ? " from " + directory : "" )
 		
 		importData( directory, ~/units.*\.txt/, { file ->
-			def units = []
-			
 			log.info( "Loading units from " + file )
-			 
-			file.toCsvReader([skipLines: 1, separatorChar: separatorChar]).eachLine { line ->
-				if( !line || line.size() < 3 ) {
-					log.warn "Skipping line as it has not enough columns: " + line?.size()
-					return
-				}
-				
-				if( !line[0] ) {
-					log.trace "Skipping empty line"
-					return
-				}
-				
-				// Check if a unit with this externalId already exists
-				if( Unit.countByExternalId( line[2] ) == 0 ) {
-			    	units << new Unit( name: line[0], externalId: line[2], code: line[1] )
-					log.trace( "Importing unit " + line[0] + " / " + line[2] )
-				} else {
-					log.info( "Skip importing unit " + line[0] + " / " + line[2] + " because it already exists" )
-				}
-					 
-				if( units.size() >= batchSize ) {
-					saveBatch( Unit, units )
-					units.clear()
-				}
-			}
-			
-			// Save all remaining units
-			saveBatch( Unit, units )
+			file.withInputStream { is -> loadUnits( is ) }
 		})
-    }
+	}
 	
 	/**
 	 * Loads properties into the database from the file properties*.txt in the given directory
 	 * @return
 	 */
-	def loadProperties( String directory = null ) {
+	def loadPropertiesFromDirectory( String directory = null ) {
 		log.info "Start loading properties " + ( directory ? " from " + directory : "" )
 		
 		importData( directory, ~/properties.*\.txt/, { file ->
-			def properties = []
-			
 			log.info( "Loading properties from " + file )
-			 
-			file.toCsvReader([skipLines: 1, separatorChar: separatorChar]).eachLine { line ->
-				if( !line || line.size() < 3 ) {
-					log.warn "Skipping line as it has not enough columns: " + line?.size()
-					return
-				}
-				
-				if( !line[0] ) {
-					log.trace "Skipping empty line"
-					return
-				}
-				
-				// If no external ID is given, the property cannot be added
-				def externalId = line[2]
-				if( !externalId ) {
-					log.warn "Skipping line with property " + line[0] + " as it has no external identifier"
-					return
-				}
-				
-				// Check if a property with this externalId already exists
-				if( Property.countByExternalId( externalId ) == 0 ) {
-					// Find the unit to use for this property
-					def unitCode = line.size() >= 4 ? line[3] : null
-					def unit
-					
-					if( unitCode ) {
-						unit = Unit.findByCode( unitCode )
-						if( !unit )
-							log.warn "Unit " + unitCode + " for property " + line[0] + " can not be found. Consider importing units first."
-					}
-					
-					properties << new Property( entity: line[0], propertyGroup: line[1], externalId: externalId, unit: unit )
-					log.trace( "Importing property " + line[0] + " / " + line[1] )
-				} else {
-					log.info( "Skip importing property " + line[0] + " (" + externalId + ") because it already exists" )
-				}
-					 
-				if( properties.size() >= batchSize ) {
-					saveBatch( Property, properties )
-					properties.clear()
-				}
-			}
-			
-			// Save all remaining units
-			saveBatch( Property, properties )
+			file.withInputStream { is -> loadProperties( is ) }
 		})
 	}
 	
@@ -130,116 +329,21 @@ class ImportService {
 	 * 		references_snps*.txt
 	 * @return
 	 */
-	def loadReferences( String directory = null ) {
-		loadGenericReferences( directory )
-		loadSNPReferences( directory )
+	def loadReferencesFromDirectory( String directory = null ) {
+		loadGenericReferencesFromDirectory( directory )
+		loadSNPReferencesFromDirectory( directory )
 	}
 	
 	/**
 	 * Loads generic references into the database from the file references_generic*.txt in the given directory
 	 * @return
 	 */
-	def loadGenericReferences( String directory = null ) {
+	def loadGenericReferencesFromDirectory( String directory = null ) {
 		log.info "Start loading generic references " + ( directory ? " from " + directory : "" )
 		
-		// Retrieve objects for age and gender, as they are needed for storing referneceValues
-		def ageProperty = Property.findByEntity( "Age" ) 
-		def genderProperty = Property.findByEntity( "Gender" )
-		
 		importData( directory, ~/references_generic.*\.txt/, { file ->
-			def references = []
-			
 			log.info( "Loading generic references from " + file )
-						 
-			// The first 2 lines 
-			file.toCsvReader([skipLines: 2, separatorChar: separatorChar]).eachLine { line ->
-				if( !line || line.size() < 5 ) {
-					log.warn "Skipping line as it has not enough columns: " + line?.size()
-					return
-				}
-				
-				if( !line[0] ) {
-					log.trace "Skipping empty line"
-					return
-				}
-				
-				// Find the property that this reference refers to
-				def property = Property.findByEntityAndPropertyGroup( line[0], line[1] )
-				
-				if( !property ) {
-					log.warn "Cannot find entity " + line[0] + " / " + line[1] + " when importing reference. Skipping this line"
-					return
-				}
-				
-				// Check whether an age and/or gender are given (in columns 4, 5, 6)
-				// TODO generalize this method to support more and other conditions
-				def age = null
-				def gender = null
-				if( line[3] || line[4] ) {
-					age = [ line[3] ?: null, line[4] ?: null ]
-				}
-				gender = line[5] ?: null
-				
-				// Check whether we have the properties for the requested conditions
-				if( age && !ageProperty ) {
-					log.error "Trying to add a reference condition on age for property " + property + " but the age property doesn't exist"
-					age = null
-				}
-				if( gender && !genderProperty ) {
-					log.error "Trying to add a reference condition on age for property " + property + " but the age property doesn't exist"
-					gender = null
-				}
-				
-				// Loop through the possible references. Each reference has 2 columns: 
-				//		color and upper boundary. The upper boundary is also used as 
-				//		the lower boundary of the next
-				def statusses = [ Status.STATUS_VERY_LOW, Status.STATUS_LOW, Status.STATUS_OK, Status.STATUS_HIGH, Status.STATUS_VERY_HIGH ]
-				def currentLowerBoundary = null
-				def currentColumnIndex = 6
-				def color
-				
-				statusses.each { status ->
-					// If no status color is given for this status, we skip this status
-					if( line.size() <= currentColumnIndex || !line[ currentColumnIndex ] ) {
-						log.trace "Status " + status + " not found for property " + property
-						currentColumnIndex += 2
-						return
-					}
-					
-					// TODO: check for duplicates
-					
-					color = line[ currentColumnIndex ]
-					def higherBoundary = line.size() > currentColumnIndex + 1 ? line[ currentColumnIndex + 1 ] : null
-					
-					def reference = new ReferenceValue(subject: property, status: status, color: Status.Color.fromString( color ) )
-					
-					if( age ) {
-						reference.addToConditions( new ReferenceCondition( subject: ageProperty, low: age[0], high: age[1] ) )
-					}
-
-					if( gender ) {
-						reference.addToConditions( new ReferenceCondition( subject: genderProperty, value: gender ) )
-					}
-					
-					// Add the condition on the property itself
-					reference.addToConditions( new ReferenceCondition( subject: property, low: currentLowerBoundary, high: higherBoundary ) )
-
-					log.trace( "Importing reference for " + property + " / " + status + " with " + reference.conditions?.size() + " conditions"  )
-					references << reference
-					
-					// Prepare for next iteration
-					currentLowerBoundary = higherBoundary
-					currentColumnIndex += 2
-				}
-				
-				if( references.size() >= batchSize ) {
-					saveBatch( ReferenceValue, references )
-					references.clear()
-				}
-			}
-			
-			// Save all remaining references
-			saveBatch( ReferenceValue, references )
+			file.withInputStream { is -> loadGenericReferences( is ) }
 		})
 	}
 	
@@ -247,79 +351,12 @@ class ImportService {
 	 * Loads SNP references into the database from the file references_snps*.txt in the given directory
 	 * @return
 	 */
-	def loadSNPReferences( String directory = null ) {
+	def loadSNPReferencesFromDirectory( String directory = null ) {
 		log.info "Start loading SNP references " + ( directory ? " from " + directory : "" )
 		
 		importData( directory, ~/references_snps.*\.txt/, { file ->
-			def references = []
-			
 			log.info( "Loading SNP references from " + file )
-						 
-			// The first 2 lines
-			def lineNo = 1
-			def columnStatus = [:]
-			file.toCsvReader([separatorChar: separatorChar]).eachLine { line ->
-				if( !line || line.size() < 2 ) {
-					log.warn "Skipping line as it has not enough columns: " + line?.size()
-					return
-				}
-				
-				// Parse the header line, to see where the risk-alleles and non-risk alleles are
-				if( lineNo++ == 1 ) {
-					def columnNo = 1
-					def currentStatus = ""
-					while( columnNo < line.size() ) {
-						if( line[ columnNo ] )
-							currentStatus = line[ columnNo ]
-						
-						columnStatus[columnNo] = currentStatus
-						columnNo++
-					}
-					
-					lineNo++
-					return
-				}
-				
-				if( !line[0] ) {
-					log.trace "Skipping empty line"
-					return
-				}
-				
-				// Find the SNP that this reference refers to
-				def snp = Property.findByEntityAndPropertyGroup( line[0], Property.PROPERTY_GROUP_SNP )
-				
-				if( !snp ) {
-					log.warn "Cannot find SNP " + line[0] + " when importing reference. Skipping this line"
-					return
-				}
-				
-				// Loop through all columns, and store a reference for the allele
-				def columnNo = 1
-				while( columnNo < line.size() ) {
-					if( line[ columnNo ] ) {
-						def status = columnStatus[columnNo]
-						
-						// Color is not relevant for SNPs
-						def color = ( status == "Risk allele" ) ? Status.Color.RED : Status.Color.GREEN
-						
-						log.info "Storing SNP " + line[0] + " / " + line[ columnNo ] + " as " + status
-						
-						def reference = new ReferenceValue(subject: snp, status: status, color: color )
-						reference.addToConditions( new ReferenceCondition( subject: snp, value: line[ columnNo ] ) )
-						references << reference
-					}
-					
-					columnNo++
-				}
-				
-				if( references.size() >= batchSize ) {
-					saveBatch( ReferenceValue, references )
-					references.clear()
-				}
-			}
-			
-			// Save all remaining references
-			saveBatch( ReferenceValue, references )
+			file.withInputStream { is -> loadSNPReferences(is) }
 		})
 	}
 	

@@ -2,14 +2,13 @@ package eu.qualify.food4me.algorithm.SOP3
 
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
+import eu.qualify.food4me.exampledata.IntegrationTestHelper;
 import eu.qualify.food4me.measurements.MeasuredNumericValue
 import eu.qualify.food4me.measurements.MeasuredTextValue
 import eu.qualify.food4me.measurements.Measurement
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
 import eu.qualify.food4me.measurements.Status
-import eu.qualify.food4me.reference.ReferenceCondition
-import eu.qualify.food4me.reference.ReferenceValue
 import grails.test.spock.IntegrationSpec
 
 class ComputeStatusServiceIntegrationSpec extends IntegrationSpec {
@@ -18,6 +17,9 @@ class ComputeStatusServiceIntegrationSpec extends IntegrationSpec {
 	
 	// Setup is done in bootstrap
 	def setup() {
+		// Make sure the database is empty
+		IntegrationTestHelper.cleanUp()
+		IntegrationTestHelper.bootStrap()
 	}
 
 	def cleanup() {
