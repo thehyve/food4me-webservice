@@ -2,6 +2,8 @@ package eu.qualify.food4me.importer
 
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
+import eu.qualify.food4me.decisiontree.Advice
+import eu.qualify.food4me.decisiontree.AdviceText
 import eu.qualify.food4me.measurements.Status
 import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
@@ -297,6 +299,70 @@ class ImportService {
 		saveBatch( ReferenceValue, references )
 	}
 
+	def loadDecisionTrees( InputStream inputStream ) {}
+	
+	/**
+	 * Loads text for advices from a CSV inputstream. 
+	 * 
+	 * The file should NOT have a header line. The first column contains the code, 
+	 * the second column contains the text to be imported
+	 * @param inputStream
+	 * @return
+	 */
+	def loadAdviceTexts( InputStream inputStream, String language = "en" ) {
+		def objects = []
+		def alreadyImportedIds = []
+		
+		inputStream.toCsvReader([skipLines: 0, separatorChar: separatorChar]).eachLine { line ->
+			if( !line || line.size() < 2 ) {
+				log.warn "Skipping line as it has not enough columns: " + line?.size()
+				return
+			}
+			
+			if( !line[0] ) {
+				log.trace "Skipping empty line"
+				return
+			}
+			
+			// Check if a unit with this externalId already exists
+			def adviceCode = line[0].trim()
+			
+			// Check if the advice already exists. If not, skip importing this line
+			def advice = Advice.findByCode( adviceCode ) 
+			if( !advice ) {
+				log.warn "Not importing data for code " + adviceCode + " as the decision tree has not been imported yet. Import decision trees first."
+				return
+			}
+			
+			// Check if the translation already exists. If so, overwrite
+			def adviceText = AdviceText.findByCodeAndLanguage( adviceCode, language )
+			if( adviceText ) {
+				log.trace "Overwriting translation for " + adviceCode + " in " + language
+				adviceText.text = line[1]
+			} else {
+				log.trace "Importing new for " + adviceCode + " in " + language
+				adviceText = new AdviceText( code: adviceCode, language: language, text: line[1], advice: advice )
+			}
+			
+			objects << adviceText
+			
+			// If text is English, overwrite the advice default text
+			if( language == "en" ) {
+				advice.text = line[1]
+				objects << advice
+			}
+				 
+			if( objects.size() >= batchSize ) {
+				saveBatch( AdviceText, objects )
+				objects.clear()
+			}
+
+		}
+		
+		// Save all remaining units
+		saveBatch( AdviceText, objects )
+	}
+	
 	/**
 	 * Loads units into the database from the file units*.txt in the given directory
 	 * @return
@@ -359,7 +425,35 @@ class ImportService {
 			file.withInputStream { is -> loadSNPReferences(is) }
 		})
 	}
-	
+
+	/**
+	 * Loads advice texts into the database from the files advice_texts*.[language].txt in the given directory
+	 * @return
+	 */
+	def loadAdviceTextsFromDirectory( String directory = null ) {
+		log.info "Start loading advice texts " + ( directory ? " from " + directory : "" )
+		
+		importData( directory, ~/advice_texts.*\.[a-zA-Z]+\.txt/, { file ->
+			def match = file.name =~ /([a-zA-Z]+)\.txt$/
+			if( !match ) {
+				log.warn( "Trying to load advice texts from " + file + " but no proper language was specified" )
+				return
+			}
+			
+			def language = match[0][0]
+			
+			log.info( "Loading advice texts from " + file + " in language " + language )
+			file.withInputStream { is -> loadAdviceTexts(is, language) }
+		})
+	}
+
+		
+	/**
+	 * Import data from files in the given directory
+	 * @param matcher
+	 * @param fileHandler
+	 * @return
+	 */
 	protected def importData( String directory = null, def matcher, Closure fileHandler ) {
 		if( !directory ) { 
 			directory = grailsApplication.config.food4me.importDirectory
@@ -382,6 +476,12 @@ class ImportService {
 		baseDir.eachFileMatch matcher, fileHandler
 	}
 	
+	/**
+	 * Store a set of objects and cleanup GORM afterwards
+	 * @param domainClass
+	 * @param objects
+	 * @return
+	 */
 	protected def saveBatch( def domainClass, def objects ) {
 		def numSaves = 0;
 		

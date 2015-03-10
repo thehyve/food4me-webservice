@@ -38,9 +38,10 @@ class Advice {
 	 */
 	int position = 0
 	
-	static hasMany = [ conditions: AdviceCondition ]
+	static hasMany = [ conditions: AdviceCondition, translations: AdviceText ]
 	
     static constraints = {
+		text nullable: true
     }
 	
 	static mapping = {

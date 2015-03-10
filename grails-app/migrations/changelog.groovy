@@ -134,4 +134,8 @@ databaseChangeLog = {
 	include file: 'add-modifier-to-advice-condition.groovy'
 
 	include file: 'advice-text-large-than-255.groovy'
+
+	include file: 'advice-translations.groovy'
+
+	include file: 'advice-text-nullable.groovy'
 }
