@@ -3,11 +3,13 @@ package eu.qualify.food4me.decisiontree
 import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.interfaces.Measurable
+import groovy.transform.EqualsAndHashCode
 
 /**
  * Reference value for a given property
  * @author robert
  */
+@EqualsAndHashCode(includes="code")
 class Advice {
 	/**
 	 * Unique code of the advice.

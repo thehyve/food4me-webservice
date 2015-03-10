@@ -16,7 +16,8 @@ import groovy.transform.Canonical
 	}
 	
 	void add(Measurement measurement) {
-		measurements << measurement
+		if( measurement )
+			measurements << measurement
 	}
 	
 	public MeasuredValue getValueFor( Measurable p ) {

@@ -18,4 +18,15 @@ abstract class MeasuredValue {
 	 * @return
 	 */
 	public abstract def getValue();
+	
+	/**
+	 * Factory method to create a measuredValue object
+	 */
+	public static MeasuredValue fromValue( def value ) {
+		if( value instanceof String ) {
+			new MeasuredTextValue( value: value )
+		} else if( value instanceof Number ) {
+			new MeasuredNumericValue( value: value )
+		}
+	}
 }

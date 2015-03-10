@@ -9,20 +9,20 @@ interface Parser {
 	 * @param params
 	 * @return
 	 */
-	Measurements parseMeasurements(params)
+	Measurements parseMeasurements(String input)
 
 	/**
 	 * Parses the input to determine the status of several measurements
 	 * @param params
 	 * @return
 	 */
-	MeasurementStatus parseStatus(params)
+	MeasurementStatus parseStatus(String input)
 		
 	/**
 	 * Parses the input to retrieve a list of entities to give advice on
 	 * @param params
 	 * @return
 	 */
-	List<Advisable> parseEntityList(params);
+	List<Advisable> parseEntityList(String input);
 
 }
