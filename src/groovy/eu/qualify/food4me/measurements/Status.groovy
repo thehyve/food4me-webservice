@@ -10,6 +10,10 @@ class Status {
 	static final String STATUS_HIGH = "High"
 	static final String STATUS_VERY_HIGH = "Very high"
 	
+	// Statusses used for nutrient intake from supplements
+	static final String STATUS_NO = "No"
+	static final String STATUS_YES = "Yes"
+	
 	// Statusses used for SNPS
 	static final String STATUS_RISK = "Risk allele"
 	static final String STATUS_NON_RISK = "Non-risk allele"

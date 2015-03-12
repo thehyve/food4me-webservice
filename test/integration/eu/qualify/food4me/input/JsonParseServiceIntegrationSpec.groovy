@@ -53,10 +53,10 @@ class JsonParseServiceIntegrationSpec extends IntegrationSpec {
 			def input = [
 				nutrients: [
 					protein: [
-						cereals: [ value: 2, unit: "g/kg bw" ],
-						eggs: [ value: 1, unit: "g/kg bw" ],
-						meat: [ value: 1, unit: "g/kg bw" ],
-						supplements: [ value: 3, unit: "g/kg bw" ]
+						(ModifiedProperty.Modifier.INTAKE_MEAT_FISH.id): [ value: 2, unit: "g/kg bw" ],
+						(ModifiedProperty.Modifier.INTAKE_EGGS.id): [ value: 1, unit: "g/kg bw" ],
+						(ModifiedProperty.Modifier.INTAKE_POTATOES_RICE_PASTA.id): [ value: 1, unit: "g/kg bw" ],
+						(ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS.id): [ value: 3, unit: "g/kg bw" ]
 					],
 				],
 				generic: [
@@ -86,9 +86,9 @@ class JsonParseServiceIntegrationSpec extends IntegrationSpec {
 			measurements.all.size() == 6
 			measurements.getValueFor( age ) == new MeasuredNumericValue( value: 31, unit: year ) 
 			measurements.getValueFor( gender ) == new MeasuredTextValue( value: "Male" )
-			measurements.getValueFor( new ModifiedProperty( property: protein, modifier: "cereals" ) ) == new MeasuredNumericValue( value: 2, unit: gPerKgBW )
-			measurements.getValueFor( new ModifiedProperty( property: protein, modifier: "eggs" ) ) == new MeasuredNumericValue( value: 1, unit: gPerKgBW )
-			measurements.getValueFor( new ModifiedProperty( property: protein, modifier: "meat" ) ) == new MeasuredNumericValue( value: 1, unit: gPerKgBW )
-			measurements.getValueFor( new ModifiedProperty( property: protein, modifier: "supplements" ) ) == new MeasuredNumericValue( value: 3, unit: gPerKgBW )
+			measurements.getValueFor( new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_MEAT_FISH.id ) ) == new MeasuredNumericValue( value: 2, unit: gPerKgBW )
+			measurements.getValueFor( new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_EGGS.id ) ) == new MeasuredNumericValue( value: 1, unit: gPerKgBW )
+			measurements.getValueFor( new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_POTATOES_RICE_PASTA.id ) ) == new MeasuredNumericValue( value: 1, unit: gPerKgBW )
+			measurements.getValueFor( new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS.id ) ) == new MeasuredNumericValue( value: 3, unit: gPerKgBW )
     }
 }

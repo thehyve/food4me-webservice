@@ -1,6 +1,7 @@
 package eu.qualify.food4me
 
 import eu.qualify.food4me.interfaces.Advisable
+
 import eu.qualify.food4me.interfaces.Measurable
 import groovy.transform.EqualsAndHashCode
 

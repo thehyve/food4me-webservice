@@ -3,6 +3,7 @@ package eu.qualify.food4me.importer
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
 import eu.qualify.food4me.decisiontree.Advice
+import eu.qualify.food4me.decisiontree.AdviceCondition
 import eu.qualify.food4me.decisiontree.AdviceText
 import eu.qualify.food4me.measurements.Status
 import eu.qualify.food4me.reference.ReferenceCondition
@@ -24,6 +25,8 @@ class ImportService {
 		loadUnitsFromDirectory( directory )
 		loadPropertiesFromDirectory( directory )
 		loadReferencesFromDirectory( directory )
+		loadDecisionTreesFromDirectory( directory )
+		loadAdviceTextsFromDirectory( directory )
 	}
 	
 	/**
@@ -299,7 +302,185 @@ class ImportService {
 		saveBatch( ReferenceValue, references )
 	}
 
-	def loadDecisionTrees( InputStream inputStream ) {}
+	/**
+	 * Loads decision trees from a CSV inputstream
+	 * 
+	 * Format: 	Cel A1 contains the property that this decision tree is about
+	 * 			Row 1 (from column B) contains the properties to decide on
+	 *			Row 2 (from column B) contains optional modifiers on the properties
+	 *			Row 3 (from column B) contains either Status or Value
+	 * The lines below that contain the advices, the first column contains the advice code, 
+	 * the other columns contain the value or status of the given variable
+	 *
+	 * @param inputStream
+	 * @return
+	 */
+	def loadDecisionTrees( InputStream inputStream ) {
+		def objects = []
+		
+		def adviceSubject
+		def conditionSubjects = []
+		
+		def lineNo = 1
+		def headerLines = []
+		def structure
+		
+		inputStream.toCsvReader([skipLines: 0, separatorChar: separatorChar]).eachLine { line ->
+			if( !line || line.size() < 2 ) {
+				log.warn "Skipping line as it has not enough columns: " + line?.size()
+				return
+			}
+			
+			// Combine the first three header lines to be parsed separately
+			if( lineNo++ < 4 ) {
+				headerLines << line
+				return;
+			}
+			
+			// If we reach this point, we should first parse the header lines
+			if( headerLines ) {
+				structure = parseDecisionTreeHeaderLines( headerLines )
+				headerLines = null
+			}
+			
+			// If the header lines could not be properly parsed, there is no need
+			// to continue, as we can't store anything
+			if( !structure ) {
+				return
+			}
+			
+			if( !line[0] ) {
+				log.trace "Skipping empty line"
+				return
+			}
+			
+			// As the status in the file could be 'below OK' or 'above OK',
+			// it should be translated into Low and Very Low and the same for above OK.
+			// That means, multiple advices could be generated for each line.
+			//
+			// To handle that, we create a list with a list of options for each column. That means
+			// if we start with a line like [advice1, Below OK, High, Above OK], it would result in
+			// a list as follows: [ [Very Low, Low], [High], [Above OK] ]. We will later on create
+			// combinations of these conditions to end up with all required records in the database.
+			//
+			// Please note, in order to properly generate the combinations, we will insert a list with 
+			// NULL value for each empty cell. These will be discarded when generating the domain objects
+			// itself.
+			
+			def conditions = []
+			
+			def columnNo = 1
+			def translationMap = [
+				"below ok": [ Status.STATUS_VERY_LOW, Status.STATUS_LOW ],
+				"above ok": [ Status.STATUS_VERY_HIGH, Status.STATUS_HIGH ]
+			]
+			
+			while( columnNo < line.size() ) {
+				if( line[columnNo] ) {
+					def currentValue = line[columnNo]
+					
+					// Check if we need to translate this property into multiple statusses
+					// That is, if the column is set to filter on status and we have a translation for this status
+					if( structure.conditionSubjects[columnNo].filterOnStatus && translationMap.containsKey( currentValue.toLowerCase() ) ) {
+						conditions << translationMap[currentValue.toLowerCase()]
+					} else {
+						conditions << [currentValue]
+					}
+				} else {
+					// Add a dummy value for this condition, in order to make the combinations
+					// method work properly later on 
+					conditions << [null]
+				}
+				
+				columnNo++
+			}
+						
+			// Generate combinations of all conditoins
+			def adviceConditions = conditions.combinations()
+			
+			// Generate objects for all advices
+			adviceConditions.each { conditionSet ->
+				def advice = new Advice( code: line[0], subject: structure.adviceSubject ) 
+				
+				conditionSet.eachWithIndex { conditionValue, index ->
+					if( conditionValue ) {
+						// Retrieve the parameters for this column
+						def conditionParams = structure.conditionSubjects[index+1]
+						
+						def condition = new AdviceCondition( subject: conditionParams.property, modifier: conditionParams.modifier )
+						if( conditionParams.filterOnStatus ) {
+							condition.status = conditionValue
+						} else {
+							condition.value = conditionValue
+						}
+						
+						advice.addToConditions( condition )
+					}
+				}
+				
+				objects << advice
+			}
+			
+			if( objects.size() >= batchSize ) {
+				saveBatch( Advice, objects )
+				objects.clear()
+			}
+
+		}
+		
+		// Save all remaining units
+		saveBatch( Advice, objects )
+	}
+	
+	protected def parseDecisionTreeHeaderLines( def headerLines ) {
+		def decisionTreeStructure = [
+			adviceSubject: null,
+			conditionSubjects: [:]
+		]
+		
+		if( headerLines.size() != 3 ) {
+			log.error "Invalid number of header lines for decision tree: " + headerLines.size() + " lines. Skipping import of this file"
+			return null
+		}
+		
+		if( headerLines[0].size() != headerLines[1].size() || headerLines[0].size() != headerLines[2].size() ) {
+			log.error "Invalid format of header lines for decision tree: all header lines should be equal length. Sizes are: " + headerLines.collect { it.size() } + ". Skipping import of this file."
+			return null
+		}
+		
+		// The first cell contains the subject of the advice
+		decisionTreeStructure.adviceSubject = Property.findByEntity( headerLines[0][0] )
+		
+		if( !decisionTreeStructure.adviceSubject ) {
+			log.warn "No property could be found for advice subject " + line[0] + ". Skipping import of this file."
+			return
+		}
+
+		// The rest of the columns contain the properties
+		def columnNo = 1
+		def conditionProperty
+		while( columnNo < headerLines[0].size() ) {
+			if( headerLines[0][columnNo] ) { 
+				conditionProperty = Property.findByEntity( headerLines[0][columnNo] )
+				
+				if( !conditionProperty ) {
+					log.warn "Cannot find property for column ${columnNo}: " + headerLines[0][columnNo] + ". Skipping import of this file."
+					return null
+				}
+				
+				decisionTreeStructure.conditionSubjects[ columnNo ] = [
+					property: conditionProperty,
+					modifier: headerLines[1][columnNo],
+					filterOnValue: ( headerLines[2][columnNo]?.toLowerCase() == "value" ),
+					filterOnStatus: ( headerLines[2][columnNo]?.toLowerCase() != "value" )
+				] 
+			}
+			
+			columnNo++
+		}
+		
+		decisionTreeStructure
+	}
 	
 	/**
 	 * Loads text for advices from a CSV inputstream. 
@@ -311,7 +492,6 @@ class ImportService {
 	 */
 	def loadAdviceTexts( InputStream inputStream, String language = "en" ) {
 		def objects = []
-		def alreadyImportedIds = []
 		
 		inputStream.toCsvReader([skipLines: 0, separatorChar: separatorChar]).eachLine { line ->
 			if( !line || line.size() < 2 ) {
@@ -327,13 +507,6 @@ class ImportService {
 			// Check if a unit with this externalId already exists
 			def adviceCode = line[0].trim()
 			
-			// Check if the advice already exists. If not, skip importing this line
-			def advice = Advice.findByCode( adviceCode ) 
-			if( !advice ) {
-				log.warn "Not importing data for code " + adviceCode + " as the decision tree has not been imported yet. Import decision trees first."
-				return
-			}
-			
 			// Check if the translation already exists. If so, overwrite
 			def adviceText = AdviceText.findByCodeAndLanguage( adviceCode, language )
 			if( adviceText ) {
@@ -341,17 +514,11 @@ class ImportService {
 				adviceText.text = line[1]
 			} else {
 				log.trace "Importing new for " + adviceCode + " in " + language
-				adviceText = new AdviceText( code: adviceCode, language: language, text: line[1], advice: advice )
+				adviceText = new AdviceText( code: adviceCode, language: language, text: line[1] )
 			}
 			
 			objects << adviceText
 			
-			// If text is English, overwrite the advice default text
-			if( language == "en" ) {
-				advice.text = line[1]
-				objects << advice
-			}
-				 
 			if( objects.size() >= batchSize ) {
 				saveBatch( AdviceText, objects )
 				objects.clear()

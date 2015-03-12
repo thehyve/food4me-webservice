@@ -12,7 +12,7 @@ import groovy.transform.EqualsAndHashCode
 @EqualsAndHashCode(includes="code")
 class Advice {
 	/**
-	 * Unique code of the advice.
+	 * Code of the advice.
 	 */
 	String code
 	
@@ -21,11 +21,6 @@ class Advice {
 	 */
 	Property subject
 
-	/**
-	 * Text of the advice
-	 */
-	String text
-	
 	/**
 	 * Number of conditions applicable to this advice
 	 * This is stored separately (and could be updated using triggers) to 
@@ -38,14 +33,12 @@ class Advice {
 	 */
 	int position = 0
 	
-	static hasMany = [ conditions: AdviceCondition, translations: AdviceText ]
+	static hasMany = [ conditions: AdviceCondition ]
 	
     static constraints = {
-		text nullable: true
     }
 	
 	static mapping = {
-		text type: 'text'
 	}
 	
 	public String toString() {

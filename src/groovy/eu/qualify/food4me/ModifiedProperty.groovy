@@ -9,6 +9,10 @@ class ModifiedProperty implements Measurable {
 	Property property
 	String modifier
 	
+	public String getPropertyGroup() {
+		property?.propertyGroup
+	}
+	
 	public String toString() {
 		String description = property.toString()
 		
@@ -19,9 +23,25 @@ class ModifiedProperty implements Measurable {
 	}
 	
 	public enum Modifier {
-		// Modifiers with respect to intake
-		INTAKE_DIETARY("Dietary"),
-		INTAKE_SUPPLEMENT("Supplements")
+		// Modifiers with respect to nutrient intake
+		INTAKE_MEAT_FISH("Meat and fish"),
+		INTAKE_DAIRY("Dairy"),
+		INTAKE_SOUP_SAUCES("Soup and sauces"),
+		INTAKE_SWEETS_SNACKS("Sweets and snacks"),
+		INTAKE_FATS_SPREADS("Fats and spreads"),
+		INTAKE_POTATOES_RICE_PASTA("Potatoes, rice and pasta"),
+		INTAKE_EGGS("Eggs"),
+		
+		INTAKE_DIETARY("From food"),
+		INTAKE_SUPPLEMENTS("From supplements"),
+		
+		// Modifiers used for food groups that contribute to nutrient intake
+		FIRST_CONTRIBUTING_FOOD_GROUP("First contributing food group"),
+		SECOND_CONTRIBUTING_FOOD_GROUP("Second contributing food group"),
+		
+		// Special modifiers used for salt intake
+		SALT_ON_TABLE( "Add at the table" ),
+		SALT_WHEN_COOKING( "Add when cooking" )
 		
 		private final String value
 		
@@ -31,6 +51,21 @@ class ModifiedProperty implements Measurable {
 		
 		String getId(){
 			value
+		}
+		
+		/**
+		 * Checks whether this enum contains an item with the given string as value
+		 * @param test
+		 * @return
+		 */
+		public static boolean contains(String test) {
+			for (Modifier m : Modifier.values()) {
+				if (m.id == test) {
+					return true;
+				}
+			}
+		
+			return false;
 		}
 	}
 }

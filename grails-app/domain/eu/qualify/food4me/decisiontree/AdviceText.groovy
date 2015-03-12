@@ -18,13 +18,11 @@ class AdviceText {
 	 */
 	String language
 	
-	static belongsTo = [ advice: Advice ]
-	
     static constraints = {
-		
     }
 	
 	static mapping = {
 		text type: 'text'
+		code index: 'Code_index'
 	}
 }

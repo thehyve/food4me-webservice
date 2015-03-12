@@ -1,5 +1,7 @@
 package eu.qualify.food4me.input
 
+import java.util.List;
+
 import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
@@ -23,7 +25,7 @@ class JsonParseService implements Parser {
 		physical: Property.PROPERTY_GROUP_PHYSICAL,
 		foodgroups: Property.PROPERTY_GROUP_FOODGROUP
 	]
-		
+
 	@Override
 	public Measurements parseMeasurements(String input) {
 		def measurementJSON = input
@@ -49,10 +51,7 @@ class JsonParseService implements Parser {
 
 				// Nutrients are treated differently, as the intake is split into groups
 				if( groupName.toLowerCase() == "nutrients" ) {
-					// The data is split up into foodgroups
-					valueData.each { foodGroup, groupData ->
-						output.add parseMeasurement( new ModifiedProperty( property: property, modifier: foodGroup ), property.unit, groupData)
-					}
+					output.addAll parseNutrient( valueData, property )
 				} else {
 					output.add parseMeasurement( property, property.unit, valueData)
 				}
@@ -62,6 +61,13 @@ class JsonParseService implements Parser {
 		output
 	}
 	
+	/**
+	 * Parse a single measurement
+	 * @param measurable	Property to measure
+	 * @param unit			Unit that is expected 
+	 * @param data			Map with keys value and unit
+	 * @return
+	 */
 	protected Measurement parseMeasurement( Measurable measurable, Unit unit, def data ) {
 		// Check if the value is the correct format { value: ..., unit: "" }
 		if( !(data instanceof Map) || !data.containsKey( "value" ) ) {
@@ -83,7 +89,27 @@ class JsonParseService implements Parser {
 		new Measurement(property: measurable, value: measuredValue )
 	}
 		
+	protected List<Measurement> parseNutrient( def valueData, Measurable measurable ) {
+		List<Measurement> measurements = []
+		
+		// The data is split up into foodgroups. The allowed foodgroups are specified as 
+		// a value in the ModifiedProperty.Modifier enum
+		def allowedFoodGroups
+		valueData.each { modifier, groupData ->
+			// Check if this modifier is supported. If not, skip this measurement
+			if( !ModifiedProperty.Modifier.contains( modifier ) ) {
+				log.warn "The group " + modifier + " to be imported for " + measurable + " is not supported. " + 
+					"Please note that the totals for this nutrient may not be accurate as this measurement is not used." 
+				return
+			}
+			
+			// Parse the measurement itself
+			measurements << parseMeasurement( new ModifiedProperty( property: measurable, modifier: modifier ), measurable.unit, groupData)
+		}
 
+		measurements
+	}
+	
 	@Override
 	public MeasurementStatus parseStatus(String input) {
 		// TODO Auto-generated method stub

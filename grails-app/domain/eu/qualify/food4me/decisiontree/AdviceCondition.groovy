@@ -1,9 +1,9 @@
 package eu.qualify.food4me.decisiontree
 
-import java.math.BigDecimal;
+import eu.qualify.food4me.Property
+import groovy.transform.EqualsAndHashCode
 
-import eu.qualify.food4me.Property;
-
+@EqualsAndHashCode
 class AdviceCondition {
 	/**
 	 * Property this condition applies to 

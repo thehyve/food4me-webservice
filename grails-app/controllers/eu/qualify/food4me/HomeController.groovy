@@ -7,11 +7,10 @@ import eu.qualify.food4me.reference.ReferenceValue
 class HomeController {
 	def importService
 	
-    def index() { 
-		importService.loadUnits()
-		importService.loadProperties()
-		importService.loadReferences()
-		
-		render "Food4me"
+    def importData() { 
+		importService.loadAll()
+		render "Food4me imported"
 	}
+	
+	 
 }

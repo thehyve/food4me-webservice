@@ -138,4 +138,6 @@ databaseChangeLog = {
 	include file: 'advice-translations.groovy'
 
 	include file: 'advice-text-nullable.groovy'
+
+	include file: 'advice-text-separate-from-advices.groovy'
 }
