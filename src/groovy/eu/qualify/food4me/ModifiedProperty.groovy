@@ -9,8 +9,12 @@ class ModifiedProperty implements Measurable {
 	Property property
 	String modifier
 	
-	public String getPropertyGroup() {
-		property?.propertyGroup
+	/**
+	 * Returns the root property for this measurable
+	 * @return
+	 */
+	Property getRootProperty() {
+		property
 	}
 	
 	public String toString() {

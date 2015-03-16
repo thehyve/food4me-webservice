@@ -8,4 +8,8 @@ import groovy.transform.Canonical
 class Measurement {
 	Measurable property
 	MeasuredValue value
+	
+	public String toString() {
+		"Measurement for " + property + ": " + value
+	} 
 }

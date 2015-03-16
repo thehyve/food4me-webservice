@@ -9,34 +9,34 @@ import eu.qualify.food4me.measurements.Measurements
 import grails.transaction.Transactional
 
 @Transactional
-class DevisedMeasurementsService {
+class DerivedMeasurementsService {
 
 	List<String> foodModifiers = [
-		ModifiedProperty.Modifier.INTAKE_DAIRY,
-		ModifiedProperty.Modifier.INTAKE_EGGS,
-		ModifiedProperty.Modifier.INTAKE_FATS_SPREADS,
-		ModifiedProperty.Modifier.INTAKE_MEAT_FISH,
-		ModifiedProperty.Modifier.INTAKE_POTATOES_RICE_PASTA,
-		ModifiedProperty.Modifier.INTAKE_SOUP_SAUCES,
-		ModifiedProperty.Modifier.INTAKE_SWEETS_SNACKS,
+		ModifiedProperty.Modifier.INTAKE_DAIRY.id,
+		ModifiedProperty.Modifier.INTAKE_EGGS.id,
+		ModifiedProperty.Modifier.INTAKE_FATS_SPREADS.id,
+		ModifiedProperty.Modifier.INTAKE_MEAT_FISH.id,
+		ModifiedProperty.Modifier.INTAKE_POTATOES_RICE_PASTA.id,
+		ModifiedProperty.Modifier.INTAKE_SOUP_SAUCES.id,
+		ModifiedProperty.Modifier.INTAKE_SWEETS_SNACKS.id,
 	]
 	
 	/**
 	 * Devise detailed measurements from the given values
 	 * @param measurements
 	 */
-	public void deviseMeasurements(Measurements measurements) {
+	public void deriveMeasurements(Measurements measurements) {
 		// Return if no values are given
 		if( !measurements )
 			return;
 	
-		// Determine a list of nutrients, for which we have to devise measurements
+		// Determine a list of nutrients, for which we have to derive measurements
 		List<Property> nutrients = measurements.getAllPropertiesForPropertyGroup( Property.PROPERTY_GROUP_NUTRIENT )
-			
-		// For each nutrient, compute some devised measurements
+
+		// For each nutrient, compute some derived measurements
 		nutrients.each { nutrient ->
 			def nutrientMeasurements = measurements.getValuesFor(nutrient)
-			measurements.addAll deviseMeasurementsForNutrient( nutrient, nutrientMeasurements )
+			measurements.addAll deriveMeasurementsForNutrient( nutrient, nutrientMeasurements )
 		}
 		
 		// Compute omega3 index and total carotenoids
@@ -56,17 +56,17 @@ class DevisedMeasurementsService {
 	 * @param nutrientMeasurements
 	 * @return
 	 */
-	protected List<Measurement> deviseMeasurementsForNutrient( Property nutrient, List<Measurement> nutrientMeasurements ) {
+	protected List<Measurement> deriveMeasurementsForNutrient( Property nutrient, List<Measurement> nutrientMeasurements ) {
 		List<Measurement> measurements = []
 		
 		if( !nutrientMeasurements ) {
-			log.warn "No measurements given for " + nutrient + ", so no devised measurements are computed."
+			log.warn "No measurements given for " + nutrient + ", so no derived measurements are computed."
 			return []
 		} 
 		
-		// We can only devise measurements for this nutrient if all given measurements have the same unit
-		if( nutrientMeasurements.find { it.measuredValue.unit && it.measuredValue.unit != nutrient.unit } ) {
-			log.warn "One or more of the measurements given for " + nutrient + " have not the expected unit and cannot devise measurements." + 
+		// We can only derive measurements for this nutrient if all given measurements have the same unit
+		if( nutrientMeasurements.find { it.value.unit && it.value.unit != nutrient.unit } ) {
+			log.warn "One or more of the measurements given for " + nutrient + " have not the expected unit and cannot derive measurements." + 
 				" Currently, we cannot convert between units, so all values should be given in " + nutrient.unit
 			return []
 		}
@@ -88,9 +88,16 @@ class DevisedMeasurementsService {
 	}	
 	
 	protected Measurement computeTotalForNutrient( Property nutrient, List<Measurement> nutrientMeasurements ) {
+		// Check if the list of measurements already contains a 'total'
 		if( !nutrientMeasurements.find { it.property == nutrient } ) {
 			// Create a new measurement with the total for all nutrient measurements
-			def total = nutrientMeasurements.collect { it.measuredValue.type == "numeric" ? it.measuredValue.value : 0 }.sum()
+			def total = nutrientMeasurements.collect {
+				// Discard the measurement for 'total from food' from this total computation
+				if( it.property instanceof ModifiedProperty && it.property.modifier == ModifiedProperty.Modifier.INTAKE_DIETARY.id ) 
+					0
+				else
+					it.value.type == "numeric" ? it.value.value : 0 
+			}.sum()
 			return new Measurement( property: nutrient, value: new MeasuredNumericValue( unit: nutrient.unit, value: total ) )
 		} else {
 			log.info "A total value for " + nutrient + " is already provided, so will not be computed."
@@ -99,12 +106,12 @@ class DevisedMeasurementsService {
 	
 	
 	protected Measurement computeIntakeFromFoodForNutrient( Property nutrient, List<Measurement> nutrientMeasurements ) {
-		def fromFoodProperty = new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY )
+		def fromFoodProperty = new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id )
 		if( !nutrientMeasurements.find { it.property == fromFoodProperty } ) {
 			// Create a new measurement with the total intake from food
 			def totalFromFood = nutrientMeasurements.collect {
 				if( it.property instanceof ModifiedProperty && it.property.modifier in foodModifiers ) {
-					it.measuredValue.type == "numeric" ? it.measuredValue.value : 0
+					it.value.type == "numeric" ? it.value.value : 0
 				} else {
 					0
 				}
@@ -120,14 +127,14 @@ class DevisedMeasurementsService {
 	}
 
 	
-	protected Measurement computeContributingFoodGroupsForNutrient( Property nutrient, List<Measurement> nutrientMeasurements ) {
+	protected List<Measurement> computeContributingFoodGroupsForNutrient( Property nutrient, List<Measurement> nutrientMeasurements ) {
 		List<Measurement> measurements = []
 		
 		// Compute the most contributing food groups. To do that,
 		// use only the measurements for this nutrient, that have a modifier, are numeric and are not from supplements
 		// after that, sort descending on value
 		def sortedMeasurements = nutrientMeasurements
-			.findAll { it.property instanceof ModifiedProperty && it.value?.type == "numeric" && it.property.modifier != ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS }
+			.findAll { it.property instanceof ModifiedProperty && it.value?.type == "numeric" && it.property.modifier in foodModifiers }
 			.sort { a, b ->
 				// Sort descending on numeric value
 				b.value.value <=> a.value.value
@@ -135,14 +142,14 @@ class DevisedMeasurementsService {
 			
 		if( sortedMeasurements.size() >= 1 ) {
 			measurements << new Measurement(
-				property: new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.FIRST_CONTRIBUTING_FOOD_GROUP ),
+				property: new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.FIRST_CONTRIBUTING_FOOD_GROUP.id ),
 				value: new MeasuredTextValue( value: sortedMeasurements[0].property.modifier )
 			)
 		}
 
 		if( sortedMeasurements.size() >= 2 ) {
 			measurements << new Measurement(
-				property: new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.FIRST_CONTRIBUTING_FOOD_GROUP ),
+				property: new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.SECOND_CONTRIBUTING_FOOD_GROUP.id ),
 				value: new MeasuredTextValue( value: sortedMeasurements[1].property.modifier )
 			)
 		}
@@ -158,7 +165,7 @@ class DevisedMeasurementsService {
 	 * @param measurements
 	 * @return
 	 */
-	protected computeTotalCarotenoids(Measurements measurements) {
+	protected void computeTotalCarotenoids(Measurements measurements) {
 		def totalCarotenoids = Property.findByEntity( "Carotenoids" )
 		
 		if( !totalCarotenoids ) {
@@ -166,7 +173,7 @@ class DevisedMeasurementsService {
 			return
 		}
 
-		if( measurements.findValueFor( totalCarotenoids ) ) {
+		if( measurements.getValueFor( totalCarotenoids ) ) {
 			log.info "A value is already given for total carotenoids. No need to compute it."
 			return
 		}
@@ -180,14 +187,14 @@ class DevisedMeasurementsService {
 		}
 		
 		
-		def inputMeasurements = inputProperties.collect { measurements.getValueFor(it) }
+		def inputMeasurements = inputProperties.collect { measurements.getValueFor(it) }.findAll { it && it.type == "numeric" }
 		
 		if( inputMeasurements.findAll().size() < inputProperties.size() ) {
-			log.warn "Not enough information to compute the total carotenoids. Required properties are " + inputs
+			log.warn "Not enough information to compute the total carotenoids. The computation needs numeric measurements for " + inputs
 			return
 		}
 		
-		def totalCarotenoidsValue = inputMeasurements.collect { it.value.value }.sum()
+		def totalCarotenoidsValue = inputMeasurements*.value.sum()
 		
 		measurements.add new Measurement(
 			property: totalCarotenoids,
@@ -206,7 +213,7 @@ class DevisedMeasurementsService {
 	 * @param measurements
 	 * @return
 	 */
-	protected computeOmega3Index(Measurements measurements) {
+	protected void computeOmega3Index(Measurements measurements) {
 		def n3Index = Property.findByEntity( "Omega-3 index" )
 		
 		if( !n3Index ) {
@@ -214,25 +221,28 @@ class DevisedMeasurementsService {
 			return
 		}
 
-		if( measurements.findValueFor( n3Index ) ) {
+		if( measurements.getValueFor( n3Index ) ) {
 			log.info "A value is already given for the omega-3 index. No need to compute it."
 			return
 		}
 
-		def dpa = Property.findByEntity( "Docosapentaenoic acid" )
-		def epa = Property.findByEntity( "Eicosapentanoic acid" )
-		def dha = Property.findByEntity( "Docosahexaenoic acid" )
+		def inputs = [ "Docosapentaenoic acid", "Eicosapentanoic acid", "Docosahexaenoic acid" ]
 		
-		def dpaMeasurement = measurements.getValueFor( dpa )
-		def epaMeasurement = measurements.getValueFor( epa )
-		def dhaMeasurement = measurements.getValueFor( dha )
+		def inputProperties = inputs.collect { Property.findByEntity(it) }
 		
-		if( !dpaMeasurement || !epaMeasurement || !dhaMeasurement ) {
-			log.warn "Not enough information to compute the omega-3 index. Required properties are " + [ dpa, epa, dha ]
+		if( inputProperties.findAll().size() < inputs.size() ) {
+			log.warn "Not all properties to compute the omega-3 index could be found. The needed properties are: " + inputs
 			return
 		}
 		
-		def n3IndexValue = 1.4473 + 0.8303 * ( dpaMeasurement.value.value + epaMeasurement.value.value + dhaMeasurement.value.value )
+		def inputMeasurements = inputProperties.collect { measurements.getValueFor(it) }.findAll { it && it.type == "numeric" }
+		
+		if( inputMeasurements.findAll().size() < inputProperties.size() ) {
+			log.warn "Not enough information to compute the omega-3 index. The computation needs numeric values for " + inputs
+			return
+		}
+		
+		def n3IndexValue = 1.4473 + 0.8303 * inputMeasurements*.value.sum()
 		
 		measurements.add new Measurement(
 			property: n3Index,

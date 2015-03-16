@@ -38,6 +38,14 @@ class Property implements Measurable, Advisable {
 		unit nullable: true
     }
 	
+	/**
+	 * Returns the root property for this measurable
+	 * @return
+	 */
+	Property getRootProperty() {
+		this
+	}
+	
 	public String toString() {
 		String description = "" + entity
 		

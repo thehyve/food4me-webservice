@@ -19,6 +19,10 @@ abstract class MeasuredValue {
 	 */
 	public abstract def getValue();
 	
+	public String toString() {
+		value + ( unit ? " " + unit.code : "" )
+	}
+	
 	/**
 	 * Factory method to create a measuredValue object
 	 */

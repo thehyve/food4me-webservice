@@ -36,8 +36,8 @@ import groovy.transform.Canonical
 	 * @return
 	 */
 	public List<Measurement> getValuesFor( Property p ) {
-		return measurements.findAll { 
-			it.property == p || ( it.property instanceof ModifiedProperty && it.property.property == p ) 
+		return measurements.findAll {
+			it?.property?.rootProperty == p 
 		}
 	}
 
@@ -48,15 +48,10 @@ import groovy.transform.Canonical
 	 */
 	public List<Property> getAllPropertiesForPropertyGroup( String propertyGroup ) {
 		measurements.collect {
-			if( it.propertyGroup != propertyGroup )
+			if( it?.property?.rootProperty?.propertyGroup != propertyGroup )
 				return null
 			
-			if( it instanceof ModifiedProperty )
-				return it.property
-			else if( it instanceof Property )
-				return it
-			else
-				return null
+			it?.property?.rootProperty
 		}.findAll().unique()
 	}
 	

@@ -372,7 +372,9 @@ class ImportService {
 			def columnNo = 1
 			def translationMap = [
 				"below ok": [ Status.STATUS_VERY_LOW, Status.STATUS_LOW ],
-				"above ok": [ Status.STATUS_VERY_HIGH, Status.STATUS_HIGH ]
+				"above ok": [ Status.STATUS_VERY_HIGH, Status.STATUS_HIGH ],
+				"ok and lower": [ Status.STATUS_OK, Status.STATUS_LOW, Status.STATUS_VERY_LOW ],
+				"ok and higher": [ Status.STATUS_OK, Status.STATUS_HIGH, Status.STATUS_VERY_HIGH ],
 			]
 			
 			while( columnNo < line.size() ) {
@@ -452,7 +454,7 @@ class ImportService {
 		decisionTreeStructure.adviceSubject = Property.findByEntity( headerLines[0][0] )
 		
 		if( !decisionTreeStructure.adviceSubject ) {
-			log.warn "No property could be found for advice subject " + line[0] + ". Skipping import of this file."
+			log.warn "No property could be found for advice subject " + headerLines[0][0] + ". Skipping import of this file."
 			return
 		}
 
@@ -600,7 +602,7 @@ class ImportService {
 	def loadAdviceTextsFromDirectory( String directory = null ) {
 		log.info "Start loading advice texts " + ( directory ? " from " + directory : "" )
 		
-		importData( directory, ~/advice_texts.*\.[a-zA-Z]+\.txt/, { file ->
+		importData( directory, ~/advice_texts.*\.[a-zA-Z]+\.txt$/, { file ->
 			def match = file.name =~ /([a-zA-Z]+)\.txt$/
 			if( !match ) {
 				log.warn( "Trying to load advice texts from " + file + " but no proper language was specified" )
@@ -614,7 +616,20 @@ class ImportService {
 		})
 	}
 
+	/**
+	 * Loads decision trees into the database from the files decision_trees*.txt in the given directory
+	 * @return
+	 */
+	def loadDecisionTreesFromDirectory( String directory = null ) {
+		log.info "Start loading advice texts " + ( directory ? " from " + directory : "" )
 		
+		importData( directory, ~/decision_trees.*\.txt/, { file ->
+			log.info( "Loading decision trees from " + file )
+			file.withInputStream { is -> loadDecisionTrees(is) }
+		})
+	}
+
+			
 	/**
 	 * Import data from files in the given directory
 	 * @param matcher
