@@ -1,8 +1,9 @@
 package eu.qualify.food4me.algorithm.SOP3
 
+import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
-import eu.qualify.food4me.exampledata.IntegrationTestHelper;
+import eu.qualify.food4me.exampledata.IntegrationTestHelper
 import eu.qualify.food4me.measurements.MeasuredNumericValue
 import eu.qualify.food4me.measurements.MeasuredTextValue
 import eu.qualify.food4me.measurements.Measurement
@@ -134,6 +135,27 @@ class ComputeStatusServiceIntegrationSpec extends IntegrationSpec {
 			statuses.getStatus( fibre ).status == Status.STATUS_UNKNOWN
 	}
 
+	void "test status computation for modified properties"() {
+		given:
+			def protein = Property.findByEntity( "Protein" )
+			def proteinFromFood = new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id );
+			def proteinSupplements = new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS.id );
+			
+			measurements = new Measurements()
+			measurements.add( new Measurement( property: protein, value: new MeasuredNumericValue( value: 0.7, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.add( new Measurement( property: proteinFromFood, value: new MeasuredNumericValue( value: 0.4, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.add( new Measurement( property: proteinSupplements, value: new MeasuredNumericValue( value: 0.3, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			
+		when:
+			MeasurementStatus statuses = computeStatusService.computeStatus( measurements )
+		
+		then:
+			statuses
+			statuses.getStatus( protein ).status == Status.STATUS_OK
+			statuses.getStatus( proteinFromFood ).status == Status.STATUS_VERY_LOW
+			!statuses.getStatus( proteinSupplements )
+	}
+	
 	void "test boundary values"() {
 		
 	}

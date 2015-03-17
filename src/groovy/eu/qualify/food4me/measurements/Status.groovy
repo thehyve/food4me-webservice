@@ -35,6 +35,10 @@ class Status {
 		return status && status != STATUS_UNKNOWN
 	}
 	
+	public String toString() {
+		return "" + entity + " = " + status
+	}
+	
 	/**
 	 * Color that is used to show on screen and determine the severity
 	 * of the status
