@@ -16,8 +16,8 @@ class ImportServicePropertiesSpec extends ImportServiceIntegrationSpec {
 		given: "a list of 2 properties to import, in the expected format"
 			def propertiesToImport = [
 				[ "headerline", "to", "be", "ignored" ],
-				[ "Glucose", "Biomarker", "67079006", "mmol/L" ],
-				[ "Vitamin C", "Nutrient", "286586005", "mg" ]
+				[ "Glucose", "Biomarker", "67079006", "", "mmol/L" ],
+				[ "Vitamin C", "Nutrient", "286586005", "", "mg" ]
 			]
 			InputStream is = getInputStreamFromImportDatastructure(propertiesToImport)
 			
@@ -39,13 +39,37 @@ class ImportServicePropertiesSpec extends ImportServiceIntegrationSpec {
 			Property.findByEntity( "Glucose" ).unit instanceof Unit
 			Property.findByEntity( "Glucose" ).unit.externalId == "258813002"
 	}
+	
+	void "test importing properties with secondary external ID"() {
+		given: "a list of 2 properties to import, one without external ID and one with only a secondary ID"
+			def propertiesToImport = [
+				[ "headerline", "to", "be", "ignored" ],
+				[ "Glucose", "Biomarker", "", "", "mmol/L" ],
+				[ "Vitamin C", "Nutrient", "", "other ID", "mg" ]
+			]
+			InputStream is = getInputStreamFromImportDatastructure(propertiesToImport)
+			
+			assert Property.count == 0
+		
+		and: "the corresponding units in the database"
+			new Unit( name: "mmol/L", code: "mmol/L", externalId: "258813002").save()
+			new Unit( name: "mg", code: "mg", externalId: "'258684004").save()
+			
+		when: "importing the properties"
+			importService.loadProperties(is)
+		
+		then: "only the second property is imported, with the correct ID"
+			Property.count == 1
+			Property.findByEntity( "Vitamin C" )
+			Property.findByEntity( "Vitamin C" ).externalId == "other ID"
+	}
 
 	void "test importing duplicate properties"() {
 		given: "a list of 2 properties to import, with the same external ID"
 			def propertiesToImport = [
 				[ "headerline", "to", "be", "ignored" ],
-				[ "Glucose", "Biomarker", "67079006", "mmol/L" ],
-				[ "Vitamin C", "Nutrient", "67079006", "mg" ]
+				[ "Glucose", "Biomarker", "67079006", "", "mmol/L" ],
+				[ "Vitamin C", "Nutrient", "67079006", "", "mg" ]
 			]
 			InputStream is = getInputStreamFromImportDatastructure(propertiesToImport)
 			
@@ -69,10 +93,10 @@ class ImportServicePropertiesSpec extends ImportServiceIntegrationSpec {
 			def propertiesToImport = [
 				[ "headerline", "to", "be", "ignored" ],
 				[ "Cholesterol" ],
-				[ "Glucose", "Biomarker", "67079006", "mmol/L" ],
+				[ "Glucose", "Biomarker", "67079006", "", "mmol/L" ],
 				[ "", "", "", "", "", "sixth column" ],
 				[],
-				[ "Vitamin C", "Nutrient", "286586005", "mg" ]
+				[ "Vitamin C", "Nutrient", "286586005", "", "mg" ]
 			]
 			InputStream is = getInputStreamFromImportDatastructure(propertiesToImport)
 			
@@ -99,8 +123,8 @@ class ImportServicePropertiesSpec extends ImportServiceIntegrationSpec {
 		given: "a list of 2 properties to import, in the expected format"
 			def propertiesToImport = [
 				[ "headerline", "to", "be", "ignored" ],
-				[ "Glucose", "Biomarker", "67079006", "mmol/L" ],
-				[ "Vitamin C", "Nutrient", "286586005", "mg" ]
+				[ "Glucose", "Biomarker", "67079006", "", "mmol/L" ],
+				[ "Vitamin C", "Nutrient", "286586005", "", "mg" ]
 			]
 			InputStream is = getInputStreamFromImportDatastructure(propertiesToImport)
 			
