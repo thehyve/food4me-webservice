@@ -14,7 +14,7 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 	// TODO: Improve performance
 	@Lazy
 	protected List<Property> geneRiskProperties = {[
-		Property.findByEntity( "Omega-3" ),
+		Property.findByEntity( "Omega-3 index" ),
 		Property.findByEntity( "Saturated fat" ),
 		Property.findByEntity( "Total fat" ),
 		Property.findByEntity( "Folate" )
@@ -128,7 +128,7 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 			case 1:
 				return [
 					Property.findByEntity( "Cholesterol" ),
-					Property.findByEntity( "Omega-3" ),
+					Property.findByEntity( "Omega-3 index" ),
 					Property.findByEntity( "Saturated fat" ),
 					Property.findByEntity( "Total fat" ),
 					Property.findByEntity( "Monounsaturated fat" ),
