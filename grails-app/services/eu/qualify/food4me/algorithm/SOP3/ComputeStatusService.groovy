@@ -58,13 +58,21 @@ class ComputeStatusService implements StatusComputer {
 	protected Status determineStatus( ModifiedProperty property, Measurements measurements ) {
 		log.debug "  - modified property"
 		
-		// A status can only be determined for properties with modifier 'from food'
+		// A status can be determined for properties with modifier 'from food'
 		// For those properties, the same reference values apply as for the total
 		// value of the (root) properties.
-		if( property.modifier != ModifiedProperty.Modifier.INTAKE_DIETARY.id )
-			return null
+		// Also, a status can be determined for properties with modifier 'supplements'
+		switch( property.modifier ) {
+			case ModifiedProperty.Modifier.INTAKE_DIETARY.id:
+				// Use the same reference as the root property
+				return determineStatusForProperty( property, property.rootProperty, measurements )
+			case ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS.id:
+				// Only determine yes or no
+				return determineStatusForSupplement( property, property.rootProperty, measurements )
+		}
 		
-		determineStatusForProperty( property, property.rootProperty, measurements )
+		return null
+		
 	}
 	
 	/**
@@ -124,6 +132,30 @@ class ComputeStatusService implements StatusComputer {
 		return status
 	}
 
+	/**
+	 * Determines the status for some supplement intake value
+	 * @param valueProperty		Property to retrieve the value for
+	 * @param referenceProperty	Property to determine the reference
+	 * @param measurements		Set of measurements used as input
+	 * @return
+	 */
+	protected Status determineStatusForSupplement( ModifiedProperty valueProperty, Property referenceProperty, Measurements measurements ) {
+		def status = new Status( entity: valueProperty )
+
+		// A very simple check: yes or no
+		def value = measurements.getValueFor( valueProperty )
+		
+		if( value && value.type == "numeric" && value.value > 0 ) {
+			status.status = Status.STATUS_YES
+			status.color = Status.Color.GREEN
+		} else {
+			status.status = Status.STATUS_NO
+			status.color = Status.Color.RED
+		}
+
+		return status
+	}
+	
 	
 	protected def generateWhereClause( List<Property> properties, Measurements measurements, int index = 0 ) {
 		List<String> whereClause = []

@@ -139,10 +139,12 @@ class ComputeStatusServiceIntegrationSpec extends IntegrationSpec {
 		given:
 			def protein = Property.findByEntity( "Protein" )
 			def proteinFromFood = new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id );
+			def proteinFromMeat = new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_MEAT_FISH.id );
 			def proteinSupplements = new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS.id );
 			
 			measurements = new Measurements()
 			measurements.add( new Measurement( property: protein, value: new MeasuredNumericValue( value: 0.7, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.add( new Measurement( property: proteinFromMeat, value: new MeasuredNumericValue( value: 0.2, unit: Unit.findByCode( "g/kg bw" ) ) ) )
 			measurements.add( new Measurement( property: proteinFromFood, value: new MeasuredNumericValue( value: 0.4, unit: Unit.findByCode( "g/kg bw" ) ) ) )
 			measurements.add( new Measurement( property: proteinSupplements, value: new MeasuredNumericValue( value: 0.3, unit: Unit.findByCode( "g/kg bw" ) ) ) )
 			
@@ -153,7 +155,8 @@ class ComputeStatusServiceIntegrationSpec extends IntegrationSpec {
 			statuses
 			statuses.getStatus( protein ).status == Status.STATUS_OK
 			statuses.getStatus( proteinFromFood ).status == Status.STATUS_VERY_LOW
-			!statuses.getStatus( proteinSupplements )
+			statuses.getStatus( proteinSupplements ).status == Status.STATUS_YES
+			!statuses.getStatus( proteinFromMeat )
 	}
 	
 	void "test boundary values"() {
