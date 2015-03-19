@@ -8,15 +8,16 @@ import eu.qualify.food4me.decisiontree.AdviceText
 import eu.qualify.food4me.measurements.Status
 import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
-import grails.transaction.Transactional
+import groovy.sql.Sql
 
-@Transactional
+
 class ImportService {
 	static transactional = false
 	
 	def sessionFactory
 	def propertyInstanceMap = org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
 	def grailsApplication
+	def dataSource
 	
 	int batchSize = 50
 	String separatorChar = "\t"
@@ -50,7 +51,7 @@ class ImportService {
 			}
 			
 			// Check if a unit with this externalId already exists
-			def externalId = line[2]
+			def externalId = line[2] ?: line[3]
 			if( Unit.countByExternalId( externalId ) > 0 || externalId in alreadyImportedIds) {
 				log.info( "Skip importing unit " + line[0] + " / " + externalId + " because it already exists" )
 			} else {
@@ -90,7 +91,8 @@ class ImportService {
 			}
 			
 			// If no external ID is given, the property cannot be added
-			def externalId = line[2]
+			// We use the snomedct id initially, but if it is not given, we use the EuroFIR code
+			def externalId = line[2] ?: line[3]
 			if( !externalId ) {
 				log.warn "Skipping line with property " + line[0] + " as it has no external identifier"
 				return
@@ -101,7 +103,7 @@ class ImportService {
 				log.info( "Skip importing property " + line[0] + " (" + externalId + ") because it already exists" )
 			} else {
 				// Find the unit to use for this property
-				def unitCode = line.size() >= 4 ? line[3] : null
+				def unitCode = line.size() >= 5 ? line[4] : null
 				def unit
 				
 				if( unitCode ) {
@@ -114,7 +116,7 @@ class ImportService {
 				
 				properties << new Property( entity: line[0], propertyGroup: line[1], externalId: externalId, unit: unit )
 				alreadyImportedIds << externalId
-				log.trace( "Importing property " + line[0] + " / " + line[1] )
+				log.trace( "Importing property " + line[0] + " / " + line[1] + " with external ID " + externalId )
 			}
 				 
 			if( properties.size() >= batchSize ) {
@@ -282,7 +284,7 @@ class ImportService {
 					// Color is not relevant for SNPs, but we store a color anyhow
 					def color = ( status == "Risk allele" ) ? Status.Color.RED : Status.Color.GREEN
 					
-					log.info "Storing SNP " + line[0] + " / " + line[ columnNo ] + " as " + status
+					log.trace "Storing SNP " + line[0] + " / " + line[ columnNo ] + " as " + status
 					
 					def reference = new ReferenceValue(subject: snp, status: status, color: color )
 					reference.addToConditions( new ReferenceCondition( subject: snp, value: line[ columnNo ] ) )
@@ -316,7 +318,7 @@ class ImportService {
 	 * @return
 	 */
 	def loadDecisionTrees( InputStream inputStream ) {
-		def objects = []
+		def adviceObjects = []
 		
 		def adviceSubject
 		def conditionSubjects = []
@@ -325,7 +327,7 @@ class ImportService {
 		def headerLines = []
 		def structure
 		
-		inputStream.toCsvReader([skipLines: 0, separatorChar: separatorChar]).eachLine { line ->
+		inputStream?.toCsvReader([skipLines: 0, separatorChar: separatorChar]).eachLine { line ->
 			if( !line || line.size() < 2 ) {
 				log.warn "Skipping line as it has not enough columns: " + line?.size()
 				return
@@ -366,6 +368,7 @@ class ImportService {
 			// Please note, in order to properly generate the combinations, we will insert a list with 
 			// NULL value for each empty cell. These will be discarded when generating the domain objects
 			// itself.
+			log.trace "Generate advice combinations for advice " + structure.adviceSubject + " / " + line[0]
 			
 			def conditions = []
 			
@@ -379,7 +382,7 @@ class ImportService {
 			
 			while( columnNo < line.size() ) {
 				if( line[columnNo] ) {
-					def currentValue = line[columnNo]
+					def currentValue = line[columnNo]?.trim()
 					
 					// Check if we need to translate this property into multiple statusses
 					// That is, if the column is set to filter on status and we have a translation for this status
@@ -397,12 +400,17 @@ class ImportService {
 				columnNo++
 			}
 						
-			// Generate combinations of all conditoins
+			if( !conditions || !conditions.findAll() ) {
+				log.warn "No conditions are found for advice with code " + line[0]
+			}
+			// Generate combinations of all conditions
 			def adviceConditions = conditions.combinations()
 			
 			// Generate objects for all advices
 			adviceConditions.each { conditionSet ->
 				def advice = new Advice( code: line[0], subject: structure.adviceSubject ) 
+				
+				log.trace "  Generating advice with conditions + " + conditionSet
 				
 				conditionSet.eachWithIndex { conditionValue, index ->
 					if( conditionValue ) {
@@ -416,22 +424,22 @@ class ImportService {
 							condition.value = conditionValue
 						}
 						
-						advice.addToConditions( condition )
+						advice.addToConditions condition
 					}
 				}
 				
-				objects << advice
+				adviceObjects << advice
 			}
 			
-			if( objects.size() >= batchSize ) {
-				saveBatch( Advice, objects )
-				objects.clear()
+			if( adviceObjects.size() >= batchSize ) {
+				saveBatch( Advice, adviceObjects )
+				adviceObjects.clear()
 			}
 
 		}
 		
-		// Save all remaining units
-		saveBatch( Advice, objects )
+		// Save all remaining objects
+		saveBatch( Advice, adviceObjects )
 	}
 	
 	protected def parseDecisionTreeHeaderLines( def headerLines ) {
@@ -451,7 +459,7 @@ class ImportService {
 		}
 		
 		// The first cell contains the subject of the advice
-		decisionTreeStructure.adviceSubject = Property.findByEntity( headerLines[0][0] )
+		decisionTreeStructure.adviceSubject = Property.findByEntity( headerLines[0][0].trim() )
 		
 		if( !decisionTreeStructure.adviceSubject ) {
 			log.warn "No property could be found for advice subject " + headerLines[0][0] + ". Skipping import of this file."
@@ -463,18 +471,25 @@ class ImportService {
 		def conditionProperty
 		while( columnNo < headerLines[0].size() ) {
 			if( headerLines[0][columnNo] ) { 
-				conditionProperty = Property.findByEntity( headerLines[0][columnNo] )
+				conditionProperty = Property.findByEntity( headerLines[0][columnNo].trim() )
 				
 				if( !conditionProperty ) {
 					log.warn "Cannot find property for column ${columnNo}: " + headerLines[0][columnNo] + ". Skipping import of this file."
 					return null
 				}
 				
+				def filterOnValue = headerLines[2][columnNo]?.trim()?.toLowerCase() == "value"
+				
+				// Check whether we know any references for the given property. If not, the status should be given by the user
+				if( !filterOnValue && ReferenceValue.countBySubject( conditionProperty ) == 0 ) {
+					log.warn "Cannot find any references for " + headerLines[0][columnNo] + ". This means that we can't determine a status for this variable automatically."
+				}
+				
 				decisionTreeStructure.conditionSubjects[ columnNo ] = [
 					property: conditionProperty,
 					modifier: headerLines[1][columnNo],
-					filterOnValue: ( headerLines[2][columnNo]?.toLowerCase() == "value" ),
-					filterOnStatus: ( headerLines[2][columnNo]?.toLowerCase() != "value" )
+					filterOnValue: filterOnValue,
+					filterOnStatus: !filterOnValue
 				] 
 			}
 			
@@ -576,10 +591,21 @@ class ImportService {
 	def loadGenericReferencesFromDirectory( String directory = null ) {
 		log.info "Start loading generic references " + ( directory ? " from " + directory : "" )
 		
-		importData( directory, ~/references_generic.*\.txt/, { file ->
-			log.info( "Loading generic references from " + file )
-			file.withInputStream { is -> loadGenericReferences( is ) }
-		})
+		// First disable the trigger for advice conditions, as that slows down the import heavily
+		log.info "Disabling trigger on reference_condition"
+		disableTriggers "reference_condition"
+		
+		try {
+			importData( directory, ~/references-generic.*\.txt/, { file ->
+				log.info( "Loading generic references from " + file )
+				file.withInputStream { is -> loadGenericReferences( is ) }
+			})
+		} finally {
+			// Re enable the trigger for advice conditions
+			log.info "Re enabling trigger on reference_condition"
+			enableTriggers "reference_condition"
+		}
+		
 	}
 	
 	/**
@@ -589,10 +615,20 @@ class ImportService {
 	def loadSNPReferencesFromDirectory( String directory = null ) {
 		log.info "Start loading SNP references " + ( directory ? " from " + directory : "" )
 		
-		importData( directory, ~/references_snps.*\.txt/, { file ->
-			log.info( "Loading SNP references from " + file )
-			file.withInputStream { is -> loadSNPReferences(is) }
-		})
+		// First disable the trigger for advice conditions, as that slows down the import heavily
+		log.info "Disabling trigger on reference_conditoin"
+		disableTriggers "reference_condition"
+		
+		try {
+			importData( directory, ~/references-snps.*\.txt/, { file ->
+				log.info( "Loading SNP references from " + file )
+				file.withInputStream { is -> loadSNPReferences(is) }
+			})
+		} finally {
+			// Re enable the trigger for advice conditions
+			log.info "Re enabling trigger on reference_condition"
+			enableTriggers "reference_condition"
+		}
 	}
 
 	/**
@@ -602,7 +638,7 @@ class ImportService {
 	def loadAdviceTextsFromDirectory( String directory = null ) {
 		log.info "Start loading advice texts " + ( directory ? " from " + directory : "" )
 		
-		importData( directory, ~/advice_texts.*\.[a-zA-Z]+\.txt$/, { file ->
+		importData( directory, ~/advice-texts.*\.[a-zA-Z]+\.txt$/, { file ->
 			def match = file.name =~ /([a-zA-Z]+)\.txt$/
 			if( !match ) {
 				log.warn( "Trying to load advice texts from " + file + " but no proper language was specified" )
@@ -621,12 +657,24 @@ class ImportService {
 	 * @return
 	 */
 	def loadDecisionTreesFromDirectory( String directory = null ) {
-		log.info "Start loading advice texts " + ( directory ? " from " + directory : "" )
+		log.info "Start loading decision trees " + ( directory ? " from " + directory : "" )
 		
-		importData( directory, ~/decision_trees.*\.txt/, { file ->
-			log.info( "Loading decision trees from " + file )
-			file.withInputStream { is -> loadDecisionTrees(is) }
-		})
+		// First disable the trigger for advice conditions, as that slows down the import heavily
+		log.info "Disabling trigger on advice_condition"
+		disableTriggers "advice_condition"
+		
+		try {
+			importData( directory, ~/decision-trees.*\.txt/, { file ->
+				log.info( "Loading decision trees from " + file )
+				file.withInputStream { is -> loadDecisionTrees(is) }
+			})
+		} finally {
+			// Re enable the trigger for advice conditions
+			log.info "Re enabling trigger on advice_condition"
+			enableTriggers "advice_condition"
+		}
+	
+
 	}
 
 			
@@ -668,11 +716,11 @@ class ImportService {
 		def numSaves = 0;
 		
 		if( !objects ) {
-			log.warn "No objects of type " + domainClass + " to store"
+			log.warn "No objects of type " + domainClass?.simpleName + " to store"
 			return
 		} 
 		
-		log.info "Batch saving " + objects.size() + " objects of type " + domainClass 
+		log.info "Batch saving " + objects.size() + " objects of type " + domainClass?.simpleName 
 		
 		domainClass.withTransaction {
 			objects.each { object ->
@@ -691,12 +739,30 @@ class ImportService {
 		return numSaves
 	}
 	
+	protected def disableTriggers( String table ) {
+		final Sql sql = new Sql(dataSource)
+		sql.execute "ALTER TABLE " + table + " DISABLE TRIGGER USER"
+	}
+	
+	protected def enableTriggers( String table ) {
+		final Sql sql = new Sql(dataSource)
+		sql.execute "ALTER TABLE " + table + " ENABLE TRIGGER USER"
+		
+		// Update rows in the table without changing the data itself
+		// This will execute the trigger
+		sql.execute "UPDATE " + table + " set id = id"
+	}
+	
 	/**
 	 * Cleaning up of GORM session caches, which are a performance killer if not flushed regularly
 	 * @return
 	 */
 	protected def cleanUpGORM() {
 		def session = sessionFactory.currentSession
+		
+		if( !session )
+			log.warn "No hibernate session could be retrieved"
+			
 		session?.flush()
 		session?.clear()
 		propertyInstanceMap.get().clear()
