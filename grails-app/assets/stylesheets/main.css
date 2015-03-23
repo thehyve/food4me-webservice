@@ -47,8 +47,8 @@ body {
 	        box-shadow: 0 0 0.3em #255b17;
 }
 
-#grailsLogo {
-	background-color: #abbf78;
+#qualifyLogo {
+	background-color: #D6DDF7;
 }
 
 /* replace with .no-boxshadow body if you have modernizr available */
@@ -89,9 +89,9 @@ img {
 
 /* GENERAL */
 
-#grailsLogo a {
+#qualifyLogo a {
 	display: inline-block;
-	margin: 1em;
+	margin: 0.5em;
 }
 
 .content {
@@ -108,7 +108,7 @@ img {
 }
 
 .footer {
-	background: #abbf78;
+	background: #D6DDF7;
 	color: #000;
 	clear: both;
 	font-size: 0.8em;
@@ -594,3 +594,18 @@ a.skip {
 	position: absolute;
 	left: -9999px;
 }
+
+#mainbody { padding: 1em 0.5em; }
+#adminPanel {
+	float: right;
+	width: 250px;
+	border: 1px solid black;
+	padding: 1em;
+}
+
+#adminPanel ul {
+	padding-left: 20px; 
+	margin-bottom: 20px;
+}
+
+#adminPanel ul li { margin: 5px 0; }
