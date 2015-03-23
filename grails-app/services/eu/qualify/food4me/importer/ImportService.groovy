@@ -202,15 +202,15 @@ class ImportService {
 				def reference = new ReferenceValue(subject: property, status: status, color: Status.Color.fromString( color ) )
 				
 				if( age ) {
-					reference.addToConditions( new ReferenceCondition( subject: ageProperty, low: age[0], high: age[1] ) )
+					reference.addToConditions( new ReferenceCondition( subject: ageProperty, low: age[0], high: age[1], conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				}
 
 				if( gender ) {
-					reference.addToConditions( new ReferenceCondition( subject: genderProperty, value: gender ) )
+					reference.addToConditions( new ReferenceCondition( subject: genderProperty, value: gender, conditionType: ReferenceCondition.TYPE_TEXT ) )
 				}
 				
 				// Add the condition on the property itself
-				reference.addToConditions( new ReferenceCondition( subject: property, low: currentLowerBoundary, high: higherBoundary ) )
+				reference.addToConditions( new ReferenceCondition( subject: property, low: currentLowerBoundary, high: higherBoundary, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 
 				log.trace( "Importing reference for " + property + " / " + status + " with " + reference.conditions?.size() + " conditions"  )
 				references << reference
@@ -287,7 +287,7 @@ class ImportService {
 					log.trace "Storing SNP " + line[0] + " / " + line[ columnNo ] + " as " + status
 					
 					def reference = new ReferenceValue(subject: snp, status: status, color: color )
-					reference.addToConditions( new ReferenceCondition( subject: snp, value: line[ columnNo ] ) )
+					reference.addToConditions( new ReferenceCondition( subject: snp, value: line[ columnNo ], conditionType: ReferenceCondition.TYPE_TEXT ) )
 					references << reference
 				}
 				
@@ -523,6 +523,12 @@ class ImportService {
 			
 			// Check if a unit with this externalId already exists
 			def adviceCode = line[0].trim()
+			def translation = line[1]?.trim()
+			
+			if( !translation ) {
+				log.warn "Skipping translation for code " + adviceCode + " as it is empty"
+				return
+			}
 			
 			// Check if the translation already exists. If so, overwrite
 			def adviceText = AdviceText.findByCodeAndLanguage( adviceCode, language )
@@ -645,7 +651,7 @@ class ImportService {
 				return
 			}
 			
-			def language = match[0][0]
+			def language = match[0][1]
 			
 			log.info( "Loading advice texts from " + file + " in language " + language )
 			file.withInputStream { is -> loadAdviceTexts(is, language) }
@@ -677,6 +683,13 @@ class ImportService {
 
 	}
 
+	/**
+	 * Returns the default import directory to import from
+	 * @return
+	 */
+	public String getDefaultImportDirectory() {
+		grailsApplication.config.food4me.importDirectory
+	}
 			
 	/**
 	 * Import data from files in the given directory
@@ -686,7 +699,7 @@ class ImportService {
 	 */
 	protected def importData( String directory = null, def matcher, Closure fileHandler ) {
 		if( !directory ) { 
-			directory = grailsApplication.config.food4me.importDirectory
+			directory = getDefaultImportDirectory()
 
 			if( !directory ) {
 				log.error "No default directory given to import data from. Please specify the configuration value food4me.importDirectory to a readable directory."

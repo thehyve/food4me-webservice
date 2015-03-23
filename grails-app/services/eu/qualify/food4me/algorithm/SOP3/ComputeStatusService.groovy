@@ -124,6 +124,14 @@ class ComputeStatusService implements StatusComputer {
 			
 		if( statuses.size() > 1 ) {
 			log.warn "Multiple references apply for ${referenceProperty}. Retrieval parameters are " + hqlParams
+			
+			if( log.traceEnabled ) {
+				log.trace "  HQL: " + hql
+				log.trace "  params: " + hqlParams
+				statuses.each {
+					log.trace "  Reference: " + it 
+				}
+			}
 		}
 		
 		// Return the first status found
@@ -174,9 +182,9 @@ class ComputeStatusService implements StatusComputer {
 		
 		// There is a difference between text and numeric values
 		if( measuredValue instanceof MeasuredNumericValue )
-			condition += "( ( low IS NULL or low < :value" + index + " ) AND ( high IS NULL OR high >= :value" + index + " ) )"
+			condition += "( condition_type = 'numeric' AND ( low IS NULL or low < :value" + index + " ) AND ( high IS NULL OR high >= :value" + index + " ) )"
 		 else
-			 condition += "( value IS NULL or value = :value" + index + " )"
+			 condition += "( condition_type = 'text' AND ( value IS NULL or value = :value" + index + " ) )"
 		 
 		whereClause << condition + " )"
 		

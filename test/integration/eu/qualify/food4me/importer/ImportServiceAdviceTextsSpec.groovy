@@ -82,6 +82,33 @@ class ImportServiceAdviceTextsSpec extends ImportServiceIntegrationSpec {
 			AdviceText.countByCode( "Non-existing-code" ) == 1
 	}
 	
+	void "test importing translations without text"() {
+		given: "a list of advices to import without text"
+			// Format: code, text
+			def advicesToImport = [
+				[ "L0.0.1"  ],
+				[ "L0.2.5", "Some text" ],
+			]
+			InputStream is = getInputStreamFromImportDatastructure(advicesToImport)
+			
+			assert AdviceText.count == 0
+		
+		and: "the corresponding advices in the database"
+			def carbohydrate = new Property( entity: "Carbohydrate", propertyGroup: "Nutrient", externalId: "2331003" )
+			carbohydrate.save()
+			def advice1 = new Advice( code: "L0.0.1", subject: carbohydrate )
+			advice1.save()
+			def advice2 = new Advice( code: "L0.2.5", subject: carbohydrate )
+			advice2.save()
+			
+		when: "importing the texts in German"
+			importService.loadAdviceTexts(is, "de")
+		
+		then: "texts for the second advice is imported, the first one is discarded"
+			AdviceText.count == 1
+			AdviceText.countByCode( "L0.2.5" ) == 1
+	}
+	
 	void "test importing translations with special characters"() {
 		given: "a list of advices to import, in the expected format with special characters in UTF-8"
 			// Format: code, text

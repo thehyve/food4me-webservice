@@ -27,11 +27,17 @@ class JsonParseService implements Parser {
 	]
 
 	@Override
-	public Measurements parseMeasurements(String input) {
-		def measurementJSON = input
-		def parsed = JSON.parse(measurementJSON)
-		
+	public Measurements parseMeasurements(def input) {
 		def output = new Measurements()
+		def measurementJSON = input.toString()
+		def parsed
+		
+		try {
+			parsed = JSON.parse(measurementJSON)
+		} catch( Exception e ) {
+			log.error "No proper JSON is provided to describe the measurements: " + measurementJSON
+			return output
+		}
 
 		// Loop through each group of measurements		
 		parsed.each { groupName, data ->
@@ -111,13 +117,13 @@ class JsonParseService implements Parser {
 	}
 	
 	@Override
-	public MeasurementStatus parseStatus(String input) {
+	public MeasurementStatus parseStatus(def input) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Advisable> parseEntityList(String input) {
+	public List<Advisable> parseEntityList(def input) {
 		// TODO Auto-generated method stub
 		return null;
 	}

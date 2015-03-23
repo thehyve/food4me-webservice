@@ -1,9 +1,8 @@
 package eu.qualify.food4me.importer
 
 import eu.qualify.food4me.Property
-import eu.qualify.food4me.decisiontree.Advice
-import eu.qualify.food4me.decisiontree.AdviceText
 import eu.qualify.food4me.measurements.Status
+import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
 import grails.test.mixin.*
 
@@ -52,6 +51,7 @@ class ImportServiceReferencesSpec extends ImportServiceIntegrationSpec {
 			verylow.conditions?.size() == 1
 			
 			verylow.conditions[0].subject == carbohydrate
+			verylow.conditions[0].conditionType == ReferenceCondition.TYPE_NUMERIC
 			!verylow.conditions[0].low
 			verylow.conditions[0].high == 40
 			!verylow.conditions[0].value
@@ -61,6 +61,7 @@ class ImportServiceReferencesSpec extends ImportServiceIntegrationSpec {
 			low.conditions?.size() == 1
 			
 			low.conditions[0].subject == carbohydrate
+			low.conditions[0].conditionType == ReferenceCondition.TYPE_NUMERIC
 			low.conditions[0].low == 40
 			low.conditions[0].high == 45
 			!low.conditions[0].value
@@ -70,6 +71,7 @@ class ImportServiceReferencesSpec extends ImportServiceIntegrationSpec {
 			ok.conditions?.size() == 1
 			
 			ok.conditions[0].subject == carbohydrate
+			ok.conditions[0].conditionType == ReferenceCondition.TYPE_NUMERIC
 			ok.conditions[0].low == 45
 			ok.conditions[0].high == 65
 			!ok.conditions[0].value
@@ -79,6 +81,7 @@ class ImportServiceReferencesSpec extends ImportServiceIntegrationSpec {
 			high.conditions?.size() == 1
 			
 			high.conditions[0].subject == carbohydrate
+			high.conditions[0].conditionType == ReferenceCondition.TYPE_NUMERIC
 			high.conditions[0].low == 65
 			high.conditions[0].high == 70
 			!high.conditions[0].value
@@ -88,6 +91,7 @@ class ImportServiceReferencesSpec extends ImportServiceIntegrationSpec {
 			veryhigh.conditions?.size() == 1
 			
 			veryhigh.conditions[0].subject == carbohydrate
+			veryhigh.conditions[0].conditionType == ReferenceCondition.TYPE_NUMERIC
 			veryhigh.conditions[0].low == 70
 			!veryhigh.conditions[0].high
 			!veryhigh.conditions[0].value
@@ -98,12 +102,14 @@ class ImportServiceReferencesSpec extends ImportServiceIntegrationSpec {
 			vlow.conditions?.size() == 3
 			
 			def ageCondition = vlow.conditions.find { it.subject == age }
+			ageCondition.conditionType == ReferenceCondition.TYPE_NUMERIC
 			ageCondition.low == 10
 			ageCondition.high == 20
 			
 			def genderCondition = vlow.conditions.find { it.subject == gender }
 			!genderCondition.low
 			!genderCondition.high
+			genderCondition.conditionType == ReferenceCondition.TYPE_TEXT
 			genderCondition.value == "Male"
 			
 			def vitaminCCondition = vlow.conditions.find { it.subject == vitaminC }
