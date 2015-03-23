@@ -40,7 +40,7 @@ class ParameterBasedParseService implements Parser {
 
 		conversionMap.each { groupName, group ->
 			if( params[groupName] ) {
-				log.info "Parsing the measurements for group " + groupName
+				log.trace "Parsing the measurements for group " + groupName
 
 				def data = params[groupName]
 				if( !data || !(data instanceof Map) ) {
@@ -54,7 +54,7 @@ class ParameterBasedParseService implements Parser {
 					if( propertyName.contains( "." ) )
 						return
 						
-					log.info "  Property " + propertyName + " in group " + groupName
+					log.trace "  Property " + propertyName + " in group " + groupName
 					
 					// Find the given property
 					def property = Property.findByEntityIlikeAndPropertyGroup( propertyName, conversionMap[ groupName ] )
@@ -95,7 +95,7 @@ class ParameterBasedParseService implements Parser {
 		}
 			
 		// Create a value and measurement object
-		log.info "Parsing measurement for ${measurable}: ${data}"
+		log.trace "  Parsing measurement for ${measurable}: ${data}"
 		
 		// Parameters are always specified as string. If the value is numeric, we should treat is as such
 		def measuredValue
@@ -120,7 +120,6 @@ class ParameterBasedParseService implements Parser {
 			// Check if this modifier is supported. If not, skip this measurement
 			def modifierObject = ModifiedProperty.Modifier.values().find { it.id.toLowerCase() == modifier.toLowerCase() }
 			if( !modifierObject ) {
-				log.info "" + ModifiedProperty.Modifier.values()*.id
 				log.warn "The group " + modifier + " to be imported for " + measurable + " is not supported. " + 
 					"Please note that the totals for this nutrient may not be accurate as this measurement is not used." 
 				return

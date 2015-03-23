@@ -36,7 +36,7 @@ class ComputeStatusService implements StatusComputer {
 	}
 	
 	public Status getStatus( Measurement measurement, Measurements measurements ) {
-		log.info "Determine status for " + measurement
+		log.trace "Determine status for " + measurement
 		MeasuredValue value = measurement.value
 		
 		def status = determineStatus( measurement.property, measurements )

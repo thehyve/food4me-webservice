@@ -27,7 +27,7 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 		// Get the highest priority property from each of the groups
 		for( int group = 1; group <= 3; group++ ) {
 			def advisable = getAdvisableFromGroup( measurementStatus, group )
-			log.info "Advisable for group " + group + ": " + advisable
+			log.trace "Advisable for group " + group + ": " + advisable
 			if( advisable )
 				advisables << advisable
 		}
@@ -73,7 +73,7 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 			if( advisables.size() >= 3 )
 				advisables.pop()
 				
-			log.info "  Adding gene risk property " + sortedStatusses[0].entity 
+			log.trace "  Adding gene risk property " + sortedStatusses[0].entity 
 				
 			advisables << sortedStatusses[0].entity
 		}

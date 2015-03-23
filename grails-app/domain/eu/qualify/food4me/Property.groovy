@@ -47,11 +47,6 @@ class Property implements Measurable, Advisable {
 	}
 	
 	public String toString() {
-		String description = "" + entity
-		
-		if( externalId )
-			description += " (" + externalId + ")"
-			
-		description
+		"" + entity
 	}
 }
