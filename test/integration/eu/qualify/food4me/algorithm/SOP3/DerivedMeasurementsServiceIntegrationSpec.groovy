@@ -60,12 +60,12 @@ class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 		
 		then: "the total and intake from food are determined for protein "
 			measurements
-			measurements.all.contains( new Measurement( property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 1.3, unit: Unit.findByCode( "g/kg bw" ) ) ) ) 
-			measurements.all.contains( new Measurement( property: protein, value: new MeasuredNumericValue( value: 1.8, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 1.3, unit: Unit.findByCode( "g/kg bw" ) ) ) ) 
+			measurements.all.contains( new Measurement( derived: true, property: protein, value: new MeasuredNumericValue( value: 1.8, unit: Unit.findByCode( "g/kg bw" ) ) ) )
 
 		and: "the total and intake from food are determined for carbohydrate"
-			measurements.all.contains( new Measurement( property: new ModifiedProperty( property: carbohydrate, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 18, unit: Unit.findByCode( "% energy intake" ) ) ) )
-			measurements.all.contains( new Measurement( property: carbohydrate, value: new MeasuredNumericValue( value: 18, unit: Unit.findByCode( "% energy intake" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: new ModifiedProperty( property: carbohydrate, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 18, unit: Unit.findByCode( "% energy intake" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: carbohydrate, value: new MeasuredNumericValue( value: 18, unit: Unit.findByCode( "% energy intake" ) ) ) )
 
 		and: "no measurements are derived for age"
 			measurements.getValuesFor(age)?.size() == 1
@@ -108,10 +108,10 @@ class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 		
 		then: "no total intake is determined for protein, as is was already provided"
 			measurements
-			measurements.all.contains( new Measurement( property: protein, value: new MeasuredNumericValue( value: 0.5, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.all.contains( new Measurement( derived: false, property: protein, value: new MeasuredNumericValue( value: 0.5, unit: Unit.findByCode( "g/kg bw" ) ) ) )
 			
 		and: "the total food intake is computed"
-			measurements.all.contains( new Measurement( property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 1.3, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 1.3, unit: Unit.findByCode( "g/kg bw" ) ) ) )
 		
 	}
 	
@@ -133,10 +133,10 @@ class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 		
 		then: "no intake from food is determined for protein, as is was already provided"
 			measurements
-			measurements.all.contains( new Measurement( property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 1.0, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.all.contains( new Measurement( derived: false, property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 1.0, unit: Unit.findByCode( "g/kg bw" ) ) ) )
 			
 		and: "the total intake is computed"
-			measurements.all.contains( new Measurement( property: protein, value: new MeasuredNumericValue( value: 1.8, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: protein, value: new MeasuredNumericValue( value: 1.8, unit: Unit.findByCode( "g/kg bw" ) ) ) )
 	}
 	
 	void "test nutrient value derivation for non nutrient values"() {
@@ -172,12 +172,12 @@ class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 		
 		then: "the total and intake from food are determined for protein, with 0 for dietary intake"
 			measurements
-			measurements.all.contains( new Measurement( property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 0, unit: Unit.findByCode( "g/kg bw" ) ) ) )
-			measurements.all.contains( new Measurement( property: protein, value: new MeasuredNumericValue( value: 0.5, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 0, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: protein, value: new MeasuredNumericValue( value: 0.5, unit: Unit.findByCode( "g/kg bw" ) ) ) )
 	
 		and: "the total and intake from food are determined for carbohydrate, with 0 for dietary intake"
-			measurements.all.contains( new Measurement( property: new ModifiedProperty( property: carbohydrate, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 0, unit: Unit.findByCode( "% energy intake" ) ) ) )
-			measurements.all.contains( new Measurement( property: carbohydrate, value: new MeasuredNumericValue( value: 12, unit: Unit.findByCode( "% energy intake" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: new ModifiedProperty( property: carbohydrate, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 0, unit: Unit.findByCode( "% energy intake" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: carbohydrate, value: new MeasuredNumericValue( value: 12, unit: Unit.findByCode( "% energy intake" ) ) ) )
 	}
 	
 	void "test nutrient value derivation for textual nutrient values"() {
@@ -200,12 +200,12 @@ class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 		
 		then: "the total and intake from food are determined for protein, ignoring the text values"
 			measurements
-			measurements.all.contains( new Measurement( property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 0.4, unit: Unit.findByCode( "g/kg bw" ) ) ) )
-			measurements.all.contains( new Measurement( property: protein, value: new MeasuredNumericValue( value: 0.9, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 0.4, unit: Unit.findByCode( "g/kg bw" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: protein, value: new MeasuredNumericValue( value: 0.9, unit: Unit.findByCode( "g/kg bw" ) ) ) )
 	
 		and: "the total and intake from food are determined for carbohydrate, ignoring text values"
-			measurements.all.contains( new Measurement( property: new ModifiedProperty( property: carbohydrate, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 0, unit: Unit.findByCode( "% energy intake" ) ) ) )
-			measurements.all.contains( new Measurement( property: carbohydrate, value: new MeasuredNumericValue( value: 12, unit: Unit.findByCode( "% energy intake" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: new ModifiedProperty( property: carbohydrate, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY.id ), value: new MeasuredNumericValue( value: 0, unit: Unit.findByCode( "% energy intake" ) ) ) )
+			measurements.all.contains( new Measurement( derived: true, property: carbohydrate, value: new MeasuredNumericValue( value: 12, unit: Unit.findByCode( "% energy intake" ) ) ) )
 	
 		and: "no measurements are derived for age"
 			measurements.getValuesFor(age)?.size() == 1
@@ -235,18 +235,22 @@ class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 		then: "the two contributing food groups for protein are determined"
 			measurements
 			measurements.all.contains( new Measurement( 
+				derived: true,
 				property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.FIRST_CONTRIBUTING_FOOD_GROUP.id ), 
 				value: new MeasuredTextValue( value: ModifiedProperty.Modifier.INTAKE_MEAT_FISH.id ) ) )
 			measurements.all.contains( new Measurement( 
+				derived: true,
 				property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.SECOND_CONTRIBUTING_FOOD_GROUP.id ), 
 				value: new MeasuredTextValue( value: ModifiedProperty.Modifier.INTAKE_POTATOES_RICE_PASTA.id ) ) )
 	
 		and: "the two contributing food groups for carbohydrate are determined"
 			measurements
 			measurements.all.contains( new Measurement( 
+				derived: true,
 				property: new ModifiedProperty( property: carbohydrate, modifier: ModifiedProperty.Modifier.FIRST_CONTRIBUTING_FOOD_GROUP.id ), 
 				value: new MeasuredTextValue( value: ModifiedProperty.Modifier.INTAKE_SWEETS_SNACKS.id ) ) )
 			measurements.all.contains( new Measurement( 
+				derived: true,
 				property: new ModifiedProperty( property: carbohydrate, modifier: ModifiedProperty.Modifier.SECOND_CONTRIBUTING_FOOD_GROUP.id ), 
 				value: new MeasuredTextValue( value: ModifiedProperty.Modifier.INTAKE_DAIRY.id ) ) )
 	
@@ -285,6 +289,7 @@ class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 		then: "no contributing food groups for protein are determined, as no foodgroups are specified"
 			measurements
 			measurements.all.contains( new Measurement( 
+				derived: true,
 				property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.FIRST_CONTRIBUTING_FOOD_GROUP.id ), 
 				value: new MeasuredTextValue( value: ModifiedProperty.Modifier.INTAKE_MEAT_FISH.id ) ) )
 			!measurements.all*.property.contains( new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.SECOND_CONTRIBUTING_FOOD_GROUP.id ) )
@@ -304,6 +309,7 @@ class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 		then: "no contributing food groups for protein are determined, as no foodgroups are specified"
 			measurements
 			measurements.all.contains( new Measurement(
+				derived: true,
 				property: new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.FIRST_CONTRIBUTING_FOOD_GROUP.id ),
 				value: new MeasuredTextValue( value: ModifiedProperty.Modifier.INTAKE_MEAT_FISH.id ) ) )
 			!measurements.all*.property.contains( new ModifiedProperty( property: protein, modifier: ModifiedProperty.Modifier.SECOND_CONTRIBUTING_FOOD_GROUP.id ) )

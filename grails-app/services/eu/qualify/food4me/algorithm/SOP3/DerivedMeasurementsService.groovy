@@ -98,7 +98,11 @@ class DerivedMeasurementsService {
 				else
 					it.value.type == "numeric" ? it.value.value : 0 
 			}.sum()
-			return new Measurement( property: nutrient, value: new MeasuredNumericValue( unit: nutrient.unit, value: total ) )
+			return new Measurement( 
+				property: nutrient, 
+				value: new MeasuredNumericValue( unit: nutrient.unit, value: total ), 
+				derived: true 
+			)
 		} else {
 			log.info "A total value for " + nutrient + " is already provided, so will not be computed."
 		}
@@ -119,7 +123,8 @@ class DerivedMeasurementsService {
 			
 			return new Measurement(
 				property: fromFoodProperty,
-				value: new MeasuredNumericValue( unit: nutrient.unit, value: totalFromFood )
+				value: new MeasuredNumericValue( unit: nutrient.unit, value: totalFromFood ),
+				derived: true
 			)
 		} else {
 			log.info "A total value for " + nutrient + " from food is already provided, so will not be computed."
@@ -143,14 +148,16 @@ class DerivedMeasurementsService {
 		if( sortedMeasurements.size() >= 1 ) {
 			measurements << new Measurement(
 				property: new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.FIRST_CONTRIBUTING_FOOD_GROUP.id ),
-				value: new MeasuredTextValue( value: sortedMeasurements[0].property.modifier )
+				value: new MeasuredTextValue( value: sortedMeasurements[0].property.modifier ),
+				derived: true
 			)
 		}
 
 		if( sortedMeasurements.size() >= 2 ) {
 			measurements << new Measurement(
 				property: new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.SECOND_CONTRIBUTING_FOOD_GROUP.id ),
-				value: new MeasuredTextValue( value: sortedMeasurements[1].property.modifier )
+				value: new MeasuredTextValue( value: sortedMeasurements[1].property.modifier ),
+				derived: true
 			)
 		}
 
@@ -198,7 +205,8 @@ class DerivedMeasurementsService {
 		
 		measurements.add new Measurement(
 			property: totalCarotenoids,
-			value: new MeasuredNumericValue( unit: totalCarotenoids.unit, value: totalCarotenoidsValue )
+			value: new MeasuredNumericValue( unit: totalCarotenoids.unit, value: totalCarotenoidsValue ),
+			derived: true
 		)
 	}	
 	
@@ -246,7 +254,8 @@ class DerivedMeasurementsService {
 		
 		measurements.add new Measurement(
 			property: n3Index,
-			value: new MeasuredNumericValue( unit: n3Index.unit, value: n3IndexValue )
+			value: new MeasuredNumericValue( unit: n3Index.unit, value: n3IndexValue ),
+			derived: true
 		)
 	}
 

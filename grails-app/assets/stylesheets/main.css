@@ -80,7 +80,7 @@ h1 {
 }
 
 ul {
-	padding: 0;
+	padding: 0 0 0 20px;
 }
 
 img {
@@ -604,7 +604,6 @@ a.skip {
 }
 
 #adminPanel ul {
-	padding-left: 20px; 
 	margin-bottom: 20px;
 }
 

@@ -29,10 +29,7 @@ class JsonSerializeService implements Serializer {
 		
 		// Find the texts for the advices given. Create a map of the texts
 		// with the code being the key
-		def texts = [:]
-		AdviceText.findByCodeInListAndLanguage( advices*.code, language ).each { 
-			texts[ it.code ] = it
-		}
+		def texts = AdviceText.getTranslations( advices, language )
 		
 		// Combine the advices with texts and create a structure to serialize
 		def output = advices.collect { advice ->

@@ -1,6 +1,7 @@
 package eu.qualify.food4me
 
 import eu.qualify.food4me.decisiontree.Advice
+import eu.qualify.food4me.decisiontree.AdviceText
 import eu.qualify.food4me.interfaces.Advisable
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
@@ -23,7 +24,16 @@ class Food4meController {
 		MeasurementStatus status = computeStatusService.computeStatus(measurements)
 		List<Advisable> advisables = determineAdvisableService.determineAdvisables(status, measurements )
 		List<Advice> advices = generateAdviceService.generateAdvice( measurements, status, advisables )
+
+		// Determine output language. Defaults to English
+		def language = params.language
+		if( !AdviceText.isLanguageSupported( language ) )
+			language = "en"
 		
-		render jsonSerializeService.serializeAdvices( advices )
+		// Use content negotiation to output the data
+		withFormat {
+			html advices: advices, measurements: measurements, translations: AdviceText.getTranslations( advices, language )
+			json { jsonSerializeService.serializeAdvices( advices, language ) }
+		}
 	}
 }
