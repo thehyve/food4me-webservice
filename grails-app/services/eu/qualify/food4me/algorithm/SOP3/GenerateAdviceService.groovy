@@ -22,6 +22,7 @@ class GenerateAdviceService implements AdviceGenerator {
 		List<Advice> advices = []
 			
 		advisables.each { advisable ->
+			log.info "Generating advice for " + advisable
 			advices += generateAdviceFor( advisable, measurements, measurementStatus )
 		}
 
@@ -50,6 +51,8 @@ class GenerateAdviceService implements AdviceGenerator {
 			log.warn "No advices are known for ${advisable}. Please check the database"
 			return advices
 		}
+		
+		log.trace "  The following properties are needed to determine an advice for " + advisable + ": " + properties
 			
 		// Create a query that includes all values and retrieve the id and status
 		def hql = "SELECT advice.id FROM Advice as advice INNER JOIN advice.conditions as condition"
@@ -70,7 +73,9 @@ class GenerateAdviceService implements AdviceGenerator {
 			log.warn "No advices can be determined for ${advisable}. Retrieval parameters are " + hqlParams
 			return advices
 		}
-			
+		
+		log.trace "" + adviceIds?.size() + " advices have been returned for property " + advisable
+		
 		// Return the advices 
 		adviceIds.collect { Advice.get(it) }
 	}
