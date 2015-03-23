@@ -62,4 +62,15 @@ class ReferenceValue {
 		
 		referenceConditions.collect { it.subject }.unique() as List
 	}
+	
+	public static int getSubjectCount() {
+		def criteria = ReferenceValue.createCriteria()
+		def referenceSubjectCount = criteria.list {
+			projections {
+				countDistinct("subject")
+			}
+		}
+		
+		referenceSubjectCount[0]
+	}
 }

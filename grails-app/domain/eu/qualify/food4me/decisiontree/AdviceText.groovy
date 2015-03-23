@@ -25,4 +25,14 @@ class AdviceText {
 		text type: 'text'
 		code index: 'Code_index'
 	}
+	
+	public static List<String> getLanguages() {
+		def criteria = AdviceText.createCriteria()
+		
+		criteria.listDistinct {
+			projections {
+				distinct "language"
+			}
+		}
+	}
 }

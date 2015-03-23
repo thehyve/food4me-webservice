@@ -126,3 +126,32 @@ log4j.main = {
            'org.hibernate',
            'net.sf.ehcache.hibernate'
 }
+
+
+// Added by the Spring Security Core plugin:
+grails.plugin.springsecurity.userLookup.userDomainClassName = 'eu.qualify.food4me.auth.User'
+grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'eu.qualify.food4me.auth.UserRole'
+grails.plugin.springsecurity.authority.className = 'eu.qualify.food4me.auth.Role'
+grails.plugin.springsecurity.controllerAnnotations.staticRules = [
+	'/advices':                       ['permitAll'],
+	'/assets/**':                     ['permitAll'],
+	'/**/js/**':                      ['permitAll'],
+	'/**/css/**':                     ['permitAll'],
+	'/**/images/**':                  ['permitAll'],
+	'/**/favicon.ico':                ['permitAll']
+]
+
+// Application configuration
+
+/**
+ * Default administrator password to be used for the admin account, if
+ * no admin account exists in the application.
+ * For security reasons, this should be overwritten in the externalized configuration
+ * before starting the application for the first time!
+ */
+food4me.adminPassword = "admin"
+
+/**
+ * Default import directory to import the data from
+ */
+food4me.importDirectory = ""

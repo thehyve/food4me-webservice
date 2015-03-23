@@ -140,4 +140,8 @@ databaseChangeLog = {
 	include file: 'advice-text-nullable.groovy'
 
 	include file: 'advice-text-separate-from-advices.groovy'
+
+	include file: 'authorization.groovy'
+
+	include file: 'reference-type.groovy'
 }

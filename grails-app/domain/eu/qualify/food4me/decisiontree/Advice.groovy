@@ -80,4 +80,16 @@ class Advice {
 			} 
 		}.unique() as List
 	}
+	
+	public static int getSubjectCount() {
+		def criteria = Advice.createCriteria()
+		def adviceSubjectCount = criteria.list {
+			projections {
+				countDistinct("subject")
+			}
+		}
+		
+		adviceSubjectCount[0]
+	}
+
 }

@@ -5,6 +5,9 @@ import java.math.BigDecimal;
 import eu.qualify.food4me.Property;
 
 class ReferenceCondition {
+	public static final TYPE_TEXT = 'text'
+	public static final TYPE_NUMERIC = 'numeric'
+	
 	/**
 	 * Property this condition applies to 
 	 */
@@ -24,6 +27,11 @@ class ReferenceCondition {
 	 * String value that the property should have to result in this status
 	 */
 	String value
+
+	/**
+	 * Condition type determines whether a low/high or value is given
+	 */
+	String conditionType
 	
 	static belongsTo = [referenceValue: ReferenceValue]
 	
