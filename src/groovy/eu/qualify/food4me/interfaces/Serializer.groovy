@@ -19,27 +19,27 @@ interface Serializer {
 	 * @param status
 	 * @return
 	 */
-	String serializeStatus(MeasurementStatus status)
+	def serializeStatus(MeasurementStatus status)
 
 	/**
 	 * Serializes a list of advisables to give advice on
 	 * @param advisables
 	 * @return
 	 */
-	String serializeEntityList(List<Advisable> advisables)
+	def serializeEntityList(List<Advisable> advisables)
 
 	/**
 	 * Serializes a list of advices in English
 	 * @param advices
 	 * @return
 	 */
-	String serializeAdvices(List<Advice> advices)
+	def serializeAdvices(List<Advice> advices)
 
 	/**
 	 * Serializes a list of advices
 	 * @param advices
 	 * @return
 	 */
-	String serializeAdvices(List<Advice> advices, String language)
+	def serializeAdvices(List<Advice> advices, String language)
 
 }

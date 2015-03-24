@@ -1,5 +1,6 @@
 package eu.qualify.food4me.input
 
+import java.awt.event.ItemEvent;
 import java.util.List;
 
 import eu.qualify.food4me.ModifiedProperty
@@ -16,6 +17,7 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 
 class ParameterBasedParseService implements Parser {
+	protected final String MODIFIER_TOTAL = "total"
 	
 	protected conversionMap = [
 		generic: Property.PROPERTY_GROUP_GENERIC,
@@ -115,18 +117,25 @@ class ParameterBasedParseService implements Parser {
 		
 		// The data is split up into foodgroups. The allowed foodgroups are specified as 
 		// a value in the ModifiedProperty.Modifier enum
-		def allowedFoodGroups
+		def property
 		valueData.each { modifier, groupData ->
-			// Check if this modifier is supported. If not, skip this measurement
-			def modifierObject = ModifiedProperty.Modifier.values().find { it.id.toLowerCase() == modifier.toLowerCase() }
-			if( !modifierObject ) {
-				log.warn "The group " + modifier + " to be imported for " + measurable + " is not supported. " + 
-					"Please note that the totals for this nutrient may not be accurate as this measurement is not used." 
-				return
+			// Handle the special modifier 'total', as it should be stored without modifier
+			if( modifier.toLowerCase() == MODIFIER_TOTAL ) {
+				property = measurable
+			} else {
+				// Check if this modifier is supported. If not, skip this measurement
+				def modifierObject = ModifiedProperty.Modifier.values().find { it.id.toLowerCase() == modifier.toLowerCase() }
+				if( !modifierObject ) {
+					log.warn "The group " + modifier + " to be imported for " + measurable + " is not supported. " + 
+						"Please note that the totals for this nutrient may not be accurate as this measurement is not used." 
+					return
+				}
+				
+				property = new ModifiedProperty( property: measurable, modifier: modifierObject.id )
 			}
 			
 			// Parse the measurement itself
-			measurements << parseMeasurement( new ModifiedProperty( property: measurable, modifier: modifierObject.id ), measurable.unit, groupData)
+			measurements << parseMeasurement( property, measurable.unit, groupData)
 		}
 
 		measurements

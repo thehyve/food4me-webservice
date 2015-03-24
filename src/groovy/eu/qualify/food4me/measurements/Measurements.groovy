@@ -23,7 +23,7 @@ import groovy.transform.Canonical
 	}
 	
 	void addAll(Collection<Measurement> measurements ) {
-		this.measurements.addAll(measurements)
+		this.measurements.addAll(measurements.findAll())
 	}
 	
 	public MeasuredValue getValueFor( Measurable p ) {

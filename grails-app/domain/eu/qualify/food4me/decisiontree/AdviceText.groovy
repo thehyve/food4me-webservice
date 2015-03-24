@@ -33,6 +33,9 @@ class AdviceText {
 	 * @return
 	 */
 	public static Map getTranslations( List<Advice> advices, String language) {
+		if( !advices )
+			return [:]
+		
 		// Find the texts for the advices given. Create a map of the texts
 		// with the code being the key
 		def texts = [:]
