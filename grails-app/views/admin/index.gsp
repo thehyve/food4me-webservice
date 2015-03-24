@@ -19,6 +19,7 @@
 						no translations
 					</g:else>
 				</li>
+				<li><g:link action="consistencyCheck">Consistency check</g:link></li>
 			</ul>
 			
 			<p>Import directory</p>

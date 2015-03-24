@@ -38,6 +38,38 @@ class AdminController {
 		]
 	}
 	
+	def consistencyCheck() {
+		// Do we have all translations for available languages
+		def advices = Advice.list()
+		
+		def missingCodes = [:]
+		AdviceText.getLanguages().each { language ->
+			// Determine the existing codes for this language
+			def languageCodes = AdviceText.createCriteria().listDistinct() {
+				eq( 'language', language )
+				projections {
+					distinct 'code'
+				}
+			}
+			
+			// List the missing advice codes
+			missingCodes[ language ] = advices.findAll { !languageCodes.contains( it.code ) } 
+		}
+		
+		
+		// Do we have references for all decision tree arguments
+		def statusAdviceConditions = AdviceCondition.findAllByStatusIsNotNull()
+		def referenceProperties = ReferenceValue.createCriteria().listDistinct() {
+			projections {
+				distinct 'subject'
+			}
+		}
+		
+		def missingReferences = statusAdviceConditions.findAll { !referenceProperties.contains( it.subject ) }
+		
+		[ missingCodes: missingCodes, missingReferences: missingReferences]
+	}
+	
     def clearAll() {
 		ReferenceCondition.executeUpdate( "DELETE FROM ReferenceCondition")
 		ReferenceValue.executeUpdate( "DELETE FROM ReferenceValue")
