@@ -9,7 +9,10 @@
 		<div id="advices">
 			<ul>
 				<g:each in="${advices}" var="advice">
-					<li><strong>${advice.code}</strong>: ${translations[advice.code]}</li>
+					<li>
+						<strong>${advice.code}</strong>: 
+							<g:lines string="${translations[advice.code]}" />
+					</li>
 				</g:each>
 			</ul>
 		</div>
@@ -24,5 +27,16 @@
 				</g:each>
 			</ul>
 		</div>
+		
+		<h1>Derived measurements</h1>
+		<div id="measurements">
+			<ul>
+				<g:each in="${measurements?.all}" var="measurement">
+					<g:if test="${measurement.derived}">
+						<li>${measurement.property}: ${measurement.value}</li>
+					</g:if>
+				</g:each>
+			</ul>
+		</div>		
 	</body>
 </html>

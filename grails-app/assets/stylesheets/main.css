@@ -595,6 +595,9 @@ a.skip {
 	left: -9999px;
 }
 
+/**
+ Administration panel
+ */
 #mainbody { padding: 1em 0.5em; }
 #adminPanel {
 	float: right;
@@ -608,3 +611,19 @@ a.skip {
 }
 
 #adminPanel ul li { margin: 5px 0; }
+
+/**
+ Form to generate advices manually
+ **/
+ 
+#generate_advices { font-size: 0.8em; }
+#generate_advices th { max-width: 80px; text-align: left; overflow: hidden; }
+#generate_advices td { padding-top: 0.3em; padding-bottom: 0.3em;  }
+
+#generate_advices fieldset { margin-left: 0.25em; }
+#generate_advices legend { font-weight: bold; }
+#generate_advices ul { list-style-type: none; padding-left: 1.25em; }
+#generate_advices ul label { margin-right: 1.2em; }
+#generate_advices li { padding: 0.3em 0;  }
+#generate_advices label { display: inline-block; width: 200px; }
+#generate_advices input[type=text] { display: inline; width: 70px; }
