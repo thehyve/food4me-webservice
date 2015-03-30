@@ -83,19 +83,19 @@ class ParameterBasedParseService implements Parser {
 	}
 	
 	/**
-	 * Parse a single measurement
+	 * Parses a single measurement
 	 * @param measurable	Property to measure
 	 * @param unit			Unit that is expected 
 	 * @param data			Map with keys value and unit
 	 * @return
 	 */
-	protected Measurement parseMeasurement( Measurable measurable, Unit unit, String data ) {
+	protected Measurement parseMeasurement( Measurable measurable, Unit unit, def data ) {
 		// Check if the value is the correct format { value: ..., unit: "" }
-		if( !data ) {
+		if( !data || !( data instanceof String ) ) {
 			log.warn "The value specified for ${measurable} is invalid: " + data
 			return
 		}
-			
+		
 		// Create a value and measurement object
 		log.trace "  Parsing measurement for ${measurable}: ${data}"
 		
@@ -111,7 +111,13 @@ class ParameterBasedParseService implements Parser {
 		
 		new Measurement(property: measurable, value: measuredValue )
 	}
-		
+
+	/**
+	 * Parses a single nutrient
+	 * @param valueData		Map with data for the nutrient. Each key is parsed as a modifier for the nutrient
+	 * @param measurable	Nutrient to parse the data for
+	 * @return
+	 */
 	protected List<Measurement> parseNutrient( def valueData, Measurable measurable ) {
 		List<Measurement> measurements = []
 		
@@ -140,15 +146,23 @@ class ParameterBasedParseService implements Parser {
 
 		measurements
 	}
-	
+
+	/**
+	 * Parse a set of entities from the parameter list
+	 * 
+	 * Each parameter should be given in the format
+	 * 		property=[propertyname]
+	 */
 	@Override
-	public MeasurementStatus parseStatus(def input) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Measurable> parseEntityList(def params) {
+		params.list( 'property' )?.collect {
+			Property.findByEntity( it )
+		}.findAll().unique()
 	}
 
+
 	@Override
-	public List<Advisable> parseEntityList(def input) {
+	public MeasurementStatus parseStatus(def input) {
 		// TODO Auto-generated method stub
 		return null;
 	}

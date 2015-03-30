@@ -23,6 +23,6 @@ interface Parser {
 	 * @param params
 	 * @return
 	 */
-	List<Advisable> parseEntityList(def input);
+	List<Measurable> parseEntityList(def input);
 
 }

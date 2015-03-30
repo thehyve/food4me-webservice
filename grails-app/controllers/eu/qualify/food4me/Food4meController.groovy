@@ -1,10 +1,15 @@
 package eu.qualify.food4me
 
+import java.util.List;
+import java.util.Map;
+
 import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.decisiontree.AdviceText
 import eu.qualify.food4me.interfaces.Advisable
+import eu.qualify.food4me.interfaces.Measurable
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
+import eu.qualify.food4me.reference.ReferenceValue;
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -17,6 +22,8 @@ class Food4meController {
 	
 	def parameterBasedParseService
 	def structuredSerializationService
+	
+	def referenceService
 	
 	def form() {
 		// Find all properties grouped by propertygroup
@@ -65,12 +72,13 @@ class Food4meController {
 
 	/**
 	 * Webservice to return status of the provided raw measurements
+	 * 
+	 * @see ParameterBasedParseService.parseMeasurements()
 	 * @return
 	 */
 	def status() {
 		Measurements measurements = parameterBasedParseService.parseMeasurements(params)
 		derivedMeasurementsService.deriveMeasurements(measurements)
-		
 		MeasurementStatus status = computeStatusService.computeStatus(measurements)
 
 		// Use content negotiation to output the data
@@ -85,7 +93,21 @@ class Food4meController {
 	 * @return
 	 */
 	def references() {
+		// Parse a list of entities to return the references for
+		List<Measurable> entities = parameterBasedParseService.parseEntityList(params)
 		
+		// Parse the list of measurements to find the references. Only gender and age 
+		// are used, the rest of the measurements are discarded
+		Measurements measurements = parameterBasedParseService.parseMeasurements(params)
+		
+		// Retrieve the references that apply
+		Map<Property,List<ReferenceValue>> references = referenceService.getReferences( entities, measurements )
+
+		// Use content negotiation to output the data
+		withFormat {
+			html entities: entities, references: references
+			json { render structuredSerializationService.serializeReferences( references ) as JSON }
+		}
 	}
 			
 	/**

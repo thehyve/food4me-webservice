@@ -1,7 +1,9 @@
 package eu.qualify.food4me.interfaces
 
 import java.util.List;
+import java.util.Map;
 
+import eu.qualify.food4me.Property;
 import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.reference.ReferenceValue;
@@ -37,7 +39,7 @@ interface Serializer {
 	 * @param references
 	 * @return
 	 */
-	def serializeReferences(List<ReferenceValue> references)
+	def serializeReferences(Map<Property,List<ReferenceValue>> references)
 	
 	/**
 	 * Serializes a list of advices in English

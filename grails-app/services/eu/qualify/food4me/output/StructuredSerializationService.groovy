@@ -1,6 +1,7 @@
 package eu.qualify.food4me.output
 
 import eu.qualify.food4me.ModifiedProperty
+import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
 import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.decisiontree.AdviceText
@@ -9,6 +10,7 @@ import eu.qualify.food4me.interfaces.Measurable
 import eu.qualify.food4me.interfaces.Serializer
 import eu.qualify.food4me.measurements.MeasuredValue
 import eu.qualify.food4me.measurements.MeasurementStatus
+import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
 
 
@@ -52,9 +54,24 @@ class StructuredSerializationService implements Serializer {
 	}
 	
 	@Override
-	public String serializeReferences(List<ReferenceValue> references) {
-		// TODO Auto-generated method stub
-		return null;
+	public Map serializeReferences(Map<Property,List<ReferenceValue>> references) {
+		def output  = [:]
+		references.each { property, referenceValues ->
+			if( !referenceValues ) {
+				log.warn "No references found when serializing " + property
+				return
+			}
+			
+			def referenceStructure = [:]
+			referenceStructure.property = serializeMeasurable( property )
+			referenceStructure.references = referenceValues.collect { referenceValue ->
+				serializeReference(referenceValue)
+			}
+			 
+			output[property.externalId] = referenceStructure
+		}
+		
+		output
 	}
 
 	@Override
@@ -132,6 +149,59 @@ class StructuredSerializationService implements Serializer {
 			code: unit.code,
 			name: unit.name
 		]
+	}
+	
+	/**
+	 * Serializes a reference value
+	 * @param reference
+	 * @return
+	 */
+	protected Map serializeReference( ReferenceValue reference ) {
+		if( !reference )
+			return null
+			
+		def output = [
+			status: reference.status,
+			color: reference.color.toString(),
+		]
+		
+		// Add boundaries
+		def subjectCondition = reference.subjectCondition
+		if( subjectCondition ) {
+			output.value = serializeReferenceCondition(subjectCondition)
+		}
+		 
+		def conditions = []
+		reference.conditions.each { condition ->
+			// Conditions for the subject iself are represented separately
+			if( condition.subject == reference.subject )
+				return;
+			
+			conditions << serializeReferenceCondition( condition, true )
+		}
+		
+		if( conditions )
+			output.conditions = conditions
+			
+		output
+	}
+	
+	protected Map serializeReferenceCondition(ReferenceCondition condition, includeProperty = false ) {
+		def output = [:]
+		
+		if( includeProperty )
+			output.property = serializeMeasurable( condition.subject )
+		
+		if( condition.low )
+			output.lower_boundary = condition.low
+		
+		if( condition.high )
+			output.upper_boundary = condition.high
+
+		if( condition.value )
+			output.exact_match = condition.value
+		
+		output
 	}
 
 }

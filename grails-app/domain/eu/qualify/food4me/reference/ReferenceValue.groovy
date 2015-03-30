@@ -40,6 +40,14 @@ class ReferenceValue {
     }
 	
 	/**
+	 * Returns the condition for the subject itself, if any  
+	 * @return
+	 */
+	public ReferenceCondition getSubjectCondition() {
+		conditions.find { it.subject == subject }
+	}
+	
+	/**
 	 * Returns a list of properties needed to determine the status for a given property
 	 * 
 	 * For example, the status of BMI depends on the BMI itself, but also on Gender and Age
