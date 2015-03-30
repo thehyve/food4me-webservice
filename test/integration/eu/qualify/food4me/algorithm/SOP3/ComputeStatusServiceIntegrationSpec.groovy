@@ -101,7 +101,7 @@ class ComputeStatusServiceIntegrationSpec extends IntegrationSpec {
 		when:
 			measurements = new Measurements()
 			measurements.add( new Measurement( property: fibre, value: new MeasuredNumericValue( value: 30, unit: fibre.unit ) ) )
-			measurements.add( new Measurement( property: gender, value: new MeasuredTextValue( value: "male" ) ) )
+			measurements.add( new Measurement( property: gender, value: new MeasuredTextValue( value: "Male" ) ) )
 			measurements.add( new Measurement( property: age, value: new MeasuredNumericValue( value: 35, unit: age.unit ) ) )
 
 			statuses = computeStatusService.computeStatus( measurements )
@@ -113,7 +113,7 @@ class ComputeStatusServiceIntegrationSpec extends IntegrationSpec {
 		when:
 			measurements = new Measurements()
 			measurements.add( new Measurement( property: fibre, value: new MeasuredNumericValue( value: 30, unit: fibre.unit ) ) )
-			measurements.add( new Measurement( property: gender, value: new MeasuredTextValue( value: "female" ) ) )
+			measurements.add( new Measurement( property: gender, value: new MeasuredTextValue( value: "Female" ) ) )
 			measurements.add( new Measurement( property: age, value: new MeasuredNumericValue( value: 35, unit: age.unit ) ) )
 
 			statuses = computeStatusService.computeStatus( measurements )

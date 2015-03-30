@@ -44,6 +44,14 @@
 		<g:form action="clearAll">
 			<input type="submit" value="Clear the database" />
 		</g:form>
+
+		<hr />
+		
+		<g:form action="importExampleData">
+			<input type="submit" value="Load example data" />
+		</g:form>
+	
+		<hr />
 		
 		<g:form action="importAll">
 			<input type="submit" value="Import all data" />

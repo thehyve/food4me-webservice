@@ -90,225 +90,228 @@ class ExampleData {
 						
 		// Initialize a few simple references
 		if( ReferenceValue.count == 0 ) {
-			def proteinVeryLow = new ReferenceValue(subject: protein, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+			def proteinVeryLow = new ReferenceValue(subject: protein, status: Status.STATUS_VERY_LOW, color: Status.Color.RED, numConditions: 1 )
 				proteinVeryLow.addToConditions( new ReferenceCondition( subject: protein, high: 0.52, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				proteinVeryLow.save(failOnError: true)
 				
-			def proteinLow = new ReferenceValue(subject: protein, status: Status.STATUS_LOW, color: Status.Color.AMBER )
+			def proteinLow = new ReferenceValue(subject: protein, status: Status.STATUS_LOW, color: Status.Color.AMBER, numConditions: 1 )
 				proteinLow.addToConditions( new ReferenceCondition( subject: protein, low: 0.52, high: 0.66, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				proteinLow.save(failOnError: true)
 	
-			def proteinOK = new ReferenceValue(subject: protein, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def proteinOK = new ReferenceValue(subject: protein, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 1 )
 				proteinOK.addToConditions( new ReferenceCondition( subject: protein, low: 0.66, high: 2.4, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				proteinOK.save(failOnError: true)
 	
-			def proteinHigh = new ReferenceValue(subject: protein, status: Status.STATUS_HIGH, color: Status.Color.RED )
+			def proteinHigh = new ReferenceValue(subject: protein, status: Status.STATUS_HIGH, color: Status.Color.RED, numConditions: 1 )
 				proteinHigh.addToConditions( new ReferenceCondition( subject: protein, low: 2.4, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				proteinHigh.save(failOnError: true)
 				
-			def carbohydrateVeryLow = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+			def carbohydrateVeryLow = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_VERY_LOW, color: Status.Color.RED, numConditions: 1 )
 				carbohydrateVeryLow.addToConditions( new ReferenceCondition( subject: carbohydrate, high: 40, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				carbohydrateVeryLow.save(failOnError: true)
 				
-			def carbohydrateLow = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_LOW, color: Status.Color.AMBER )
+			def carbohydrateLow = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_LOW, color: Status.Color.AMBER, numConditions: 1 )
 				carbohydrateLow.addToConditions( new ReferenceCondition( subject: carbohydrate, low: 40, high: 45, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				carbohydrateLow.save(failOnError: true)
 	
-			def carbohydrateOK = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def carbohydrateOK = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 1 )
 				carbohydrateOK.addToConditions( new ReferenceCondition( subject: carbohydrate, low: 45, high: 65, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				carbohydrateOK.save(failOnError: true)
 	
-			def carbohydrateHigh = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER )
+			def carbohydrateHigh = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER, numConditions: 1 )
 				carbohydrateHigh.addToConditions( new ReferenceCondition( subject: carbohydrate, low: 65, high: 70, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				carbohydrateHigh.save(failOnError: true)
 				
-			def carbohydrateVeryHigh = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED )
+			def carbohydrateVeryHigh = new ReferenceValue(subject: carbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED, numConditions: 1 )
 				carbohydrateVeryHigh.addToConditions( new ReferenceCondition( subject: carbohydrate, low: 70, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				carbohydrateVeryHigh.save(failOnError: true)
 	
-			def fibreVeryLow1 = new ReferenceValue(subject: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+			def fibreVeryLow1 = new ReferenceValue(subject: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED, numConditions: 3 )
 				fibreVeryLow1.addToConditions( new ReferenceCondition( subject: fibre, high: 28, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreVeryLow1.addToConditions( new ReferenceCondition( subject: gender, value: "male", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreVeryLow1.addToConditions( new ReferenceCondition( subject: gender, value: "Male", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreVeryLow1.addToConditions( new ReferenceCondition( subject: age, low: 17, high: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreVeryLow1.save(failOnError: true)
 				
-			def fibreLow1 = new ReferenceValue(subject: fibre, status: Status.STATUS_LOW, color: Status.Color.AMBER )
+			def fibreLow1 = new ReferenceValue(subject: fibre, status: Status.STATUS_LOW, color: Status.Color.AMBER, numConditions: 3 )
 				fibreLow1.addToConditions( new ReferenceCondition( subject: fibre, low: 28, high: 38, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreLow1.addToConditions( new ReferenceCondition( subject: gender, value: "male", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreLow1.addToConditions( new ReferenceCondition( subject: gender, value: "Male", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreLow1.addToConditions( new ReferenceCondition( subject: age, low: 17, high: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreLow1.save(failOnError: true)
 	
-			def fibreOK1 = new ReferenceValue(subject: fibre, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def fibreOK1 = new ReferenceValue(subject: fibre, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 3 )
 				fibreOK1.addToConditions( new ReferenceCondition( subject: fibre, low: 38, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreOK1.addToConditions( new ReferenceCondition( subject: gender, value: "male", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreOK1.addToConditions( new ReferenceCondition( subject: gender, value: "Male", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreOK1.addToConditions( new ReferenceCondition( subject: age, low: 17, high: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreOK1.save(failOnError: true)
 	
-			def fibreVeryLow2 = new ReferenceValue(subject: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+			def fibreVeryLow2 = new ReferenceValue(subject: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED, numConditions: 3 )
 				fibreVeryLow2.addToConditions( new ReferenceCondition( subject: fibre, high: 20, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreVeryLow2.addToConditions( new ReferenceCondition( subject: gender, value: "male", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreVeryLow2.addToConditions( new ReferenceCondition( subject: gender, value: "Male", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreVeryLow2.addToConditions( new ReferenceCondition( subject: age, low: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreVeryLow2.save(failOnError: true)
 				
-			def fibreLow2 = new ReferenceValue(subject: fibre, status: Status.STATUS_LOW, color: Status.Color.AMBER )
+			def fibreLow2 = new ReferenceValue(subject: fibre, status: Status.STATUS_LOW, color: Status.Color.AMBER, numConditions: 3 )
 				fibreLow2.addToConditions( new ReferenceCondition( subject: fibre, low: 20, high: 30, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreLow2.addToConditions( new ReferenceCondition( subject: gender, value: "male", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreLow2.addToConditions( new ReferenceCondition( subject: gender, value: "Male", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreLow2.addToConditions( new ReferenceCondition( subject: age, low: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreLow2.save(failOnError: true)
 	
-			def fibreOK2 = new ReferenceValue(subject: fibre, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def fibreOK2 = new ReferenceValue(subject: fibre, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 3 )
 				fibreOK2.addToConditions( new ReferenceCondition( subject: fibre, low: 30, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreOK2.addToConditions( new ReferenceCondition( subject: gender, value: "male", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreOK2.addToConditions( new ReferenceCondition( subject: gender, value: "Male", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreOK2.addToConditions( new ReferenceCondition( subject: age, low: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreOK2.save(failOnError: true)
 	
-			def fibreVeryLow3 = new ReferenceValue(subject: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+			def fibreVeryLow3 = new ReferenceValue(subject: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED, numConditions: 3 )
 				fibreVeryLow3.addToConditions( new ReferenceCondition( subject: fibre, high: 15, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreVeryLow3.addToConditions( new ReferenceCondition( subject: gender, value: "female", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreVeryLow3.addToConditions( new ReferenceCondition( subject: gender, value: "Female", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreVeryLow3.addToConditions( new ReferenceCondition( subject: age, low: 17, high: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreVeryLow3.save(failOnError: true)
 				
-			def fibreLow3 = new ReferenceValue(subject: fibre, status: Status.STATUS_LOW, color: Status.Color.AMBER )
+			def fibreLow3 = new ReferenceValue(subject: fibre, status: Status.STATUS_LOW, color: Status.Color.AMBER, numConditions: 3 )
 				fibreLow3.addToConditions( new ReferenceCondition( subject: fibre, low: 15, high: 25, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreLow3.addToConditions( new ReferenceCondition( subject: gender, value: "female", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreLow3.addToConditions( new ReferenceCondition( subject: gender, value: "Female", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreLow3.addToConditions( new ReferenceCondition( subject: age, low: 17, high: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreLow3.save(failOnError: true)
 	
-			def fibreOK3 = new ReferenceValue(subject: fibre, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def fibreOK3 = new ReferenceValue(subject: fibre, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 3 )
 				fibreOK3.addToConditions( new ReferenceCondition( subject: fibre, low: 25, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreOK3.addToConditions( new ReferenceCondition( subject: gender, value: "female", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreOK3.addToConditions( new ReferenceCondition( subject: gender, value: "Female", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreOK3.addToConditions( new ReferenceCondition( subject: age, low: 17, high: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreOK3.save(failOnError: true)
 	
-			def fibreVeryLow4 = new ReferenceValue(subject: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+			def fibreVeryLow4 = new ReferenceValue(subject: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED, numConditions: 3 )
 				fibreVeryLow4.addToConditions( new ReferenceCondition( subject: fibre, high: 14, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreVeryLow4.addToConditions( new ReferenceCondition( subject: gender, value: "female", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreVeryLow4.addToConditions( new ReferenceCondition( subject: gender, value: "Female", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreVeryLow4.addToConditions( new ReferenceCondition( subject: age, low: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreVeryLow4.save(failOnError: true)
 				
-			def fibreLow4 = new ReferenceValue(subject: fibre, status: Status.STATUS_LOW, color: Status.Color.AMBER )
+			def fibreLow4 = new ReferenceValue(subject: fibre, status: Status.STATUS_LOW, color: Status.Color.AMBER, numConditions: 3 )
 				fibreLow4.addToConditions( new ReferenceCondition( subject: fibre, low: 14, high: 21, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreLow4.addToConditions( new ReferenceCondition( subject: gender, value: "female", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreLow4.addToConditions( new ReferenceCondition( subject: gender, value: "Female", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreLow4.addToConditions( new ReferenceCondition( subject: age, low: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreLow4.save(failOnError: true)
 	
-			def fibreOK4 = new ReferenceValue(subject: fibre, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def fibreOK4 = new ReferenceValue(subject: fibre, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 3 )
 				fibreOK4.addToConditions( new ReferenceCondition( subject: fibre, low: 21, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				fibreOK4.addToConditions( new ReferenceCondition( subject: gender, value: "female", conditionType: ReferenceCondition.TYPE_TEXT) )
+				fibreOK4.addToConditions( new ReferenceCondition( subject: gender, value: "Female", conditionType: ReferenceCondition.TYPE_TEXT) )
 				fibreOK4.addToConditions( new ReferenceCondition( subject: age, low: 50, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				fibreOK4.save(failOnError: true)
 				
-			def cholesterolOK = new ReferenceValue(subject: cholesterol, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def cholesterolOK = new ReferenceValue(subject: cholesterol, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 1 )
 				cholesterolOK.addToConditions( new ReferenceCondition( subject: cholesterol, high: 5, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				cholesterolOK.save(failOnError: true)
 
-			def cholesterolHigh = new ReferenceValue(subject: cholesterol, status: Status.STATUS_HIGH, color: Status.Color.AMBER )
+			def cholesterolHigh = new ReferenceValue(subject: cholesterol, status: Status.STATUS_HIGH, color: Status.Color.AMBER, numConditions: 1 )
 				cholesterolHigh.addToConditions( new ReferenceCondition( subject: cholesterol, low: 5, high: 8, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				cholesterolHigh.save(failOnError: true)
 
-			def cholesterolVeryHigh = new ReferenceValue(subject: cholesterol, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED )
+			def cholesterolVeryHigh = new ReferenceValue(subject: cholesterol, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED, numConditions: 1 )
 				cholesterolVeryHigh.addToConditions( new ReferenceCondition( subject: cholesterol, low: 8, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				cholesterolVeryHigh.save(failOnError: true)
 
-			def folateOK = new ReferenceValue(subject: folate, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def folateOK = new ReferenceValue(subject: folate, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 1 )
 				folateOK.addToConditions( new ReferenceCondition( subject: folate, low: 320, high: 1000, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				folateOK.save(failOnError: true)
 
-			def folateLow = new ReferenceValue(subject: folate, status: Status.STATUS_OK, color: Status.Color.AMBER )
+			def folateLow = new ReferenceValue(subject: folate, status: Status.STATUS_OK, color: Status.Color.AMBER, numConditions: 1 )
 				folateLow.addToConditions( new ReferenceCondition( subject: folate, low: 240, high: 320, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				folateLow.save(failOnError: true)
 				
-			def folateVeryLow = new ReferenceValue(subject: folate, status: Status.STATUS_OK, color: Status.Color.RED )
+			def folateVeryLow = new ReferenceValue(subject: folate, status: Status.STATUS_OK, color: Status.Color.RED, numConditions: 1 )
 				folateVeryLow.addToConditions( new ReferenceCondition( subject: folate, high: 240, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				folateVeryLow.save(failOnError: true)
 				
-			def folateHigh = new ReferenceValue(subject: folate, status: Status.STATUS_HIGH, color: Status.Color.RED )
+			def folateHigh = new ReferenceValue(subject: folate, status: Status.STATUS_HIGH, color: Status.Color.RED, numConditions: 1 )
 				folateHigh.addToConditions( new ReferenceCondition( subject: folate, low: 1000, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				folateHigh.save(failOnError: true)
 
-			def vitaminAVeryLow1 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+			def vitaminAVeryLow1 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_VERY_LOW, color: Status.Color.RED, numConditions: 2 )
 				vitaminAVeryLow1.addToConditions( new ReferenceCondition( subject: vitaminA, high: 350, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				vitaminAVeryLow1.addToConditions( new ReferenceCondition( subject: gender, value: "male", conditionType: ReferenceCondition.TYPE_TEXT ) )
+				vitaminAVeryLow1.addToConditions( new ReferenceCondition( subject: gender, value: "Male", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				vitaminAVeryLow1.save(failOnError: true)
 
-			def vitaminALow1 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_LOW, color: Status.Color.AMBER )
+			def vitaminALow1 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_LOW, color: Status.Color.AMBER, numConditions: 2 )
 				vitaminALow1.addToConditions( new ReferenceCondition( subject: vitaminA, low: 350, high: 625, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				vitaminALow1.addToConditions( new ReferenceCondition( subject: gender, value: "male", conditionType: ReferenceCondition.TYPE_TEXT ) )
+				vitaminALow1.addToConditions( new ReferenceCondition( subject: gender, value: "Male", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				vitaminALow1.save(failOnError: true)
 				
-			def vitaminAOK1 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def vitaminAOK1 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 2 )
 				vitaminAOK1.addToConditions( new ReferenceCondition( subject: vitaminA, low: 625, high: 3000, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				vitaminAOK1.addToConditions( new ReferenceCondition( subject: gender, value: "male", conditionType: ReferenceCondition.TYPE_TEXT ) )
+				vitaminAOK1.addToConditions( new ReferenceCondition( subject: gender, value: "Male", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				vitaminAOK1.save(failOnError: true)
 				
-			def vitaminAHigh1 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_HIGH, color: Status.Color.RED )
+			def vitaminAHigh1 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_HIGH, color: Status.Color.RED, numConditions: 2 )
 				vitaminAHigh1.addToConditions( new ReferenceCondition( subject: vitaminA, low: 3000, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				vitaminAHigh1.addToConditions( new ReferenceCondition( subject: gender, value: "male", conditionType: ReferenceCondition.TYPE_TEXT ) )
+				vitaminAHigh1.addToConditions( new ReferenceCondition( subject: gender, value: "Male", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				vitaminAHigh1.save(failOnError: true)
 				
-			def vitaminAVeryLow2 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+			def vitaminAVeryLow2 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_VERY_LOW, color: Status.Color.RED, numConditions: 2 )
 				vitaminAVeryLow2.addToConditions( new ReferenceCondition( subject: vitaminA, high: 300, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				vitaminAVeryLow2.addToConditions( new ReferenceCondition( subject: gender, value: "female", conditionType: ReferenceCondition.TYPE_TEXT ) )
+				vitaminAVeryLow2.addToConditions( new ReferenceCondition( subject: gender, value: "Female", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				vitaminAVeryLow2.save(failOnError: true)
 
-			def vitaminALow2 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_LOW, color: Status.Color.AMBER )
+			def vitaminALow2 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_LOW, color: Status.Color.AMBER, numConditions: 2 )
 				vitaminALow2.addToConditions( new ReferenceCondition( subject: vitaminA, low: 300, high: 500, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				vitaminALow2.addToConditions( new ReferenceCondition( subject: gender, value: "female", conditionType: ReferenceCondition.TYPE_TEXT ) )
+				vitaminALow2.addToConditions( new ReferenceCondition( subject: gender, value: "Female", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				vitaminALow2.save(failOnError: true)
 				
-			def vitaminAOK2 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def vitaminAOK2 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 2 )
 				vitaminAOK2.addToConditions( new ReferenceCondition( subject: vitaminA, low: 500, high: 3000, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				vitaminAOK2.addToConditions( new ReferenceCondition( subject: gender, value: "female", conditionType: ReferenceCondition.TYPE_TEXT ) )
+				vitaminAOK2.addToConditions( new ReferenceCondition( subject: gender, value: "Female", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				vitaminAOK2.save(failOnError: true)
 				
-			def vitaminAHigh2 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_HIGH, color: Status.Color.RED )
+			def vitaminAHigh2 = new ReferenceValue(subject: vitaminA, status: Status.STATUS_HIGH, color: Status.Color.RED, numConditions: 2 )
 				vitaminAHigh2.addToConditions( new ReferenceCondition( subject: vitaminA, low: 3000, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
-				vitaminAHigh2.addToConditions( new ReferenceCondition( subject: gender, value: "female", conditionType: ReferenceCondition.TYPE_TEXT ) )
+				vitaminAHigh2.addToConditions( new ReferenceCondition( subject: gender, value: "Female", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				vitaminAHigh2.save(failOnError: true)
 				
-			def geneFADS1Risk = new ReferenceValue(subject: geneFADS1, status: Status.STATUS_RISK, color: Status.Color.RED )
+			def geneFADS1Risk = new ReferenceValue(subject: geneFADS1, status: Status.STATUS_RISK, color: Status.Color.RED, numConditions: 1 )
 				geneFADS1Risk.addToConditions( new ReferenceCondition( subject: geneFADS1, value: "CC", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				geneFADS1Risk.save(failOnError: true)
 				
-			def geneFADS1NonRisk1 = new ReferenceValue(subject: geneFADS1, status: Status.STATUS_NON_RISK, color: Status.Color.GREEN )
+			def geneFADS1NonRisk1 = new ReferenceValue(subject: geneFADS1, status: Status.STATUS_NON_RISK, color: Status.Color.GREEN, numConditions: 1 )
 				geneFADS1NonRisk1.addToConditions( new ReferenceCondition( subject: geneFADS1, value: "TT", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				geneFADS1NonRisk1.save(failOnError: true)
 				
-			def geneFADS1NonRisk2 = new ReferenceValue(subject: geneFADS1, status: Status.STATUS_NON_RISK, color: Status.Color.GREEN )
+			def geneFADS1NonRisk2 = new ReferenceValue(subject: geneFADS1, status: Status.STATUS_NON_RISK, color: Status.Color.GREEN, numConditions: 1 )
 				geneFADS1NonRisk2.addToConditions( new ReferenceCondition( subject: geneFADS1, value: "TC", conditionType: ReferenceCondition.TYPE_TEXT ) )
 				geneFADS1NonRisk2.save(failOnError: true)
 
 			// Omega3 intake
-			def omega3IntakeOK = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def omega3IntakeOK = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 1 )
 				omega3IntakeOK.addToConditions( new ReferenceCondition( subject: omega3Intake, low: 0.6, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				omega3IntakeOK.save(failOnError: true)
 
-			def omega3IntakeLow = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_LOW, color: Status.Color.AMBER )
+			def omega3IntakeLow = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_LOW, color: Status.Color.AMBER, numConditions: 1 )
 				omega3IntakeLow.addToConditions( new ReferenceCondition( subject: omega3Intake, low: 0.2, high: 0.6, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				omega3IntakeLow.save(failOnError: true)
 
-			def omega3IntakeVeryLow = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_VERY_LOW, color: Status.Color.RED )
+			def omega3IntakeVeryLow = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_VERY_LOW, color: Status.Color.RED, numConditions: 1 )
 				omega3IntakeVeryLow.addToConditions( new ReferenceCondition( subject: omega3Intake, high: 0.2, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				omega3IntakeVeryLow.save(failOnError: true)
 
 			// Omega3 biomarker
-			def omega3BiomarkerOK = new ReferenceValue(subject: omega3Biomarker, status: Status.STATUS_OK, color: Status.Color.GREEN )
+			def omega3BiomarkerOK = new ReferenceValue(subject: omega3Biomarker, status: Status.STATUS_OK, color: Status.Color.GREEN, numConditions: 1 )
 				omega3BiomarkerOK.addToConditions( new ReferenceCondition( subject: omega3Biomarker, low: 8, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				omega3BiomarkerOK.save(failOnError: true)
 
-			def omega3BiomarkerIntermediate = new ReferenceValue(subject: omega3Intake, status: "Intermediate", color: Status.Color.AMBER )
+			def omega3BiomarkerIntermediate = new ReferenceValue(subject: omega3Intake, status: "Intermediate", color: Status.Color.AMBER, numConditions: 1 )
 				omega3BiomarkerIntermediate.addToConditions( new ReferenceCondition( subject: omega3Biomarker, low: 4, high: 8, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				omega3BiomarkerIntermediate.save(failOnError: true)
 
-			def omega3BiomarkerLow = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_LOW, color: Status.Color.RED )
+			def omega3BiomarkerLow = new ReferenceValue(subject: omega3Intake, status: Status.STATUS_LOW, color: Status.Color.RED, numConditions: 1 )
 				omega3BiomarkerLow.addToConditions( new ReferenceCondition( subject: omega3Biomarker, high: 4, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 				omega3BiomarkerLow.save(failOnError: true)
 		}
 	}
 	
 	static def initializeAdvices() {
+		println "Start initializing advices"
 		initializeBMIAdviceL3_1()
+		println "Initialized BMI advice"
 		initializeOmega3AdviceL3_4()
+		println "Initialized Omega3 advice"
 	}
 	
 	static def initializeBMIAdviceL3_1() {
@@ -346,8 +349,14 @@ class ExampleData {
 			}
 				
 			// Save all advices on BMI
+			def counter = 0
 			advicesOnBMI.each {
 				it.save(failOnError: true)
+				
+				if( counter++ >= 20 ) {
+					cleanupGORM()
+					counter = 0
+				}
 			}
 		}
 	}
@@ -378,11 +387,30 @@ class ExampleData {
 			}
 				
 			// Save all advices
+			def counter = 0
 			advicesOnOmega3Intake.each {
 				it.save(failOnError: true)
+				
+				if( counter++ >= 20 ) {
+					cleanupGORM()
+					counter = 0
+				}
 			}
 		}
 	}
 
+	protected static def cleanupGORM() {
+		println  "Cleanup GORM"
+		
+		Property.withSession { session ->
+			if( !session ) 
+				println "No session could be cleared"
+				
+			session?.flush()
+			session?.clear()
+		}
+		
+		org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP.get().clear()
+	}
 	
 }

@@ -3,6 +3,7 @@ package eu.qualify.food4me
 import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.decisiontree.AdviceCondition
 import eu.qualify.food4me.decisiontree.AdviceText
+import eu.qualify.food4me.exampledata.ExampleData
 import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
 import grails.plugin.springsecurity.annotation.Secured
@@ -113,6 +114,22 @@ class AdminController {
 	def importTranslations() {
 		importService.loadAdviceTextsFromDirectory( )
 		flash.message = "Advice text translations have been imported from the default directory"
+		redirect action: "index"
+	}
+	
+	
+	def importExampleData() {
+		// Add example data to the database
+		ExampleData.initializeGenericData()
+		log.info "Generic example data was loaded"
+		
+		ExampleData.initializeReferences()
+		log.info "Example reference data was loaded"
+		
+		ExampleData.initializeAdvices()
+		log.info "Example advice data was loaded"
+		
+		flash.message = "Example data has been loaded into the database"
 		redirect action: "index"
 	}
 	 
