@@ -89,10 +89,14 @@ class GenerateAdviceService implements AdviceGenerator {
 			MeasuredValue measuredValue = measurements.getValueFor( property )
 			Status status = measurementStatus.getStatus( property )
 			
+			log.trace "Adding advice where clause for " + property + ": " + measuredValue + " / " + status
+			
 			// If no value is measured and no status is found, we cannot
 			// filter on this property. Skipping immediately
-			if( !measuredValue && !status ) 
+			if( !measuredValue && !status ) {
+				log.warn "No value provided for " + property + ", which may be needed to generate this advice"
 				return
+			}
 			
 			// Modified property are handled differently from default properties
 			String condition = "( "

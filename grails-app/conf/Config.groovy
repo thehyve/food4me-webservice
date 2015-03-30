@@ -113,8 +113,8 @@ log4j.main = {
         console name:'stdout', layout:pattern(conversionPattern: '%d [%p] %c{1} - %m%n')
     }
 
-	info   'org.grails.app', 'eu.qualify'
-    warn  'org.codehaus.groovy.grails.web.servlet',        // controllers
+	warn  'org.grails.app', 'eu.qualify',
+    	   'org.codehaus.groovy.grails.web.servlet',        // controllers
            'org.codehaus.groovy.grails.web.pages',          // GSP
            'org.codehaus.groovy.grails.web.sitemesh',       // layouts
            'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
@@ -133,7 +133,9 @@ grails.plugin.springsecurity.userLookup.userDomainClassName = 'eu.qualify.food4m
 grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'eu.qualify.food4me.auth.UserRole'
 grails.plugin.springsecurity.authority.className = 'eu.qualify.food4me.auth.Role'
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
+	'/':                       		  ['permitAll'],
 	'/advices':                       ['permitAll'],
+	
 	'/assets/**':                     ['permitAll'],
 	'/**/js/**':                      ['permitAll'],
 	'/**/css/**':                     ['permitAll'],

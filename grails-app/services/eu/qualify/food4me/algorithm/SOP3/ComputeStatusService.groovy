@@ -24,14 +24,23 @@ class ComputeStatusService implements StatusComputer {
 	
 		MeasurementStatus measurementStatus = new MeasurementStatus()
 			
-		// Check the status for all nutrients
+		// Check the status for all properties
 		measurements.all.each { measurement ->
 			Status status = getStatus( measurement, measurements )
 			
 			if( status != null )
 				measurementStatus.addStatus( status.entity, status )
 		}
-			
+
+		
+		// Determine status for supplement intake for all nutrients.
+		measurements.getAllPropertiesForPropertyGroup( Property.PROPERTY_GROUP_NUTRIENT ).each { nutrient ->
+			log.trace "Determine status for supplement intake for " + nutrient
+			Status status = determineStatusForSupplement( new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS ), nutrient, measurements )
+			if( status != null )
+				measurementStatus.addStatus( status.entity, status )
+		}
+		
 		return measurementStatus;
 	}
 	
@@ -178,6 +187,13 @@ class ComputeStatusService implements StatusComputer {
 	}
 	
 	protected void extendWhereClauses( List whereClause, Map whereParams, Property property, MeasuredValue measuredValue, int index = 0 ) {
+		// If no value is provided, we cannot filter on this property. That
+		// may result in no status being determined for this property. Skipping immediately
+		if( !measuredValue ) {
+			log.warn "No value provided for " + property + ", which may be needed to determine the status"
+			return
+		}
+		
 		String condition = " ( condition.subject = :property" + index + " AND "
 		
 		// There is a difference between text and numeric values

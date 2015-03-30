@@ -5,6 +5,7 @@ class LinesTagLib {
     //static encodeAsForTags = [tagName: [taglib:'html'], otherTagName: [taglib:'none']]
 	
 	def lines = { attrs, body ->
-		out << attrs['string'].encodeAsHTML().replace('\n', '<br/>\n')
+		if( attrs['string'])
+			out << attrs['string'].encodeAsHTML().replace('\n', '<br/>\n')
 	}
 }

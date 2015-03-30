@@ -18,22 +18,38 @@
 		</div>
 		
 		<h1>Provided measurements</h1>
-		<div id="measurements">
+		<div class="measurements">
 			<ul>
 				<g:each in="${measurements?.all}" var="measurement">
 					<g:if test="${!measurement.derived}">
-						<li>${measurement.property}: ${measurement.value}</li>
+						<li>
+							<span class='property'>${measurement.property}</span>
+							<span class='value'>${measurement.value}</span>
+							
+							<% def propertyStatus = status.getStatus(measurement.property) %>
+							<g:if test="${propertyStatus}">
+								<span class="status color_${propertyStatus.color}">${propertyStatus.status}</span>
+							</g:if>
+						</li>
 					</g:if>
 				</g:each>
 			</ul>
 		</div>
 		
 		<h1>Derived measurements</h1>
-		<div id="measurements">
+		<div class="measurements">
 			<ul>
 				<g:each in="${measurements?.all}" var="measurement">
 					<g:if test="${measurement.derived}">
-						<li>${measurement.property}: ${measurement.value}</li>
+						<li>
+							<span class='property'>${measurement.property}</span>
+							<span class='value'>${measurement.value}</span>
+							
+							<% def propertyStatus = status.getStatus(measurement.property) %>
+							<g:if test="${propertyStatus}">
+								<span class="status color_${propertyStatus.color}">${propertyStatus.status}</span>
+							</g:if>
+						</li>
 					</g:if>
 				</g:each>
 			</ul>

@@ -130,7 +130,6 @@ databaseChangeLog = {
 	// Please note, creating the trigger is currently only supported on postgres
 	include file: 'trigger-on-advice-conditions.groovy'
 
-
 	include file: 'add-modifier-to-advice-condition.groovy'
 
 	include file: 'advice-text-large-than-255.groovy'

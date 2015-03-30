@@ -27,8 +27,9 @@
 				<li>${importDirectory}</li>
 			</ul>
 						
-			<p>Application version</p>
+			<p>Application</p>
 			<ul>
+				<li>${appName}</li>
 				<li>${appVersion}</li>
 			</ul>			
 			

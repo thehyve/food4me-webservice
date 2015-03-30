@@ -23,6 +23,7 @@ class AdminController {
 	def index() {
 		[ 
 			importDirectory: importService.defaultImportDirectory,
+			appName: grailsApplication.metadata['app.name'],
 			appVersion: grailsApplication.metadata['app.version'],
 			
 			numProperties: Property.count,

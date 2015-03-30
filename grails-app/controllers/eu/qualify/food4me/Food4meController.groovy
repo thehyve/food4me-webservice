@@ -54,6 +54,7 @@ class Food4meController {
 			(Property.PROPERTY_GROUP_FOODGROUP): 'foodgroup'
 		]
 		
+		// Send output to the view
 		[
 			nutrients: nutrients,
 			nutrientModifiers: nutrientModifiers, 
@@ -77,7 +78,7 @@ class Food4meController {
 		
 		// Use content negotiation to output the data
 		withFormat {
-			html advices: advices, measurements: measurements, translations: AdviceText.getTranslations( advices, language )
+			html advices: advices, measurements: measurements, status: status, translations: AdviceText.getTranslations( advices, language )
 			json { render structuredSerializationService.serializeAdvices( advices, language ) as JSON }
 		}
 	}

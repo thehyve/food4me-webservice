@@ -615,7 +615,6 @@ a.skip {
 /**
  Form to generate advices manually
  **/
- 
 #generate_advices { font-size: 0.8em; }
 #generate_advices th { max-width: 80px; text-align: left; overflow: hidden; }
 #generate_advices td { padding-top: 0.3em; padding-bottom: 0.3em;  }
@@ -627,3 +626,12 @@ a.skip {
 #generate_advices li { padding: 0.3em 0;  }
 #generate_advices label { display: inline-block; width: 200px; }
 #generate_advices input[type=text] { display: inline; width: 70px; }
+
+/** Showing the advices **/
+.measurements ul { list-style-type: none; }
+.measurements li { padding: 0.2em 0em; border-bottom: 1px solid #ddd; }
+.measurements .property { display: inline-block; width: 350px; }
+.measurements .value { display: inline-block; width: 200px; }
+.status.color_RED {color: red; }
+.status.color_AMBER {color: #E5A500; }
+.status.color_GREEN {color: green; }

@@ -1,6 +1,5 @@
 package eu.qualify.food4me.decisiontree
 
-import eu.qualify.food4me.Property;
 
 class AdviceText {
 	/**
@@ -39,7 +38,7 @@ class AdviceText {
 		// Find the texts for the advices given. Create a map of the texts
 		// with the code being the key
 		def texts = [:]
-		AdviceText.findByCodeInListAndLanguage( advices*.code, language ).each {
+		AdviceText.findAllByCodeInListAndLanguage( advices*.code, language ).each {
 			texts[ it.code ] = it.text
 		}
 		
