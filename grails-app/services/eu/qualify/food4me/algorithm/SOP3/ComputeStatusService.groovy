@@ -36,7 +36,7 @@ class ComputeStatusService implements StatusComputer {
 		// Determine status for supplement intake for all nutrients.
 		measurements.getAllPropertiesForPropertyGroup( Property.PROPERTY_GROUP_NUTRIENT ).each { nutrient ->
 			log.trace "Determine status for supplement intake for " + nutrient
-			Status status = determineStatusForSupplement( new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS ), nutrient, measurements )
+			Status status = determineStatusForSupplement( new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS.id ), nutrient, measurements )
 			if( status != null )
 				measurementStatus.addStatus( status.entity, status )
 		}
@@ -161,6 +161,7 @@ class ComputeStatusService implements StatusComputer {
 
 		// A very simple check: yes or no
 		def value = measurements.getValueFor( valueProperty )
+		status.value = value
 		
 		if( value && value.type == "numeric" && value.value > 0 ) {
 			status.status = Status.STATUS_YES
