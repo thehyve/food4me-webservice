@@ -61,6 +61,8 @@ grails {
 
 
 grails.converters.encoding = "UTF-8"
+grails.converters.default.pretty.print = true
+
 // scaffolding templates configuration
 grails.scaffolding.templates.domainSuffix = 'Instance'
 
