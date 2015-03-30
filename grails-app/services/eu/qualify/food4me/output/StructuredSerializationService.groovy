@@ -71,7 +71,7 @@ class StructuredSerializationService implements Serializer {
 		def output = advices.collect { advice ->
 			[
 				code: advice.code,
-				subject: advice.subject.toString(),
+				subject: serializeMeasurable(advice.subject),
 				text: texts[ advice.code ]
 			]
 		}
