@@ -197,7 +197,7 @@ class ImportService {
 				
 				// TODO: check for duplicates
 				color = line[ currentColumnIndex ]
-				def higherBoundary = line.size() > currentColumnIndex + 1 ? line[ currentColumnIndex + 1 ] : null
+				def higherBoundary = ( line.size() > currentColumnIndex + 1 && line[ currentColumnIndex + 1 ].isBigDecimal() ) ? line[ currentColumnIndex + 1 ].toBigDecimal() : null
 				
 				def reference = new ReferenceValue(subject: property, status: status, color: Status.Color.fromString( color ) )
 				
@@ -212,7 +212,7 @@ class ImportService {
 				// Add the condition on the property itself
 				reference.addToConditions( new ReferenceCondition( subject: property, low: currentLowerBoundary, high: higherBoundary, conditionType: ReferenceCondition.TYPE_NUMERIC ) )
 
-				log.trace( "Importing reference for " + property + " / " + status + " with " + reference.conditions?.size() + " conditions"  )
+				log.trace( "Importing reference for " + property + " / " + status + " with " + reference.conditions?.size() + " conditions " + currentLowerBoundary + " / " + higherBoundary  )
 				references << reference
 				
 				// Prepare for next iteration
