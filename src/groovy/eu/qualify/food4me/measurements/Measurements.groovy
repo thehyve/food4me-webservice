@@ -25,9 +25,13 @@ import groovy.transform.Canonical
 	void addAll(Collection<Measurement> measurements ) {
 		this.measurements.addAll(measurements.findAll())
 	}
+
+	public Measurement get( Measurable p ) {
+		return measurements.find { it.property == p }
+	}
 	
 	public MeasuredValue getValueFor( Measurable p ) {
-		return measurements.find { it.property == p }?.value
+		return get(p)?.value
 	}
 	
 	/**

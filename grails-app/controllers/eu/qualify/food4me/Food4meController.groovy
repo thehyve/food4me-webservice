@@ -62,7 +62,36 @@ class Food4meController {
 			conversionMap: conversionMap
 		]
 	}
-	
+
+	/**
+	 * Webservice to return status of the provided raw measurements
+	 * @return
+	 */
+	def status() {
+		Measurements measurements = parameterBasedParseService.parseMeasurements(params)
+		derivedMeasurementsService.deriveMeasurements(measurements)
+		
+		MeasurementStatus status = computeStatusService.computeStatus(measurements)
+
+		// Use content negotiation to output the data
+		withFormat {
+			html measurements: measurements, status: status
+			json { render structuredSerializationService.serializeStatus( status ) as JSON }
+		}
+	}
+
+	/**
+	 * Webservice to return references
+	 * @return
+	 */
+	def references() {
+		
+	}
+			
+	/**
+	 * Webservice to return advices based on the raw measurements
+	 * @return
+	 */
 	def advices() {
 		Measurements measurements = parameterBasedParseService.parseMeasurements(params)
 		derivedMeasurementsService.deriveMeasurements(measurements)

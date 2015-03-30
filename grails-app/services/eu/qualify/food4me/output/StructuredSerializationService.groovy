@@ -1,21 +1,58 @@
 package eu.qualify.food4me.output
 
+import eu.qualify.food4me.ModifiedProperty
+import eu.qualify.food4me.Unit
 import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.decisiontree.AdviceText
 import eu.qualify.food4me.interfaces.Advisable
+import eu.qualify.food4me.interfaces.Measurable
 import eu.qualify.food4me.interfaces.Serializer
+import eu.qualify.food4me.measurements.MeasuredValue
 import eu.qualify.food4me.measurements.MeasurementStatus
+import eu.qualify.food4me.reference.ReferenceValue
 
+
+/**
+ * Serializes output data in a structured way, to be used when outputting JSON or XML
+ * @author robert
+ */
 class StructuredSerializationService implements Serializer {
 
 	@Override
-	public String serializeStatus(MeasurementStatus status) {
-		// TODO Auto-generated method stub
-		return null;
+	public List serializeStatus(MeasurementStatus measurementStatus) {
+		if( !measurementStatus ) {
+			return []
+		}
+		
+		// Combine the advices with texts and create a structure to serialize
+		def output = measurementStatus.all.collect { status ->
+			def statusStructure = [
+				property: serializeMeasurable(status.entity),
+				value: serializeMeasuredValue(status.value),
+				status: status.status,
+			]
+			
+			if( status.color )
+				statusStructure.color = status.color.toString()
+			
+			statusStructure
+		}
+		
+		output
 	}
 
+	/**
+	 * Serializes a list of advisables to give advice on
+	 * @param advisables
+	 * @return
+	 */
 	@Override
 	public String serializeEntityList(List<Advisable> advisables) {
+		return null
+	}
+	
+	@Override
+	public String serializeReferences(List<ReferenceValue> references) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -40,6 +77,61 @@ class StructuredSerializationService implements Serializer {
 		}
 		
 		output
+	}
+	
+	/**
+	 * Serializes a measurable
+	 * @param measurable
+	 * @return
+	 */
+	protected Map serializeMeasurable( Measurable measurable ) {
+		if( !measurable )
+			return null
+			
+		def output = [
+			id: measurable.rootProperty.externalId,
+			name: measurable.rootProperty.entity,
+			group: measurable.rootProperty.propertyGroup,
+			unit: serializeUnit( measurable.rootProperty.unit )
+		]
+		
+		if( measurable instanceof ModifiedProperty ) {
+			output.modifier = measurable.modifier
+		}
+		
+		output
+	}
+
+	/**
+	 * Serializes a measured value
+	 * @param measurable
+	 * @return
+	 */
+	protected Map serializeMeasuredValue( MeasuredValue value ) {
+		if( !value )
+			return null
+			
+		[
+			value: value.value,
+			type: value.type,
+			unit: serializeUnit( value.unit )
+		]
+	}
+
+	/**
+	 * Serializes a unit
+	 * @param measurable
+	 * @return
+	 */
+	protected Map serializeUnit( Unit unit ) {
+		if( !unit )
+			return null
+			
+		[
+			id: unit.externalId,
+			code: unit.code,
+			name: unit.name
+		]
 	}
 
 }

@@ -63,6 +63,10 @@ class ReferenceValue {
 		referenceConditions.collect { it.subject }.unique() as List
 	}
 	
+	/**
+	 * Counts the number of subjects for which the database contains a reference.
+	 * @return
+	 */
 	public static int getSubjectCount() {
 		def criteria = ReferenceValue.createCriteria()
 		def referenceSubjectCount = criteria.list {
