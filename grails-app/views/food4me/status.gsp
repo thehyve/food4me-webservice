@@ -12,6 +12,7 @@
 					<th>Property</th>
 					<th>Measured value</th>
 					<th>Status</th>
+					<th>Reference</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -25,6 +26,16 @@
 						</td>
 						<td class="status color_${measurementStatus.color}">
 							${measurementStatus.status}
+						</td>
+						<td>
+							<g:if test="${references[measurementStatus.entity]}">
+								<g:each in="${references[measurementStatus.entity]}" var="reference">
+									<span class="status color_${reference.color}">
+										${reference.status} 
+										${reference.subjectCondition?.conditionDescription}
+									</span>
+								</g:each>
+							</g:if>							
 						</td>
 					</tr>
 				</g:each>

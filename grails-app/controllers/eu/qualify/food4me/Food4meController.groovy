@@ -99,7 +99,7 @@ class Food4meController {
 
 		// Use content negotiation to output the data
 		withFormat {
-			html measurements: measurements, status: status
+			html { [ measurements: measurements, status: status, references: referenceService.getReferences( measurements.all*.property, measurements ) ] }
 			json { render structuredSerializationService.serializeStatus( status ) as JSON }
 		}
 	}

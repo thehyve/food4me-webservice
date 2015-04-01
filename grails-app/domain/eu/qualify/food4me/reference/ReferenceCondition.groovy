@@ -58,16 +58,20 @@ class ReferenceCondition {
     }
 	
 	public String toString() {
-		def conditions = []
-		if( low )
-			conditions << "> " + low
-			
-		if( high )
-			conditions << "<= " + high
-		
-		if( value )
-			conditions << "== " + value
-			
-		"Reference condition: " + subject + "( " + conditions.join( " / " ) + ")"
+		"Reference condition: " + subject + " " + getConditionDescription()
+	}
+	
+	public String getConditionDescription() {
+		if( conditionType == TYPE_TEXT ) {
+			return "== " + value
+		} else {
+			if( low != null && high != null ) {
+				return "" + low + " - " + high
+			} else if( low != null ) {
+				return "> " + low
+			} else {
+				return "<= " + high
+			}
+		}
 	}
 }

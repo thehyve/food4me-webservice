@@ -57,24 +57,32 @@ class ReferenceService {
 		Map references = [:]
 		
 		// Now for all entities, retrieve the references
-		entities.each { property ->
-			log.info "Retrieving reference for property " + property
+		entities.each { measurable ->
+			log.info "Retrieving reference for property " + measurable
 			
 			// First determine whether we already retrieved references for this property
 			// That could happen if both a property and a modified property are given
-			if( references.containsKey( property ) ) {
-				log.info "Reference for property " + property + " was already retrieved. Skipping for now."
+			if( references.containsKey( measurable ) ) {
+				log.info "Reference for property " + measurable + " was already retrieved. Skipping for now."
+				return
+			}
+			
+			// We only have references for normal (non-modified properties)
+			// However, for dietary intake, we use the same references as for the property itself
+			def referenceProperty = measurable.referenceProperty
+			if( !referenceProperty ) {
+				log.info "We only have references for non-modified properties. There is no reference for " + measurable
 				return
 			}
 				
 			// Now determine the conditions applicable for the given property
 			// Most probably that includes the property value itself, but it could
 			// be dependent on age or gender as well
-			def properties = ReferenceValue.getConditionProperties( property )
+			def properties = ReferenceValue.getConditionProperties( referenceProperty )
 			
 			// If no properties are found, no reference values are known. Returning immediately
 			if( !properties ) {
-				log.warn "No references apply for any value of ${property}, although the client asked for it. This may indicate missing information in the database."
+				log.warn "No references apply for any value of ${referenceProperty}, although the client asked for it. This may indicate missing information in the database."
 				return
 			}
 			
@@ -86,7 +94,7 @@ class ReferenceService {
 			// we only retrieve the references given the age and gender. However, if later on the references
 			// will be dependent on other properties as well, these are easily included
 			// because the value for this property could be determined by another property (e.g. a ModifiedProperty)
-			def (whereClause, hqlParams) = generateWhereClause( properties - property, measurements )
+			def (whereClause, hqlParams) = generateWhereClause( properties - referenceProperty, measurements )
 			if( whereClause ) {
 				hql += " AND ( " + whereClause.join( " OR " ) + " )"
 			}
@@ -101,12 +109,50 @@ class ReferenceService {
 				hql += " GROUP BY reference"
 			}
 			
-			hqlParams[ "referenceProperty" ] = property
+			hqlParams[ "referenceProperty" ] = referenceProperty
 			
 			log.trace "Retrieving reference with HQL: " + hql + " / " + hqlParams
 			
 			// Retrieve the reference values
-			references[property] = ReferenceValue.executeQuery( hql, hqlParams )
+			references[measurable] = ReferenceValue.executeQuery( hql, hqlParams )?.sort { a, b ->
+				// Order the references based on their subject condition.
+				// We want it in the logical order from low to high. Hoever, if low = null it should be first
+				// but if high = null it should be last.
+				def aCondition = a.subjectCondition
+				def bCondition = b.subjectCondition
+				
+				if( !aCondition && !b ) {
+					return 0
+				}
+				
+				if( !aCondition )
+					return -1
+				
+				if( !bCondition )
+					return 1
+					
+				
+				// If the values for low are equal (probably both NULL), check the high velus
+				if( aCondition.low == bCondition.low ) {
+					// If one of the high values is NULL, put that one last
+					if( aCondition.high == null )
+						return 1
+					
+					if( bCondition.high == null )
+						return -1
+						
+					return aCondition.high <=> bCondition.high
+				} else {
+					// If the lows are not equal, but one of them is NULL, put that one first
+					if( aCondition.low == null )
+						return -1
+					
+					if( bCondition.low == null )
+						return 1
+						
+					return aCondition.low <=> bCondition.low
+				}
+			}
 		} 
 		
 		references
@@ -236,4 +282,5 @@ class ReferenceService {
 		whereParams[ "property" + index ] = property
 		whereParams[ "value" + index ] = measuredValue.value
 	}
+
 }
