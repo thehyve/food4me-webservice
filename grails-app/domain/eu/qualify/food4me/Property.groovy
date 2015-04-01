@@ -63,6 +63,15 @@ class Property implements Measurable, Advisable {
 		this
 	}
 	
+	/**
+	 * Returns the property to be used to retrieve references for this property
+	 * @return
+	 */
+	Property getReferenceProperty() {
+		this
+	}
+
+	
 	public String toString() {
 		"" + entity
 	}

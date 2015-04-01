@@ -64,40 +64,16 @@ class ComputeStatusService implements StatusComputer {
 		log.trace "Determine status for " + measurement
 		MeasuredValue value = measurement.value
 		
-		def status = determineStatus( measurement.property, measurements )
-		status?.value = value
-		return status
-	}
-	
-	protected Status determineStatus( Property property, Measurements measurements ) {
-		log.debug "  - normal property"
-		determineStatusForProperty( property, property, measurements )
-	}
-	
-	/**
-	 * Determine the status for a property including modifier
-	 * @param property
-	 * @param measurements
-	 * @return
-	 */
-	protected Status determineStatus( ModifiedProperty property, Measurements measurements ) {
-		log.debug "  - modified property"
+		// Lookup the reference property for this property
+		def referenceProperty = measurement.property?.referenceProperty
 		
-		// A status can be determined for properties with modifier 'from food'
-		// For those properties, the same reference values apply as for the total
-		// value of the (root) properties.
-		// Also, a status can be determined for properties with modifier 'supplements'
-		switch( property.modifier ) {
-			case ModifiedProperty.Modifier.INTAKE_DIETARY.id:
-				// Use the same reference as the root property
-				return determineStatusForProperty( property, property.rootProperty, measurements )
-			case ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS.id:
-				// Only determine yes or no
-				return determineStatusForSupplement( property, property.rootProperty, measurements )
+		if( referenceProperty ) {
+			def status = determineStatusForProperty( measurement.property, referenceProperty, measurements )
+			status?.value = value
+			return status
 		}
 		
 		return null
-		
 	}
 	
 	/**

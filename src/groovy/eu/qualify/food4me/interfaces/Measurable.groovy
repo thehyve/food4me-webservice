@@ -24,4 +24,12 @@ interface Measurable {
 	 * @return
 	 */
 	Property getRootProperty()
+	
+	/**
+	 * Returns the property to be used to retrieve references for this property
+	 * 
+	 * Can be used on modified properties to use the references of the root property
+	 * @return
+	 */
+	Property getReferenceProperty()
 }

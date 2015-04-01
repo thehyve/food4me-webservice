@@ -29,8 +29,22 @@ class ModifiedProperty implements Measurable {
 	 * Returns the root property for this measurable
 	 * @return
 	 */
-	Property getRootProperty() {
+	public Property getRootProperty() {
 		property
+	}
+
+	/**
+	 * Returns the property to be used to retrieve references for this property
+	 *
+	 * Can be used on modified properties to use the references of the root property
+	 * @return
+	 */
+	public Property getReferenceProperty() {
+		// Only use the root property for the intake from food, not on other modifiers
+		if( modifier == Modifier.INTAKE_DIETARY.id )
+			rootProperty
+		else
+			null
 	}
 	
 	public String toString() {
