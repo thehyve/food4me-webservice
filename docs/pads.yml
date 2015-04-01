@@ -1,0 +1,81 @@
+---
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: Personalized Dietary Advice Service
+  description: |
+    The PDAS is a web-service based on the Food4Me level 3 advices. The service uses 
+    Food Intake, biomarkers from bloodanalysis, SNP data and other body metrics 
+    (weight, BMI etc) as input. The service consists of two databases, one that 
+    contains guidelines and information like Daily, Recommended Intake values 
+    etc, etc. These values are used as cut-off values for the actual decision 
+    trees, the second database. The decision trees originate from the food4me 
+    project and lead to personal dietary advices. 
+    
+    Server code is available [here](https://github.com/thehyve/food4me-webservice). 
+    Please note that the server code doesn't contain the actual guidelines and 
+    decision trees.
+    
+host: qualify.thehyve.net
+basePath: /pdas
+schemes:
+  - http
+  - https
+securityDefinitions:
+  api_key:
+    type: apiKey
+    description: An API key obtained from the QSP Developer portal
+    name: api_key
+    in: header
+paths:
+  /advices:
+    get:
+      summary: Retrieve advices based on a set of measurements
+      description: | 
+        Given a set of measurements, a status for each is computed for each 
+        measurement. The status is used within a set of decision trees to 
+        determine relevant advices.
+        
+        A full set of parameters depends on the data that has been loaded.
+      parameters:
+        - name: generic.age
+          in: query
+          description: Age in years
+          required: true
+          type: number
+          format: integer
+        - name: generic.gender
+          in: query
+          description: Gender
+          required: true
+          type: string
+          enum: [Male, Female]
+        - name: nutrient.protein.from food
+          in: query
+          description: The amount of protein intake from food in g
+          required: true
+          type: number
+          format: decimal
+      security:
+       - api_key: []
+      responses:
+        200:
+          description:  |
+            Returns a list of advices 
+  /status:
+    get:
+      security:
+       - api_key: []
+      responses:
+        200:
+          description:  |
+            `TODO`: Add documentation
+  /references:
+    get:
+      security:
+       - api_key: []
+      responses:
+        200:
+          description:  |
+            `TODO`: Add documentation
+
