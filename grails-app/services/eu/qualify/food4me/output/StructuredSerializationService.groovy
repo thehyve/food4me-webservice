@@ -70,8 +70,8 @@ class StructuredSerializationService implements Serializer {
 	}
 	
 	@Override
-	public Map serializeReferences(Map<Property,List<ReferenceValue>> references) {
-		def output  = [:]
+	public List serializeReferences(Map<Property,List<ReferenceValue>> references) {
+		def output  = []
 		references.each { property, referenceValues ->
 			if( !referenceValues ) {
 				log.warn "No references found when serializing " + property
@@ -84,7 +84,7 @@ class StructuredSerializationService implements Serializer {
 				serializeReference(referenceValue)
 			}
 			 
-			output[property.externalId] = referenceStructure
+			output << referenceStructure
 		}
 		
 		output
