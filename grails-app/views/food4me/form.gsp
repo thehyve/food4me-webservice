@@ -39,7 +39,6 @@
 				</table>
 			</fieldset>
 		
-		
 			<g:each in="${properties}" var="propertygroup">
 				<fieldset>
 					<legend>${propertygroup.key}</legend>
@@ -59,6 +58,7 @@
 				</fieldset>
 			</g:each>
 			
+			<g:submitButton name="Retrieve status" onClick="\$(this).closest('form').attr( 'action', '${g.createLink(action: 'status')}' );"/>
 			<g:submitButton name="Retrieve advice" />
 		</g:form>
 	</body>
