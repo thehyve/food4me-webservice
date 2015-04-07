@@ -91,6 +91,33 @@ class Food4meController {
 	}
 
 	/**
+	 * Webservice that returns a list of supported properties 
+	 * 
+	 * The list of properties depends on the data that was loaded
+	 * @return
+	 */
+	def properties() {
+		def criteria = Property.createCriteria()
+		
+		def properties = criteria.list {
+			and {
+				order('propertyGroup')
+				order('entity')
+			}
+		}
+		
+		// Use content negotiation to output the data
+		withFormat {
+			html { 
+				def propertyModifiers = [:]
+				properties.each { property -> propertyModifiers[ property ] = ModifiedProperty.getAllowedModifiers(property) }
+				[ properties: properties, propertyModifiers: propertyModifiers ]  
+			}
+			json { render structuredSerializationService.serializeProperties( properties ) as JSON }
+		}
+	}
+	
+	/**
 	 * Webservice to return status of the provided raw measurements
 	 * 
 	 * @see ParameterBasedParseService.parseMeasurements()
@@ -125,7 +152,7 @@ class Food4meController {
 
 		// Use content negotiation to output the data
 		withFormat {
-			html entities: entities, references: references
+			html entities: entities, references: references, measurements: measurements, secondaryConditions: [ "age", "gender" ]
 			json { render structuredSerializationService.serializeReferences( references ) as JSON }
 		}
 	}

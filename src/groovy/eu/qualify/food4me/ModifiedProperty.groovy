@@ -56,6 +56,34 @@ class ModifiedProperty implements Measurable {
 		description
 	}
 	
+	/**
+	 * Returns a list of allowed modifiers for the given property
+	 */
+	public static List<Modifier> getAllowedModifiers(Property property) {
+		List<Modifier> modifiers = []
+		
+		if(property.propertyGroup == Property.PROPERTY_GROUP_NUTRIENT) {
+			// Modifiers that can be specified on nutrients
+			modifiers += [ 
+				Modifier.INTAKE_MEAT_FISH, 
+				Modifier.INTAKE_DAIRY, 
+				Modifier.INTAKE_SOUP_SAUCES, 
+				Modifier.INTAKE_SWEETS_SNACKS,
+				Modifier.INTAKE_FATS_SPREADS,
+				Modifier.INTAKE_POTATOES_RICE_PASTA,
+				Modifier.INTAKE_EGGS,
+				Modifier.INTAKE_DIETARY,
+				Modifier.INTAKE_SUPPLEMENTS ]
+			
+			// Special modifiers on salt
+			if( property.entity?.toLowerCase() == "salt" ) {
+				modifiers += [ Modifier.SALT_ON_TABLE, Modifier.SALT_WHEN_COOKING ]
+			}
+		}
+		
+		modifiers
+	}
+	
 	public enum Modifier {
 		// Modifiers with respect to nutrient intake
 		INTAKE_MEAT_FISH("Meat and fish"),

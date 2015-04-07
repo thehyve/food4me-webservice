@@ -16,6 +16,8 @@
  */
 package eu.qualify.food4me.output
 
+import java.util.Collection;
+
 import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
@@ -107,6 +109,23 @@ class StructuredSerializationService implements Serializer {
 				subject: serializeMeasurable(advice.subject),
 				text: texts[ advice.code ]
 			]
+		}
+		
+		output
+	}
+	
+	@Override
+	public List serializeProperties(Collection<Property> properties) {
+		def output = []
+		
+		properties.each {
+			def measurable = serializeMeasurable(it)
+			def allowedModifiers = ModifiedProperty.getAllowedModifiers(it)*.id
+			
+			if( allowedModifiers )
+				measurable.modifiers = allowedModifiers
+				 
+			output << measurable
 		}
 		
 		output

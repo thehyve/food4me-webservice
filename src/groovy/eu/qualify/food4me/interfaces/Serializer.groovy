@@ -44,6 +44,13 @@ interface Serializer {
 	def serializeStatus(MeasurementStatus status)
 
 	/**
+	 * Serializes a set of properties
+	 * @param properties
+	 * @return
+	 */
+	def serializeProperties(Collection<Property> properties)
+	
+	/**
 	 * Serializes a list of advisables to give advice on
 	 * @param advisables
 	 * @return
