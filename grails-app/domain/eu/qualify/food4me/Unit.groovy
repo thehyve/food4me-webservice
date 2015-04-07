@@ -43,6 +43,6 @@ class Unit {
 	
 	
 	public String toString() {
-		return "Unit " + name+ " (" + externalId + ")"
+		return "" + name
 	}
 }
