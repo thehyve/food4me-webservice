@@ -41,6 +41,10 @@ class Food4meController {
 	
 	def referenceService
 	
+	/**
+	 * Form that the user can use to explore the API 
+	 * @return
+	 */
 	def form() {
 		// Find all properties grouped by propertygroup
 		def groupedProperties = [:]
@@ -140,8 +144,15 @@ class Food4meController {
 
 		// Determine output language. Defaults to English
 		def language = params.language
-		if( !AdviceText.isLanguageSupported( language ) )
+		if( !language ) 
 			language = "en"
+
+		// If the language is not supported, return 404
+		if( !AdviceText.isLanguageSupported( language ) ) {
+			response.status = 404
+			render ""
+			return
+		}
 		
 		// Use content negotiation to output the data
 		withFormat {
