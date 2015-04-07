@@ -50,14 +50,12 @@ paths:
           description: "ISO 639-1 language code of the language to return."
           required: true
           enum: [en,nl]
-          default: en
         - name: format
           in: path
           type: string
           description: "Format in which the data should be returned"
           required: true
           enum: [html,json]
-          default: html
         - name: generic.age
           in: query
           description: Age in years
@@ -112,7 +110,6 @@ paths:
           description: "Format in which the data should be returned"
           required: true
           enum: [html,json]
-          default: html
         - name: generic.age
           in: query
           description: Age in years
@@ -158,7 +155,6 @@ paths:
           description: "Format in which the data should be returned"
           required: true
           enum: [html,json]
-          default: html
         - name: generic.age
           in: query
           description: Age in years
@@ -188,6 +184,39 @@ paths:
             type: array
             items:
               $ref: '#/definitions/PropertyReferences'
+        401:
+          description: "Unauthorized: provide a valid API key"
+        403:
+          description: "Forbidden: the provided API key is invalid"
+        500:
+          description: "An internal error occurred"
+  /properties.{format}:
+    get:
+      summary: Retrieve a list of properties supported by the current implementation.
+      description: | 
+        A list of properties that are supported by the current implementation is returned.
+        This can be used to determine the full set of parameters for the /advices or /status
+        webservice calls.
+      parameters:
+        - name: format
+          in: path
+          type: string
+          description: "Format in which the data should be returned"
+          required: true
+          enum: [html,json]
+      security:
+       - api_key: []
+      responses:
+        200:
+          description: |
+            Returns a list of supported properties. Each property will also
+            contain a list of supported modifiers on the given property. These
+            modifiers allow the called to give more details on a given nutrient
+            intake.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Property'
         401:
           description: "Unauthorized: provide a valid API key"
         403:
@@ -289,6 +318,11 @@ definitions:
       unit:
         description: The unit that values for this property should be expressed in.
         $ref: '#/definitions/Unit'
+      modifiers:
+        type: array
+        description: A list of modifiers that is allowed for this property
+        items:
+          type: string
   Status:
     type: string
     description: |
