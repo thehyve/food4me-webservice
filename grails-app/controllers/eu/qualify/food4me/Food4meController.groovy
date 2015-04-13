@@ -63,6 +63,7 @@ class Food4meController {
 		// Determine the modifiers to allow the user to enter through the form
 		def nutrientModifiers = [
 			ModifiedProperty.Modifier.INTAKE_MEAT_FISH,
+			ModifiedProperty.Modifier.INTAKE_DAIRY,
 			ModifiedProperty.Modifier.INTAKE_SOUP_SAUCES,
 			ModifiedProperty.Modifier.INTAKE_SWEETS_SNACKS,
 			ModifiedProperty.Modifier.INTAKE_FATS_SPREADS,

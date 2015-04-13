@@ -616,7 +616,7 @@ a.skip {
  Form to generate advices manually
  **/
 #generate_advices { font-size: 0.8em; }
-#generate_advices th { max-width: 80px; text-align: left; overflow: hidden; }
+#generate_advices th { max-width: 60px; text-align: left; overflow: hidden; font-size: 0.9em; white-space: normal;}
 #generate_advices td { padding-top: 0.3em; padding-bottom: 0.3em;  }
 
 #generate_advices fieldset { margin-left: 0.25em; }
@@ -625,7 +625,7 @@ a.skip {
 #generate_advices ul label { margin-right: 1.2em; }
 #generate_advices li { padding: 0.3em 0;  }
 #generate_advices label { display: inline-block; width: 200px; }
-#generate_advices input[type=text] { display: inline; width: 70px; }
+#generate_advices input[type=text] { display: inline; width: 55px; }
 
 /** Showing the advices **/
 .measurements ul { list-style-type: none; }
