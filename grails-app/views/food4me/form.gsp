@@ -58,8 +58,8 @@
 				</fieldset>
 			</g:each>
 			
-			<g:submitButton name="Retrieve status" onClick="\$(this).closest('form').attr( 'action', '${g.createLink(action: 'status')}' );"/>
-			<g:submitButton name="Retrieve advice" />
+			<g:submitButton name="Retrieve status" onClick="\$(this).closest('form').attr( 'action', '${g.createLink(action: 'status')}' );" />
+			<g:submitButton name="Retrieve advice" onClick="\$(this).closest('form').attr( 'action', '${g.createLink(action: 'advices')}' );"  />
 		</g:form>
 	</body>
 </html>
