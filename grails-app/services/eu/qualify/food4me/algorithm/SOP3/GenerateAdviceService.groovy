@@ -140,7 +140,7 @@ class GenerateAdviceService implements AdviceGenerator {
 			
 			// Check if the value is correct. That can only be done for text values
 			if( measuredValue instanceof MeasuredTextValue ) {
-				condition += "( condition.value IS NULL OR condition.value = :value" + index + " )"
+				condition += "( condition.value IS NULL OR lower(condition.value) = lower(:value" + index + ") )"
 				whereParams[ "value" + index ] = measuredValue.value
 			} else {
 				condition += "condition.value IS NULL"

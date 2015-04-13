@@ -193,7 +193,7 @@ class ComputeStatusService implements StatusComputer {
 		if( measuredValue instanceof MeasuredNumericValue )
 			condition += "( condition_type = 'numeric' AND ( low IS NULL or low < :value" + index + " ) AND ( high IS NULL OR high >= :value" + index + " ) )"
 		 else
-			 condition += "( condition_type = 'text' AND ( value IS NULL or value = :value" + index + " ) )"
+			 condition += "( condition_type = 'text' AND ( value IS NULL or lower(value) = lower(:value" + index + ") ) )"
 		 
 		whereClause << condition + " )"
 		
