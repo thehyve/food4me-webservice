@@ -73,7 +73,7 @@ paths:
           description: The amount of protein intake from food
           required: true
           type: number
-          format: decimal
+          format: double
       security:
        - api_key: []
       responses:
@@ -289,11 +289,11 @@ definitions:
         $ref: '#/definitions/Property'
       lower_boundary:
         type: number
-        format: decimal
+        format: double
         description: Lowest value for the given property to apply the reference
       upper_boundary:
         type: number
-        format: decimal
+        format: double
         description: Highest value for the given property to apply the reference 
       exact_match:
         type: string
@@ -368,4 +368,3 @@ definitions:
       name:
         type: string            
         description: Human readable description of the unit
-
