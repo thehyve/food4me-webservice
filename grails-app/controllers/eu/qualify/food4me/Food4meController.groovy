@@ -33,7 +33,7 @@ import grails.plugin.springsecurity.annotation.Secured
 class Food4meController {
 	def computeStatusService
 	def derivedMeasurementsService
-	def allLowOrHighAdvisableService
+	def allParametersAdvisableService
 	def generateAdviceService
 	
 	def parameterBasedParseService
@@ -167,7 +167,7 @@ class Food4meController {
 		derivedMeasurementsService.deriveMeasurements(measurements)
 		
 		MeasurementStatus status = computeStatusService.computeStatus(measurements)
-		List<Advisable> advisables = allLowOrHighAdvisableService.determineAdvisables(status, measurements )
+		List<Advisable> advisables = allParametersAdvisableService.determineAdvisables(status, measurements )
 		List<Advice> advices = generateAdviceService.generateAdvice( measurements, status, advisables )
 
 		// Determine output language. Defaults to English
