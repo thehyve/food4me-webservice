@@ -107,7 +107,12 @@ class ParameterBasedParseService implements Parser {
 	 */
 	protected Measurement parseMeasurement( Measurable measurable, Unit unit, def data ) {
 		// Check if the value is the correct format { value: ..., unit: "" }
-		if( !data || !( data instanceof String ) ) {
+		if( !data ) {
+			log.info "The value specified for ${measurable} is empty"
+			return
+		}
+		
+		if( !( data instanceof String ) ) {
 			log.warn "The value specified for ${measurable} is invalid: " + data
 			return
 		}
