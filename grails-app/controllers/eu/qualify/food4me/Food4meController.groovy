@@ -87,7 +87,8 @@ class Food4meController {
 			nutrients: nutrients,
 			nutrientModifiers: nutrientModifiers, 
 			properties: groupedProperties, 
-			conversionMap: conversionMap
+			conversionMap: conversionMap,
+			language: params.language ?: "en"
 		]
 	}
 

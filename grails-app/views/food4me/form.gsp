@@ -6,7 +6,7 @@
 	<body>
 		<h1>Generate food4me advice</h1>
 		
-		<g:form action="advices" name="generate_advices" method="get">
+		<g:form action="advices" params="${[language: language]}" name="generate_advices" method="get">
 			<fieldset>
 				<legend>Nutrients</legend>
 				
@@ -59,7 +59,7 @@
 			</g:each>
 			
 			<g:submitButton name="Retrieve status" onClick="\$(this).closest('form').attr( 'action', '${g.createLink(action: 'status')}' );" />
-			<g:submitButton name="Retrieve advice" onClick="\$(this).closest('form').attr( 'action', '${g.createLink(action: 'advices')}' );"  />
+			<g:submitButton name="Retrieve advice" onClick="\$(this).closest('form').attr( 'action', '${g.createLink(mapping: 'translatedAdvices', action: 'advices', params: [language: language])}' );"  />
 		</g:form>
 	</body>
 </html>
