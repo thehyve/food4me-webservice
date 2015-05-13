@@ -4,6 +4,11 @@ dataSource {
 	dialect = org.hibernate.dialect.PostgreSQLDialect
 	username = "username"
 	password = "password"
+
+	// For production environments pooled should 
+	// be set to true, due to other default settings in conf/DataSource.groovy
+	// You could either change the next line to true or alter
+	// the default configuration in DataSource.groovy (if you know what you are doing)
 	pooled = false
 }
 
