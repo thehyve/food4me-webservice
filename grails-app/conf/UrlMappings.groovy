@@ -11,7 +11,14 @@ class UrlMappings {
 		
 		"/status(.$format)?"( controller: "food4me", action: "status" )
 		"/references(.$format)?"( controller: "food4me", action: "references" )
+		
+		// Property URLs
+		"/properties/$id(.$format)?"(controller: "food4me", action: "property")
 		"/properties(.$format)?"( controller: "food4me", action: "properties" )
+
+		// Unit URLs
+		"/units/$id(.$format)?"(controller: "food4me", action: "unit")
+		"/units(.$format)?"( controller: "food4me", action: "units" )
 		
 		"/form"( controller: "food4me", action: "form" )
 		"/$language/form" { 

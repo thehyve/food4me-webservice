@@ -16,6 +16,7 @@ beans = {
 	springConfig.addAlias 'parser', 'parameterBasedParseService'
 
 	// Serializer implementation: how to return the data when the client asks for a JSON representation
-	springConfig.addAlias 'serializer', 'structuredSerializationService'
+	springConfig.addAlias 'jsonSerializer', 'structuredSerializationService'
+	springConfig.addAlias 'halSerializer', 'HALSerializationService'
 	
 }

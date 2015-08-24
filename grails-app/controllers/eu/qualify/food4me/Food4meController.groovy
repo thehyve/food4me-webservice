@@ -44,8 +44,9 @@ class Food4meController {
 	
 	// Services for input and output. See conf/spring/resources.groovy
 	Parser parser
-	Serializer serializer
-
+	Serializer jsonSerializer
+	Serializer halSerializer
+	
 	def derivedMeasurementsService
 	
 	def referenceService
@@ -124,7 +125,97 @@ class Food4meController {
 				properties.each { property -> propertyModifiers[ property ] = ModifiedProperty.getAllowedModifiers(property) }
 				[ properties: properties, propertyModifiers: propertyModifiers ]  
 			}
-			json { render serializer.serializeProperties( properties ) as JSON }
+			json { render jsonSerializer.serializeProperties( properties ) as JSON }
+			hal {
+				render text: halSerializer.serializeProperties( properties ) as JSON, contentType: "application/hal+json"
+			}
+		}
+	}
+	
+	/**
+	 * Webservice that returns details about a single property.
+	 * 
+	 * This method is used to have the URL for a property in HAL resolve to a page
+	 *
+	 * The list of properties depends on the data that was loaded
+	 * @return
+	 */
+	def property() {
+		def property = Property.findByExternalId(params.id)
+		
+		if( !property ) {
+			response.status = 404
+			render "Property not found"
+			return
+		}
+		
+		// Use content negotiation to output the data
+		withFormat {
+			html {
+				def propertyModifiers = [(property): ModifiedProperty.getAllowedModifiers(property) ]
+				render view: "properties", model: [ properties: [property], propertyModifiers: propertyModifiers ] 
+			}
+			json { render jsonSerializer.serializeProperty( property ) as JSON }
+			hal {
+				render text: halSerializer.serializeProperty( property ) as JSON, contentType: "application/hal+json"
+			}
+		}
+	}
+	
+	
+	/**
+	 * Webservice that returns details about a single unit.
+	 *
+	 * This method is used to have the URL for a property in HAL resolve to a page
+	 *
+	 * @return
+	 */
+	def units() {
+		def criteria = Unit.createCriteria()
+		
+		def units = criteria.list {
+			and {
+				order('name')
+			}
+		}
+		
+		// Use content negotiation to output the data
+		withFormat {
+			html {
+				[ units: units ]
+			}
+			json { render jsonSerializer.serializeUnits( units ) as JSON }
+			hal {
+				render text: halSerializer.serializeUnits( units ) as JSON, contentType: "application/hal+json"
+			}
+		}
+	}
+	
+	/**
+	 * Webservice that returns details about a single unit.
+	 *
+	 * This method is used to have the URL for a property in HAL resolve to a page
+	 *
+	 * @return
+	 */
+	def unit() {
+		def unit = Unit.findByExternalId(params.id)
+		
+		if( !unit) {
+			response.status = 404
+			render "Unit not found"
+			return
+		}
+		
+		// Use content negotiation to output the data
+		withFormat {
+			html {
+				render view: "units", [ units: [unit] ]
+			}
+			json { render jsonSerializer.serializeUnit( unit ) as JSON }
+			hal {
+				render text: halSerializer.serializeUnit( unit ) as JSON, contentType: "application/hal+json"
+			}
 		}
 	}
 	
@@ -142,7 +233,7 @@ class Food4meController {
 		// Use content negotiation to output the data
 		withFormat {
 			html { [ measurements: measurements, status: status, references: referenceService.getReferences( measurements.all*.property, measurements ) ] }
-			json { render serializer.serializeStatus( status ) as JSON }
+			json { render jsonSerializer.serializeStatus( status ) as JSON }
 		}
 	}
 
@@ -164,7 +255,7 @@ class Food4meController {
 		// Use content negotiation to output the data
 		withFormat {
 			html entities: entities, references: references, measurements: measurements, secondaryConditions: [ "age", "gender" ]
-			json { render serializer.serializeReferences( references ) as JSON }
+			json { render jsonSerializer.jsonSerializereferences( references ) as JSON }
 		}
 	}
 			
@@ -195,7 +286,7 @@ class Food4meController {
 		// Use content negotiation to output the data
 		withFormat {
 			html advices: advices, measurements: measurements, status: status, translations: AdviceText.getTranslations( advices, language )
-			json { render serializer.serializeAdvices( advices, language ) as JSON }
+			json { render jsonSerializer.serializeAdvices( advices, language ) as JSON }
 		}
 	}
 }

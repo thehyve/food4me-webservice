@@ -116,19 +116,35 @@ class StructuredSerializationService implements Serializer {
 	
 	@Override
 	public List serializeProperties(Collection<Property> properties) {
-		def output = []
+		properties.collect { serializeProperty(it) }
+	}
+	
+	@Override
+	public Map serializeProperty(Property property) {
+		def measurable = serializeMeasurable(property)
+		def allowedModifiers = ModifiedProperty.getAllowedModifiers(property)*.id
 		
-		properties.each {
-			def measurable = serializeMeasurable(it)
-			def allowedModifiers = ModifiedProperty.getAllowedModifiers(it)*.id
-			
-			if( allowedModifiers )
-				measurable.modifiers = allowedModifiers
+		if( allowedModifiers )
+			measurable.modifiers = allowedModifiers
 				 
-			output << measurable
-		}
-		
-		output
+		measurable
+	}
+	
+	@Override
+	public List serializeUnits(Collection<Unit> units) {
+		units.collect { serializeUnit(it) }
+	}
+	
+	@Override
+	public Map serializeUnit( Unit unit ) {
+		if( !unit )
+			return null
+			
+		[
+			id: unit.externalId,
+			code: unit.code,
+			name: unit.name
+		]
 	}
 	
 	/**
@@ -170,22 +186,6 @@ class StructuredSerializationService implements Serializer {
 		]
 	}
 
-	/**
-	 * Serializes a unit
-	 * @param measurable
-	 * @return
-	 */
-	protected Map serializeUnit( Unit unit ) {
-		if( !unit )
-			return null
-			
-		[
-			id: unit.externalId,
-			code: unit.code,
-			name: unit.name
-		]
-	}
-	
 	/**
 	 * Serializes a reference value
 	 * @param reference

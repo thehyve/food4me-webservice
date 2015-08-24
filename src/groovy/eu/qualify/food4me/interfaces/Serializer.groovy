@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import eu.qualify.food4me.Property;
+import eu.qualify.food4me.Unit;
 import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.reference.ReferenceValue;
@@ -49,6 +50,27 @@ interface Serializer {
 	 * @return
 	 */
 	def serializeProperties(Collection<Property> properties)
+	
+	/**
+	 * Serializes a single property
+	 * @param property
+	 * @return
+	 */
+	def serializeProperty(Property property)
+
+	/**
+	 * Serializes a set of units
+	 * @param units
+	 * @return
+	 */
+	def serializeUnits(Collection<Unit> units)
+
+	/**
+	 * Serializes a single unit
+	 * @param unit
+	 * @return
+	 */
+	def serializeUnit(Unit unit)
 	
 	/**
 	 * Serializes a list of advisables to give advice on
