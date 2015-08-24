@@ -21,8 +21,13 @@ import java.util.Map;
 
 import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.decisiontree.AdviceText
+import eu.qualify.food4me.interfaces.AdviceGenerator
 import eu.qualify.food4me.interfaces.Advisable
+import eu.qualify.food4me.interfaces.AdvisableDeterminer
 import eu.qualify.food4me.interfaces.Measurable
+import eu.qualify.food4me.interfaces.Parser
+import eu.qualify.food4me.interfaces.Serializer
+import eu.qualify.food4me.interfaces.StatusComputer
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
 import eu.qualify.food4me.reference.ReferenceValue;
@@ -31,13 +36,17 @@ import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(['IS_AUTHENTICATED_ANONYMOUSLY'])
 class Food4meController {
-	def computeStatusService
-	def derivedMeasurementsService
-	def allParametersAdvisableService
-	def generateAdviceService
 	
-	def parameterBasedParseService
-	def structuredSerializationService
+	// Services where the real action happens. See conf/spring/resources.groovy
+	StatusComputer statusComputer
+	AdvisableDeterminer advisableDeterminer
+	AdviceGenerator adviceGenerator
+	
+	// Services for input and output. See conf/spring/resources.groovy
+	Parser parser
+	Serializer serializer
+
+	def derivedMeasurementsService
 	
 	def referenceService
 	
@@ -115,25 +124,25 @@ class Food4meController {
 				properties.each { property -> propertyModifiers[ property ] = ModifiedProperty.getAllowedModifiers(property) }
 				[ properties: properties, propertyModifiers: propertyModifiers ]  
 			}
-			json { render structuredSerializationService.serializeProperties( properties ) as JSON }
+			json { render serializer.serializeProperties( properties ) as JSON }
 		}
 	}
 	
 	/**
 	 * Webservice to return status of the provided raw measurements
 	 * 
-	 * @see ParameterBasedParseService.parseMeasurements()
+	 * @see Parser.parseMeasurements()
 	 * @return
 	 */
 	def status() {
-		Measurements measurements = parameterBasedParseService.parseMeasurements(params)
+		Measurements measurements = parser.parseMeasurements(params)
 		derivedMeasurementsService.deriveMeasurements(measurements)
-		MeasurementStatus status = computeStatusService.computeStatus(measurements)
+		MeasurementStatus status = statusComputer.computeStatus(measurements)
 
 		// Use content negotiation to output the data
 		withFormat {
 			html { [ measurements: measurements, status: status, references: referenceService.getReferences( measurements.all*.property, measurements ) ] }
-			json { render structuredSerializationService.serializeStatus( status ) as JSON }
+			json { render serializer.serializeStatus( status ) as JSON }
 		}
 	}
 
@@ -143,11 +152,11 @@ class Food4meController {
 	 */
 	def references() {
 		// Parse a list of entities to return the references for
-		List<Measurable> entities = parameterBasedParseService.parseEntityList(params)
+		List<Measurable> entities = parser.parseEntityList(params)
 		
 		// Parse the list of measurements to find the references. Only gender and age 
 		// are used, the rest of the measurements are discarded
-		Measurements measurements = parameterBasedParseService.parseMeasurements(params)
+		Measurements measurements = parser.parseMeasurements(params)
 		
 		// Retrieve the references that apply
 		Map<Property,List<ReferenceValue>> references = referenceService.getReferences( entities, measurements )
@@ -155,7 +164,7 @@ class Food4meController {
 		// Use content negotiation to output the data
 		withFormat {
 			html entities: entities, references: references, measurements: measurements, secondaryConditions: [ "age", "gender" ]
-			json { render structuredSerializationService.serializeReferences( references ) as JSON }
+			json { render serializer.serializeReferences( references ) as JSON }
 		}
 	}
 			
@@ -164,12 +173,12 @@ class Food4meController {
 	 * @return
 	 */
 	def advices() {
-		Measurements measurements = parameterBasedParseService.parseMeasurements(params)
+		Measurements measurements = parser.parseMeasurements(params)
 		derivedMeasurementsService.deriveMeasurements(measurements)
 		
-		MeasurementStatus status = computeStatusService.computeStatus(measurements)
-		List<Advisable> advisables = allParametersAdvisableService.determineAdvisables(status, measurements )
-		List<Advice> advices = generateAdviceService.generateAdvice( measurements, status, advisables )
+		MeasurementStatus status = statusComputer.computeStatus(measurements)
+		List<Advisable> advisables = advisableDeterminer.determineAdvisables(status, measurements )
+		List<Advice> advices = adviceGenerator.generateAdvice( measurements, status, advisables )
 
 		// Determine output language. Defaults to English
 		def language = params.language
@@ -186,7 +195,7 @@ class Food4meController {
 		// Use content negotiation to output the data
 		withFormat {
 			html advices: advices, measurements: measurements, status: status, translations: AdviceText.getTranslations( advices, language )
-			json { render structuredSerializationService.serializeAdvices( advices, language ) as JSON }
+			json { render serializer.serializeAdvices( advices, language ) as JSON }
 		}
 	}
 }
