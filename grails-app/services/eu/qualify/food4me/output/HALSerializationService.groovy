@@ -77,24 +77,29 @@ class HALSerializationService implements Serializer {
 	}
 	
 	@Override
-	public HALElement serializeReferences(Map<Property,List<ReferenceValue>> references) {
-		def output  = []
+	public Map serializeReferences(Map<Property,List<ReferenceValue>> references) {
+		def element = new HALElement(generateLink( controller: "food4me", action: "references" ))
+		element.addParameter "count", references.size()
+		
+		// Add references to the structure
+		def referenceElements  = []
 		references.each { property, referenceValues ->
 			if( !referenceValues ) {
 				log.warn "No references found when serializing " + property
 				return
 			}
 			
-			def referenceStructure = [:]
-			referenceStructure.property = serializeMeasurable( property )
-			referenceStructure.references = referenceValues.collect { referenceValue ->
+			def referenceStructure = new HALElement(generateLink( controller: "food4me", action: "references", id: property.externalId ))
+			referenceStructure.addEmbedded( "property", serializeMeasurable( property ))
+			referenceStructure.addEmbedded( "references", new HALList(elements: referenceValues.collect { referenceValue ->
 				serializeReference(referenceValue)
-			}
-			 
-			output << referenceStructure
+			}))
+			referenceElements << referenceStructure
 		}
 		
-		output
+		element.addEmbedded "references", new HALList(elements: referenceElements )
+		
+		element.toHAL()
 	}
 
 	@Override
@@ -254,7 +259,7 @@ class HALSerializationService implements Serializer {
 		element
 	}
 	
-	protected Map serializeReferenceCondition(ReferenceCondition condition, includeProperty = false ) {
+	protected HALElement serializeReferenceCondition(ReferenceCondition condition, includeProperty = false ) {
 		def element = new HALElement()
 		
 		if( includeProperty )
@@ -285,8 +290,9 @@ class HALSerializationService implements Serializer {
 		Map parameters = [:]
 		Map<String,HALEntry> embedded = [:] 
 		
-		public HALElement(String selfURI) {
-			links << new HALLink(name: "self", href: selfURI )
+		public HALElement(String selfURI = null) {
+			if( selfURI )
+				links << new HALLink(name: "self", href: selfURI )
 		}
 		
 		def toHAL() {

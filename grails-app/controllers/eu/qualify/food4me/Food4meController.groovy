@@ -255,7 +255,8 @@ class Food4meController {
 		// Use content negotiation to output the data
 		withFormat {
 			html entities: entities, references: references, measurements: measurements, secondaryConditions: [ "age", "gender" ]
-			json { render jsonSerializer.jsonSerializereferences( references ) as JSON }
+			json { render jsonSerializer.serializeReferences( references ) as JSON }
+			hal { render text: halSerializer.serializeReferences( references ) as JSON, contentType: "application/hal+json" }
 		}
 	}
 			
