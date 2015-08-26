@@ -42,26 +42,39 @@ class HALSerializationService implements Serializer {
 	LinkGenerator grailsLinkGenerator
 	
 	@Override
-	public HALElement serializeStatus(MeasurementStatus measurementStatus) {
+	public Map serializeStatus(MeasurementStatus measurementStatus) {
 		if( !measurementStatus ) {
-			return []
+			return [:]
 		}
+		
+		def element = new HALElement(generateLink( controller: "food4me", action: "status" ))
+		element.addParameter "count", measurementStatus.all.size()
 		
 		// Combine the advices with texts and create a structure to serialize
 		def output = measurementStatus.all.collect { status ->
-			def statusStructure = [
-				property: serializeMeasurable(status.entity),
-				value: serializeMeasuredValue(status.value),
-				status: status.status,
-			]
+			def statusStructure = new HALElement()
+			statusStructure.addParameter("status", status.status)
+			statusStructure.addParameter("propertyName", status.entity.toString())
+			
+			if( status.value ) {
+				statusStructure.addParameter("value", status.value.value)
+				
+				if( status.value.unit )
+					statusStructure.addParameter("unitCode", status.value.unit.code)
+			}
+				
+			statusStructure.addEmbedded("property", serializeMeasurable(status.entity))
+			statusStructure.addEmbedded("value", serializeMeasuredValue(status.value))
 			
 			if( status.color )
-				statusStructure.color = status.color.toString()
+				statusStructure.addParameter("color", status.color.toString())
 			
 			statusStructure
 		}
 		
-		output
+		element.addEmbedded( "status", new HALList(elements: output) )
+		
+		element.toHAL()
 	}
 
 	/**
@@ -70,7 +83,7 @@ class HALSerializationService implements Serializer {
 	 * @return
 	 */
 	@Override
-	public HALElement serializeEntityList(List<Advisable> advisables) {
+	public Map serializeEntityList(List<Advisable> advisables) {
 		// TODO: Implement this
 		return null
 	}
@@ -281,6 +294,8 @@ class HALSerializationService implements Serializer {
 		]
 		
 		element.addEmbedded( "unit", unitAsHAL( value.unit ) )
+		
+		element
 	}
 	
 	protected HALElement serializeReferenceCondition(ReferenceCondition condition, includeProperty = false ) {

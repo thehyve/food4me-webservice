@@ -234,6 +234,7 @@ class Food4meController {
 		withFormat {
 			html { [ measurements: measurements, status: status, references: referenceService.getReferences( measurements.all*.property, measurements ) ] }
 			json { render jsonSerializer.serializeStatus( status ) as JSON }
+			hal { render text: halSerializer.serializeStatus( status ) as JSON, contentType: "application/hal+json" }
 		}
 	}
 
