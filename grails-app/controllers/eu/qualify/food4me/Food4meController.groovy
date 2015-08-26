@@ -256,7 +256,33 @@ class Food4meController {
 		withFormat {
 			html entities: entities, references: references, measurements: measurements, secondaryConditions: [ "age", "gender" ]
 			json { render jsonSerializer.serializeReferences( references ) as JSON }
-			hal { render text: halSerializer.serializeReferences( references ) as JSON, contentType: "application/hal+json" }
+			hal { render text: halSerializer.serializeReferences( references, measurements.all.findAll { it.property.rootProperty.entity in [ "Age", "Gender" ] } ) as JSON, contentType: "application/hal+json" }
+		}
+	}
+	
+	
+	/**
+	 * Webservice to return a single reference
+	 * @return
+	 */
+	def reference() {
+		def reference = ReferenceValue.get(params.long("id"))
+		
+		if( !reference ) {
+			response.status = 404
+			render "Reference not found"
+			return
+		}
+		
+		// Use content negotiation to output the data
+		withFormat {
+			html {
+				[reference: reference]
+			}
+			json { render jsonSerializer.serializeReference( reference ) as JSON }
+			hal {
+				render text: halSerializer.serializeReference( reference ) as JSON, contentType: "application/hal+json"
+			}
 		}
 	}
 			

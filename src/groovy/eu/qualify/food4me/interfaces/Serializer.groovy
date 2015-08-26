@@ -85,7 +85,14 @@ interface Serializer {
 	 * @return
 	 */
 	def serializeReferences(Map<Property,List<ReferenceValue>> references)
-	
+
+	/**
+	 * Serializes a single reference
+	 * @param references
+	 * @return
+	 */
+	def serializeReference(ReferenceValue reference)
+
 	/**
 	 * Serializes a list of advices in English
 	 * @param advices

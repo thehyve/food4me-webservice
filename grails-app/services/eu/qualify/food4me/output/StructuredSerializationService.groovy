@@ -191,7 +191,7 @@ class StructuredSerializationService implements Serializer {
 	 * @param reference
 	 * @return
 	 */
-	protected Map serializeReference( ReferenceValue reference ) {
+	public Map serializeReference( ReferenceValue reference ) {
 		if( !reference )
 			return null
 			

@@ -10,6 +10,9 @@ class UrlMappings {
 		"/advices(.$format)?"( controller: "food4me", action: "advices" )
 		
 		"/status(.$format)?"( controller: "food4me", action: "status" )
+		
+		// Reference URLs
+		"/references/$id(.$format)?"( controller: "food4me", action: "reference" )
 		"/references(.$format)?"( controller: "food4me", action: "references" )
 		
 		// Property URLs

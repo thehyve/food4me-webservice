@@ -16,8 +16,6 @@
  */
 package eu.qualify.food4me.output
 
-import java.util.Collection;
-
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 import eu.qualify.food4me.ModifiedProperty
@@ -29,6 +27,7 @@ import eu.qualify.food4me.interfaces.Advisable
 import eu.qualify.food4me.interfaces.Measurable
 import eu.qualify.food4me.interfaces.Serializer
 import eu.qualify.food4me.measurements.MeasuredValue
+import eu.qualify.food4me.measurements.Measurement
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
@@ -76,9 +75,19 @@ class HALSerializationService implements Serializer {
 		return null
 	}
 	
-	@Override
-	public Map serializeReferences(Map<Property,List<ReferenceValue>> references) {
-		def element = new HALElement(generateLink( controller: "food4me", action: "references" ))
+	public Map serializeReferences(Map<Property,List<ReferenceValue>> references, List<Measurement> measurements = null) {
+		// Determine the parameters to base the reference on. These parameters are 
+		// used for generating self links
+		def params = [:]
+		if( measurements ) {
+			measurements.each { measurement ->
+				def rootProperty = measurement.property.rootProperty
+				def parameterName = rootProperty.propertyGroup + "." + rootProperty.entity 
+				params[ parameterName.toLowerCase() ] = measurement.value.value
+			}
+		}
+		
+		def element = new HALElement(generateLink( controller: "food4me", action: "references", params: params ))
 		element.addParameter "count", references.size()
 		
 		// Add references to the structure
@@ -89,10 +98,10 @@ class HALSerializationService implements Serializer {
 				return
 			}
 			
-			def referenceStructure = new HALElement(generateLink( controller: "food4me", action: "references", id: property.externalId ))
+			def referenceStructure = new HALElement(generateLink( controller: "food4me", action: "references", params: params + [ property: property.entity ] ) )
 			referenceStructure.addEmbedded( "property", serializeMeasurable( property ))
 			referenceStructure.addEmbedded( "references", new HALList(elements: referenceValues.collect { referenceValue ->
-				serializeReference(referenceValue)
+				referenceAsHAL(referenceValue)
 			}))
 			referenceElements << referenceStructure
 		}
@@ -178,6 +187,57 @@ class HALSerializationService implements Serializer {
 		element
 	}
 
+	
+	/**
+	 * Serializes a reference value
+	 * @param reference
+	 * @return
+	 */
+	@Override
+	public Map serializeReference( ReferenceValue reference ) {
+		referenceAsHAL(reference, true).toHAL()
+	}
+	
+	/**
+	 * Serializes a reference value
+	 * @param reference
+	 * @return
+	 */
+	public HALElement referenceAsHAL( ReferenceValue reference, boolean includeSubject = false ) {
+		if( !reference )
+			return null
+		
+		def element = new HALElement(generateLink( controller: "food4me", action: "reference", id: reference.id ) )
+			
+		element.parameters = [
+			status: reference.status,
+			color: reference.color.toString(),
+		]
+		
+		// If subject should be added, do so as a refernece
+		if( includeSubject ) {
+			element.addEmbedded "subject", serializeMeasurable(reference.subject)
+		}
+		
+		// Add boundaries
+		if( reference.subjectCondition ) {
+			element.addEmbedded "subjectCondition", serializeReferenceCondition(reference.subjectCondition)
+		}
+		 
+		def conditions = []
+		reference.conditions.each { condition ->
+			// Conditions for the subject iself are represented separately
+			if( condition.subject == reference.subject )
+				return;
+			
+			conditions << serializeReferenceCondition( condition, true )
+		}
+		
+		if( conditions )
+			element.addEmbedded "conditions", new HALList(elements: conditions)
+			
+		element
+	}
 
 	/**
 	 * Serializes a measurable
@@ -222,42 +282,6 @@ class HALSerializationService implements Serializer {
 		
 		element.addEmbedded( "unit", unitAsHAL( value.unit ) )
 	}
-
-	/**
-	 * Serializes a reference value
-	 * @param reference
-	 * @return
-	 */
-	protected HALElement serializeReference( ReferenceValue reference ) {
-		if( !reference )
-			return null
-		
-		def element = new HALElement(generateLink( controller: "food4me", action: "references", id: reference.id ) )
-			
-		element.parameters = [
-			status: reference.status,
-			color: reference.color.toString(),
-		]
-		
-		// Add boundaries
-		if( reference.subjectCondition ) {
-			element.addEmbedded "subjectCondition", serializeReferenceCondition(reference.subjectCondition)
-		}
-		 
-		def conditions = []
-		reference.conditions.each { condition ->
-			// Conditions for the subject iself are represented separately
-			if( condition.subject == reference.subject )
-				return;
-			
-			conditions << serializeReferenceCondition( condition, true )
-		}
-		
-		if( conditions )
-			element.addEmbedded "conditions", new HALList(elements: conditions)
-			
-		element
-	}
 	
 	protected HALElement serializeReferenceCondition(ReferenceCondition condition, includeProperty = false ) {
 		def element = new HALElement()
@@ -276,7 +300,6 @@ class HALSerializationService implements Serializer {
 		
 		element
 	}
-	
 	
 	/** 
 	 * Classes for HAL generation
@@ -361,7 +384,16 @@ class HALSerializationService implements Serializer {
 		params.format = "hal"
 		params.absolute = true
 		
-		grailsLinkGenerator.link(params) + ".hal"
+		def link = grailsLinkGenerator.link(params)
+		def separatorIndex = link.indexOf( "?" )
+		
+		if( separatorIndex > -1 ) {
+			link = link[0..separatorIndex-1] + ".hal" + link[separatorIndex..-1]
+		} else {
+			link += ".hal"
+		}
+		
+		link
 	}
 	
 }
