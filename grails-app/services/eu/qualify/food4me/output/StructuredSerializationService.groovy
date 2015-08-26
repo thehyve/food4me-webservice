@@ -103,15 +103,17 @@ class StructuredSerializationService implements Serializer {
 		def texts = AdviceText.getTranslations( advices, language )
 		
 		// Combine the advices with texts and create a structure to serialize
-		def output = advices.collect { advice ->
-			[
-				code: advice.code,
-				subject: serializeMeasurable(advice.subject),
-				text: texts[ advice.code ]
-			]
-		}
+		def output = advices.collect { advice -> serializeAdvice(advice, texts[ advice.code ]) }
 		
 		output
+	}
+	
+	public Map serializeAdvice(Advice advice, String translation) {
+		[
+			code: advice.code,
+			subject: serializeMeasurable(advice.subject),
+			text: translation
+		]
 	}
 	
 	@Override

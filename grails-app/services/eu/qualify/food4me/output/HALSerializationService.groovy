@@ -125,25 +125,37 @@ class HALSerializationService implements Serializer {
 	}
 
 	@Override
-	public HALElement serializeAdvices(List<Advice> advices, String language = "en") {
+	public Map serializeAdvices(List<Advice> advices, String language = "en") {
 		if( !advices ) {
-			return []
+			return [:]
 		}
 		
 		// Find the texts for the advices given. Create a map of the texts
 		// with the code being the key
 		def texts = AdviceText.getTranslations( advices, language )
 		
-		// Combine the advices with texts and create a structure to serialize
-		def output = advices.collect { advice ->
-			[
-				code: advice.code,
-				subject: serializeMeasurable(advice.subject),
-				text: texts[ advice.code ]
-			]
-		}
+		def element = new HALElement(generateLink( controller: "food4me", action: "advices", params: [ language: language ] ))
+		element.addParameter "count", advices.size()
 		
-		output
+		// Combine the advices with texts and create a structure to serialize
+		def output = advices.collect { advice -> adviceAsHAL(advice, texts[advice.code], language) }
+		
+		element.addEmbedded( "advices", new HALList(elements: output) )
+		
+		element.toHAL()
+	}
+	
+	public Map serializeAdvice(Advice advice, String translatedText, String language = "en" ) {
+		adviceAsHAL(advice, translatedText, language).toHAL()
+	}
+	
+	public HALElement adviceAsHAL(Advice advice, String translatedText, String language = "en") {
+		def element = new HALElement(generateLink( controller: "food4me", action: "advice", id: advice.code, params: [ language: language ] ) )
+		element.addParameter( "code", advice.code)
+		element.addParameter( "text", translatedText)
+		element.addEmbedded( "subject", serializeMeasurable(advice.subject))
+		
+		element
 	}
 	
 	@Override

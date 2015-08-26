@@ -21,6 +21,10 @@ import eu.qualify.food4me.Property
 import eu.qualify.food4me.interfaces.Measurable
 import groovy.transform.EqualsAndHashCode
 
+import java.util.List;
+import java.util.Map;
+
+
 /**
  * Reference value for a given property
  * @author robert
@@ -106,6 +110,10 @@ class Advice {
 		}
 		
 		adviceSubjectCount[0]
+	}
+	
+	public String getTranslation( String language = "en" ) {
+		AdviceText.findByCodeAndLanguage( this.code, language )?.text
 	}
 
 }

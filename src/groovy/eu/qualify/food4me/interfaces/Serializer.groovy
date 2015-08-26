@@ -107,4 +107,11 @@ interface Serializer {
 	 */
 	def serializeAdvices(List<Advice> advices, String language)
 
+	/**
+	 * Serializes a list of advices with the given translated text
+	 * @param advices
+	 * @return
+	 */
+	def serializeAdvice(Advice advice, String translatedText)
+
 }

@@ -7,7 +7,14 @@ class UrlMappings {
 				language inList: [ 'en', 'nl' ]
 			}
 		}
-		"/advices(.$format)?"( controller: "food4me", action: "advices" )
+		
+		name translatedAdvice: "/$language/advices/$id(.$format)?" {
+			controller = "food4me"
+			action = "advice"
+			constraints {
+				language inList: [ 'en', 'nl' ]
+			}
+		}
 		
 		"/status(.$format)?"( controller: "food4me", action: "status" )
 		
@@ -22,6 +29,10 @@ class UrlMappings {
 		// Unit URLs
 		"/units/$id(.$format)?"(controller: "food4me", action: "unit")
 		"/units(.$format)?"( controller: "food4me", action: "units" )
+		
+		// Advice URLs
+		"/advices/$id(.$format)?"( controller: "food4me", action: "advice" )
+		"/advices(.$format)?"( controller: "food4me", action: "advices" )
 		
 		"/form"( controller: "food4me", action: "form" )
 		"/$language/form" { 

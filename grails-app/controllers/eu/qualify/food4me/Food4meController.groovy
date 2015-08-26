@@ -261,7 +261,6 @@ class Food4meController {
 		}
 	}
 	
-	
 	/**
 	 * Webservice to return a single reference
 	 * @return
@@ -299,22 +298,59 @@ class Food4meController {
 		List<Advisable> advisables = advisableDeterminer.determineAdvisables(status, measurements )
 		List<Advice> advices = adviceGenerator.generateAdvice( measurements, status, advisables )
 
+		def language = getLanguageFromRequest()
+		if( !language ) return
+		
+		// Use content negotiation to output the data
+		withFormat {
+			html advices: advices, measurements: measurements, status: status, translations: AdviceText.getTranslations( advices, language )
+			json { render jsonSerializer.serializeAdvices( advices, language ) as JSON }
+			hal { render text: halSerializer.serializeAdvices( advices, language ) as JSON, contentType: "application/hal+json" }
+		}
+	}
+	
+	
+	def advice() {
+		def advice = Advice.findByCode(params.id)
+		
+		log.debug "Finding advice for code [" + params.id + "]: " + advice
+		
+		if( !advice) {
+			response.status = 404
+			render "Advice not found"
+			return
+		}
+		
+		// Determine language
+		def language = getLanguageFromRequest()
+		if( !language ) return
+		
+		// Use content negotiation to output the data
+		withFormat {
+			html {
+				def advices = [advice]
+				render view: "advices", [ advices: advices, translations: AdviceText.getTranslations( advices, language )  ]
+			}
+			json { render jsonSerializer.serializeAdvice( advice, advice.getTranslation(language)) as JSON }
+			hal {
+				render text: halSerializer.serializeAdvice( advice, advice.getTranslation(language) ) as JSON, contentType: "application/hal+json"
+			}
+		}
+	}
+	
+	protected String getLanguageFromRequest() {
 		// Determine output language. Defaults to English
 		def language = params.language
-		if( !language ) 
+		if( !language )
 			language = "en"
 
 		// If the language is not supported, return 404
 		if( !AdviceText.isLanguageSupported( language ) ) {
 			response.status = 404
 			render ""
-			return
+			return null
 		}
-		
-		// Use content negotiation to output the data
-		withFormat {
-			html advices: advices, measurements: measurements, status: status, translations: AdviceText.getTranslations( advices, language )
-			json { render jsonSerializer.serializeAdvices( advices, language ) as JSON }
-		}
+
+		return language
 	}
 }
