@@ -177,7 +177,7 @@ class ParameterBasedParseService implements Parser {
 	@Override
 	public List<Measurable> parseEntityList(def params) {
 		params.list( 'property' )?.collect {
-			Property.findByEntity( it )
+			Property.findByEntityIlike( it )
 		}.findAll().unique()
 	}
 
