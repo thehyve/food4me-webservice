@@ -75,6 +75,32 @@ class AdviceText {
 		}
 	}
 	
+	/**
+	 * Returns a list of distinct languages available for the given code
+	 * @return
+	 */
+	public static List<String> getLanguagesForAdvice( String adviceCode ) {
+		if( !adviceCode )
+			return []
+			
+		def criteria = AdviceText.createCriteria()
+		
+		criteria.listDistinct {
+			eq("code", adviceCode)
+			projections {
+				distinct "language"
+			}
+		}
+	}
+
+	/**
+	 * Returns a list of distinct languages available for the given code
+	 * @return
+	 */
+	public static List<String> getLanguagesForAdvice( Advice advice ) {
+		getLanguagesForAdvice(advice?.code)
+	}
+	
 	public static boolean isLanguageSupported( String language ) {
 		if( !language )
 			return false

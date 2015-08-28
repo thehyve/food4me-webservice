@@ -134,7 +134,7 @@ class HALSerializationService implements Serializer {
 		// with the code being the key
 		def texts = AdviceText.getTranslations( advices, language )
 		
-		def element = new HALElement(generateLink( controller: "food4me", action: "advices", params: [ language: language ] ))
+		def element = new HALElement()
 		element.addParameter "count", advices.size()
 		
 		// Combine the advices with texts and create a structure to serialize
@@ -150,7 +150,19 @@ class HALSerializationService implements Serializer {
 	}
 	
 	public HALElement adviceAsHAL(Advice advice, String translatedText, String language = "en") {
-		def element = new HALElement(generateLink( controller: "food4me", action: "advice", id: advice.code, params: [ language: language ] ) )
+		// Closure to avoid repeating the link generation logic
+		def createAdviceLink = { linkLanguage ->
+			generateLink( mapping: "translatedAdvice", controller: "food4me", action: "advice", id: advice.code, params: [ language: linkLanguage ] )
+		} 
+		
+		def element = new HALElement(createAdviceLink(language))
+		element.addLinks( "translations", AdviceText.getLanguagesForAdvice(advice).collect {
+			 new HALLink(
+				 href: createAdviceLink(it),
+				 hreflang: it
+			 )
+		})
+		
 		element.addParameter( "code", advice.code)
 		element.addParameter( "text", translatedText)
 		element.addEmbedded( "subject", serializeMeasurable(advice.subject))
@@ -334,15 +346,24 @@ class HALSerializationService implements Serializer {
 	protected abstract class HALEntry {
 		abstract def toHAL()
 	}
-	
+
+	protected class HALKeyValue{
+		String key
+		HALEntry value
+		
+		def toHAL() {
+			def data = [(key): value.toHAL()]
+		}
+	}
+
 	protected class HALElement extends HALEntry {
-		List<HALLink> links = []
+		List<HALEntry> links = []
 		Map parameters = [:]
 		Map<String,HALEntry> embedded = [:] 
 		
 		public HALElement(String selfURI = null) {
 			if( selfURI )
-				links << new HALLink(name: "self", href: selfURI )
+				links << new HALKeyValue( 'key': "self", 'value': new HALLink(href: selfURI))
 		}
 		
 		def toHAL() {
@@ -361,9 +382,14 @@ class HALSerializationService implements Serializer {
 			data
 		}
 		
-		def addLink( HALLink link ) {
-			if( link ) links << link
+		def addLink( String name, HALLink link ) {
+			if( link ) links << new HALKeyValue( 'key': name, 'value': link )
 		}
+		def addLinks( String key, List<HALLink> newLinks ) {
+			if( key && newLinks )
+				links << new HALKeyValue( 'key': key, 'value': new HALList(elements: newLinks ) )
+		}
+
 		
 		def addEmbedded( String key, HALEntry element ) {
 			if( key && element ) embedded[key] = element
@@ -387,7 +413,6 @@ class HALSerializationService implements Serializer {
 	}
 
 	protected class HALLink extends HALEntry {
-		String name
 		String href
 		String hreflang
 		String type
@@ -401,7 +426,7 @@ class HALSerializationService implements Serializer {
 			if(type) 
 				data.type = type
 				
-			[ (name): data ]
+			data
 		}
 	}
 	
