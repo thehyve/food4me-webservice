@@ -25,7 +25,9 @@ import eu.qualify.food4me.measurements.MeasuredValue
 import eu.qualify.food4me.measurements.Measurement
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
+import groovy.util.logging.Log4j
 
+@Log4j
 class ParameterBasedParseService implements Parser {
 	protected final String MODIFIER_TOTAL = "total"
 	

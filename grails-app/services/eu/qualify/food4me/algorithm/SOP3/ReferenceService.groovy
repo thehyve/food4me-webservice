@@ -24,7 +24,9 @@ import eu.qualify.food4me.measurements.Measurements
 import eu.qualify.food4me.measurements.Status
 import eu.qualify.food4me.reference.ReferenceValue
 import grails.transaction.Transactional
+import groovy.util.logging.Log4j
 
+@Log4j
 @Transactional
 class ReferenceService {
 

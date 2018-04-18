@@ -48,7 +48,7 @@ abstract class MeasuredValue {
 		} else if (value instanceof Number) {
 			new MeasuredNumericValue(value: value)
 		} else {
-			throw new IllegalArgumentException("Unknown value $value of type $value.class")
+			throw new IllegalArgumentException("Unknown value $value of type ${value.class}")
 		}
 	}
 }

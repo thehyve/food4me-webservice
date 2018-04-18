@@ -18,6 +18,7 @@ package eu.qualify.food4me.decisiontree
 
 import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
+import eu.qualify.food4me.interfaces.Advisable
 import eu.qualify.food4me.interfaces.Measurable
 import groovy.transform.EqualsAndHashCode
 
@@ -60,9 +61,9 @@ class Advice {
 	
 	static mapping = {
 	}
-	
-	public String toString() {
-		return "Advice " + code + " on " + subject
+
+	String toString() {
+		"Advice $code on $subject"
 	}
 	
 	/**
@@ -77,39 +78,28 @@ class Advice {
 	 * @param property
 	 * @return
 	 */
-	public static List<Measurable> getConditionProperties(Advisable p) {
+	static List<Measurable> getConditionProperties(Property p) {
 		// TODO: Find out why I can't retrieve all conditions with it.advice.subject == p
-		def advices = Advice.findAllBySubject(p)
+		def advices = findAllBySubject(p)
 		
-		if( !advices )
-			return []
-			
-		def criteria = AdviceCondition.createCriteria()
-		def adviceConditions = criteria.list {
-			advice {
-				'in'( 'id', advices*.id )
-			}
-		}
-		
-		adviceConditions.collect {
+		AdviceCondition.createCriteria().list {
+			'in'( 'id', advices*.id)
+		}.collect {
 			// If the advice condition related to a modified property, return a modified property object
 			if( it.modifier ) {
 				new ModifiedProperty( property: it.subject, modifier: it.modifier )
 			} else {
 				it.subject
 			} 
-		}.unique() as List
+		}.unique()
 	}
-	
-	public static int getSubjectCount() {
-		def criteria = Advice.createCriteria()
-		def adviceSubjectCount = criteria.list {
+
+	static int getSubjectCount() {
+		createCriteria().list {
 			projections {
 				countDistinct("subject")
 			}
-		}
-		
-		adviceSubjectCount[0]
+		}[0]
 	}
 	
 	public String getTranslation( String language = "en" ) {

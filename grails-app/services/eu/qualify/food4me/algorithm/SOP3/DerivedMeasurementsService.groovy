@@ -23,7 +23,9 @@ import eu.qualify.food4me.measurements.MeasuredTextValue
 import eu.qualify.food4me.measurements.Measurement
 import eu.qualify.food4me.measurements.Measurements
 import grails.transaction.Transactional
+import groovy.util.logging.Log4j
 
+@Log4j
 @Transactional
 class DerivedMeasurementsService {
 

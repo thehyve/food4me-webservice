@@ -17,6 +17,7 @@
 package eu.qualify.food4me.algorithm.SOP3
 
 import eu.qualify.food4me.ModifiedProperty
+import eu.qualify.food4me.Property
 import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.interfaces.AdviceGenerator
 import eu.qualify.food4me.interfaces.Advisable
@@ -56,7 +57,7 @@ class GenerateAdviceService implements AdviceGenerator {
 		// First determine the conditions applicable for the given property
 		// Most probably that includes the property value itself, as well as other
 		// related properties
-		List<Measurable> properties = Advice.getConditionProperties( advisable )
+		List<Measurable> properties = Advice.getConditionProperties(advisable as Property)
 		
 		// If no properties are found, no advices are known for this property. Returning immediately
 		if( !properties ) {

@@ -27,7 +27,9 @@ import eu.qualify.food4me.measurements.Measurement
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
 import grails.converters.JSON
+import groovy.util.logging.Log4j
 
+@Log4j
 class JsonParseService implements Parser {
 	
 	protected conversionMap = [
