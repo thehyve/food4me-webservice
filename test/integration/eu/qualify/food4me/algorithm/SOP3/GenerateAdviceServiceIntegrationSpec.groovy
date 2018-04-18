@@ -52,10 +52,10 @@ class GenerateAdviceServiceIntegrationSpec extends IntegrationSpec {
 			def omega3DietaryIntake = new ModifiedProperty( property: omega3Intake, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY )
 					
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( geneFADS1, new Status( entity: geneFADS1, status: Status.STATUS_RISK, color: Status.Color.RED ) )
-			measurementStatus.addStatus( omega3Biomarker, new Status( entity: omega3Biomarker, status: Status.STATUS_LOW, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( omega3Intake, new Status( entity: omega3Intake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
-			measurementStatus.addStatus( omega3DietaryIntake, new Status( entity: omega3DietaryIntake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( geneFADS1, new Status( entity: geneFADS1, status: Status.STATUS_RISK, color: Status.Color.RED ) )
+			measurementStatus.putStatus( omega3Biomarker, new Status( entity: omega3Biomarker, status: Status.STATUS_LOW, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( omega3Intake, new Status( entity: omega3Intake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( omega3DietaryIntake, new Status( entity: omega3DietaryIntake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
 		
 		and: "an empty list of measurements, as they are not needed in this decision tree"
 			measurements = new Measurements()
@@ -78,9 +78,9 @@ class GenerateAdviceServiceIntegrationSpec extends IntegrationSpec {
 			def omega3DietaryIntake = new ModifiedProperty( property: omega3Intake, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY )
 					
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( omega3Biomarker, new Status( entity: omega3Biomarker, status: Status.STATUS_LOW, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( omega3Intake, new Status( entity: omega3Intake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
-			measurementStatus.addStatus( omega3DietaryIntake, new Status( entity: omega3DietaryIntake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( omega3Biomarker, new Status( entity: omega3Biomarker, status: Status.STATUS_LOW, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( omega3Intake, new Status( entity: omega3Intake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( omega3DietaryIntake, new Status( entity: omega3DietaryIntake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
 		
 		and: "an empty list of measurements, as they are not needed in this decision tree"
 			measurements = new Measurements()
@@ -102,9 +102,9 @@ class GenerateAdviceServiceIntegrationSpec extends IntegrationSpec {
 			def omega3DietaryIntake = new ModifiedProperty( property: omega3Intake, modifier: ModifiedProperty.Modifier.INTAKE_DIETARY )
 					
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( omega3Biomarker, new Status( entity: omega3Biomarker, status: Status.STATUS_LOW, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( omega3Intake, new Status( entity: omega3Intake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
-			measurementStatus.addStatus( omega3DietaryIntake, new Status( entity: omega3DietaryIntake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( omega3Biomarker, new Status( entity: omega3Biomarker, status: Status.STATUS_LOW, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( omega3Intake, new Status( entity: omega3Intake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( omega3DietaryIntake, new Status( entity: omega3DietaryIntake, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
 		
 		and: "an empty list of measurements, as they are not needed in this decision tree"
 			measurements = new Measurements()

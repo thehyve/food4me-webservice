@@ -45,30 +45,25 @@ class AdviceText {
 	 * Returns a map of translations in a given language
 	 * @param advices
 	 * @param language
-	 * @return
+	 * @return mapping of code to text
 	 */
-	public static Map getTranslations( List<Advice> advices, String language) {
+	static Map<String, String> getTranslations( List<Advice> advices, String language) {
 		if( !advices )
 			return [:]
 		
 		// Find the texts for the advices given. Create a map of the texts
 		// with the code being the key
-		def texts = [:]
-		AdviceText.findAllByCodeInListAndLanguage( advices*.code, language ).each {
-			texts[ it.code ] = it.text
+		findAllByCodeInListAndLanguage( advices*.code, language ).collectEntries {
+			[(it.code): it.text]
 		}
-		
-		texts
 	}
 	
 	/**
 	 * Returns a list of distinct languages in the database
 	 * @return
 	 */
-	public static List<String> getLanguages() {
-		def criteria = AdviceText.createCriteria()
-		
-		criteria.listDistinct {
+	static List<String> getLanguages() {
+		createCriteria().listDistinct {
 			projections {
 				distinct "language"
 			}
@@ -79,13 +74,11 @@ class AdviceText {
 	 * Returns a list of distinct languages available for the given code
 	 * @return
 	 */
-	public static List<String> getLanguagesForAdvice( String adviceCode ) {
+	static List<String> getLanguagesForAdvice( String adviceCode ) {
 		if( !adviceCode )
 			return []
 			
-		def criteria = AdviceText.createCriteria()
-		
-		criteria.listDistinct {
+		createCriteria().listDistinct {
 			eq("code", adviceCode)
 			projections {
 				distinct "language"
@@ -97,14 +90,11 @@ class AdviceText {
 	 * Returns a list of distinct languages available for the given code
 	 * @return
 	 */
-	public static List<String> getLanguagesForAdvice( Advice advice ) {
+	static List<String> getLanguagesForAdvice( Advice advice ) {
 		getLanguagesForAdvice(advice?.code)
 	}
-	
-	public static boolean isLanguageSupported( String language ) {
-		if( !language )
-			return false
-			
-		language.toLowerCase() in getLanguages()
+
+	static boolean isLanguageSupported(String language ) {
+		language?.toLowerCase() in getLanguages()
 	}
 }

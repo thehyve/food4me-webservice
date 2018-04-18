@@ -32,19 +32,15 @@ import grails.transaction.Transactional
 class GenerateAdviceService implements AdviceGenerator {
 
 	@Override
-	public List<Advice> generateAdvice(Measurements measurements,
-			MeasurementStatus measurementStatus, List<Advisable> advisables) {
+	List<Advice> generateAdvice(Measurements measurements,
+								MeasurementStatus measurementStatus, List<Advisable> advisables) {
 		
-		List<Advice> advices = []
-			
-		advisables.each { advisable ->
+		advisables.collectMany { advisable ->
 			log.info "Generating advice for " + advisable
-			advices += generateAdviceFor( advisable, measurements, measurementStatus )
+			generateAdviceFor( advisable, measurements, measurementStatus )
 		}
-
-		advices		
 	}
-		
+
 	/**
 	 * Generates a list of advices for a given property, based on the measurements	
 	 * @param advisable
@@ -52,7 +48,7 @@ class GenerateAdviceService implements AdviceGenerator {
 	 * @param measurementStatus
 	 * @return
 	 */
-	public List<Advice> generateAdviceFor( Advisable advisable, Measurements measurements,
+	List<Advice> generateAdviceFor( Advisable advisable, Measurements measurements,
 		MeasurementStatus measurementStatus) {
 
 		List<Advice> advices = []
@@ -96,7 +92,7 @@ class GenerateAdviceService implements AdviceGenerator {
 		adviceIds.collect { Advice.get(it) }
 	}
 	
-	protected def generateWhereClause( List<Measurable> properties, MeasurementStatus measurementStatus, Measurements measurements ) {
+	protected static def generateWhereClause(List<Measurable> properties, MeasurementStatus measurementStatus, Measurements measurements ) {
 		List<String> whereClause = []
 		def whereParams = [:]
 		int index = 0;

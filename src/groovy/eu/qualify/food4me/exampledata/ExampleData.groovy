@@ -24,6 +24,7 @@ import eu.qualify.food4me.decisiontree.AdviceCondition
 import eu.qualify.food4me.measurements.Status
 import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
+import org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin
 
 class ExampleData {
 
@@ -426,7 +427,7 @@ class ExampleData {
 			session?.clear()
 		}
 		
-		org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP.get().clear()
+		DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP.get().clear()
 	}
 	
 }

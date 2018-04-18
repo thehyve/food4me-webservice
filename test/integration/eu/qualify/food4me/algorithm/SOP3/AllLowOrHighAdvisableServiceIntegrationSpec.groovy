@@ -48,10 +48,10 @@ class AllLowOrHighAdvisableServiceIntegrationSpec extends IntegrationSpec {
 			def cholesterol = Property.findByEntity( "Cholesterol" )
 			
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( protein, new Status( entity: protein, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
-			measurementStatus.addStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( vitaminA, new Status( entity: vitaminA, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
-			measurementStatus.addStatus( cholesterol, new Status( entity: cholesterol, status: Status.STATUS_LOW, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( protein, new Status( entity: protein, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( vitaminA, new Status( entity: vitaminA, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
+			measurementStatus.putStatus( cholesterol, new Status( entity: cholesterol, status: Status.STATUS_LOW, color: Status.Color.AMBER ) )
 			
 		when: "the advisables are determined"
 			List<Advisable> advisables = allLowOrHighAdvisableService.determineAdvisables( measurementStatus, new Measurements() )
@@ -70,8 +70,8 @@ class AllLowOrHighAdvisableServiceIntegrationSpec extends IntegrationSpec {
 			def cholesterol = Property.findByEntity( "Cholesterol" )
 			
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( protein, new Status( entity: protein, status: Status.STATUS_VERY_LOW, color: Status.Color.RED ) )
-			measurementStatus.addStatus( cholesterol, new Status( entity: cholesterol, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( protein, new Status( entity: protein, status: Status.STATUS_VERY_LOW, color: Status.Color.RED ) )
+			measurementStatus.putStatus( cholesterol, new Status( entity: cholesterol, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
 			
 		when: "the advisables are determined"
 			List<Advisable> advisables = allLowOrHighAdvisableService.determineAdvisables( measurementStatus, new Measurements() )
@@ -107,15 +107,15 @@ class AllLowOrHighAdvisableServiceIntegrationSpec extends IntegrationSpec {
 			def geneFTO = Property.findByEntity("FTO")
 			
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( protein, new Status( entity: protein, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
-			measurementStatus.addStatus( fibre, new Status( entity: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED ) )
-			measurementStatus.addStatus( folate, new Status( entity: folate, status: Status.STATUS_LOW, color: Status.Color.GREEN ) )
-			measurementStatus.addStatus( cholesterol, new Status( entity: cholesterol, status: Status.STATUS_OK, color: Status.Color.RED ) )
-			measurementStatus.addStatus( age, new Status( entity: age, status: Status.STATUS_UNKNOWN, color: Status.Color.RED ) )
+			measurementStatus.putStatus( protein, new Status( entity: protein, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
+			measurementStatus.putStatus( fibre, new Status( entity: fibre, status: Status.STATUS_VERY_LOW, color: Status.Color.RED ) )
+			measurementStatus.putStatus( folate, new Status( entity: folate, status: Status.STATUS_LOW, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( cholesterol, new Status( entity: cholesterol, status: Status.STATUS_OK, color: Status.Color.RED ) )
+			measurementStatus.putStatus( age, new Status( entity: age, status: Status.STATUS_UNKNOWN, color: Status.Color.RED ) )
 			
-			measurementStatus.addStatus( geneFADS1, new Status( entity: geneFADS1, status: Status.STATUS_RISK, color: Status.Color.RED ) )
-			measurementStatus.addStatus( geneFTO, new Status( entity: geneFTO, status: Status.STATUS_NON_RISK, color: Status.Color.RED ) )
+			measurementStatus.putStatus( geneFADS1, new Status( entity: geneFADS1, status: Status.STATUS_RISK, color: Status.Color.RED ) )
+			measurementStatus.putStatus( geneFTO, new Status( entity: geneFTO, status: Status.STATUS_NON_RISK, color: Status.Color.RED ) )
 			
 		when: "the advisables are determined"
 			List<Advisable> advisables = allLowOrHighAdvisableService.determineAdvisables( measurementStatus, new Measurements() )
@@ -140,13 +140,13 @@ class AllLowOrHighAdvisableServiceIntegrationSpec extends IntegrationSpec {
 			def modifiedFolate = new ModifiedProperty( property: folate, modifier: ModifiedProperty.Modifier.INTAKE_FATS_SPREADS.id )
 			
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( protein, new Status( entity: protein, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
-			measurementStatus.addStatus( folate, new Status( entity: folate, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( protein, new Status( entity: protein, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
+			measurementStatus.putStatus( folate, new Status( entity: folate, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
 
-			measurementStatus.addStatus( modifiedProtein, new Status( entity: modifiedProtein, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( modifiedCarbohydrate, new Status( entity: modifiedCarbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
-			measurementStatus.addStatus( modifiedFolate, new Status( entity: modifiedFolate, status: Status.STATUS_HIGH, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( modifiedProtein, new Status( entity: modifiedProtein, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( modifiedCarbohydrate, new Status( entity: modifiedCarbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
+			measurementStatus.putStatus( modifiedFolate, new Status( entity: modifiedFolate, status: Status.STATUS_HIGH, color: Status.Color.GREEN ) )
 
 		when: "the advisables are determined"
 			List<Advisable> advisables = allLowOrHighAdvisableService.determineAdvisables( measurementStatus, new Measurements() )

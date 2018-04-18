@@ -16,14 +16,10 @@
  */
 package eu.qualify.food4me.algorithm.SOP3
 
-import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.interfaces.Measurable
-import eu.qualify.food4me.interfaces.StatusComputer
 import eu.qualify.food4me.measurements.MeasuredNumericValue
 import eu.qualify.food4me.measurements.MeasuredValue
-import eu.qualify.food4me.measurements.Measurement
-import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
 import eu.qualify.food4me.measurements.Status
 import eu.qualify.food4me.reference.ReferenceValue
@@ -40,7 +36,7 @@ class ReferenceService {
 	 * @param measurements
 	 * @return
 	 */
-	public Map<Measurable, List<ReferenceValue>> getReferences( List<Measurable> entities, Measurements measurements ) {
+	Map<Measurable, List<ReferenceValue>> getReferences(List<Measurable> entities, Measurements measurements ) {
 		def age = Property.findByEntity( 'Age' )
 		def gender = Property.findByEntity( 'Gender' )
 		
@@ -222,34 +218,8 @@ class ReferenceService {
 		status.color = statuses[0][2]
 		return status
 	}
-
-	/**
-	 * Determines the status for some supplement intake value
-	 * @param valueProperty		Property to retrieve the value for
-	 * @param referenceProperty	Property to determine the reference
-	 * @param measurements		Set of measurements used as input
-	 * @return
-	 */
-	protected Status determineStatusForSupplement( ModifiedProperty valueProperty, Property referenceProperty, Measurements measurements ) {
-		def status = new Status( entity: valueProperty )
-
-		// A very simple check: yes or no
-		def value = measurements.getValueFor( valueProperty )
-		status.value = value
-		
-		if( value && value.type == "numeric" && value.value > 0 ) {
-			status.status = Status.STATUS_YES
-			status.color = Status.Color.GREEN
-		} else {
-			status.status = Status.STATUS_NO
-			status.color = Status.Color.RED
-		}
-
-		return status
-	}
 	
-	
-	protected def generateWhereClause( List<Property> properties, Measurements measurements, int index = 0 ) {
+	protected static def generateWhereClause(List<Property> properties, Measurements measurements, int index = 0 ) {
 		List<String> whereClause = []
 		def whereParams = [:]
 		
@@ -261,7 +231,7 @@ class ReferenceService {
 		[ whereClause, whereParams ]
 	}
 	
-	protected void extendWhereClauses( List whereClause, Map whereParams, Property property, MeasuredValue measuredValue, int index = 0 ) {
+	protected static void extendWhereClauses(List whereClause, Map whereParams, Property property, MeasuredValue measuredValue, int index = 0 ) {
 		// If no value is provided, we cannot filter on this property. That
 		// may result in no status being determined for this property. Skipping immediately
 		if( !measuredValue ) {

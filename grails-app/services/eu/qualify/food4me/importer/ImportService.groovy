@@ -157,7 +157,7 @@ class ImportService {
 		def references = []
 		
 		// The first 2 lines contain the headers
-		inputStream.toCsvReader([skipLines: 2, separatorChar: separatorChar]).eachLine { line ->
+		inputStream.toCsvReader([skipLines: 2, separatorChar: separatorChar]).eachLine { String line ->
 			if( !line || line.size() < 5 ) {
 				log.warn "Skipping line as it has not enough columns: " + line?.size()
 				return
@@ -187,11 +187,11 @@ class ImportService {
 			
 			// Check whether we have the properties for the requested conditions
 			if( age && !ageProperty ) {
-				log.error "Trying to add a reference condition on age for property " + property + " but the age property doesn't exist"
+				log.error "Trying to add a reference condition on age for property $property but the age property doesn't exist"
 				return
 			}
 			if( gender && !genderProperty ) {
-				log.error "Trying to add a reference condition on age for property " + property + " but the age property doesn't exist"
+				log.error "Trying to add a reference condition on age for property $property but the age property doesn't exist"
 				return
 			}
 			
@@ -200,8 +200,8 @@ class ImportService {
 			//		the lower boundary of the next
 			def statusses = [ Status.STATUS_VERY_LOW, Status.STATUS_LOW, Status.STATUS_OK, Status.STATUS_HIGH, Status.STATUS_VERY_HIGH ]
 			def currentLowerBoundary = null
-			def currentColumnIndex = 6
-			def color
+			int currentColumnIndex = 6
+			String color
 			
 			statusses.each { status ->
 				// If no status color is given for this status, we skip this status
@@ -256,9 +256,9 @@ class ImportService {
 		// The first 2 lines
 		def lineNo = 1
 		def columnStatus = [:]
-		inputStream.toCsvReader([separatorChar: separatorChar]).eachLine { line ->
+		inputStream.toCsvReader([separatorChar: separatorChar]).eachLine { String line ->
 			if( !line || line.size() < 2 ) {
-				log.warn "Skipping line as it has not enough columns: " + line?.size()
+				log.warn "Skipping line as it has not enough columns: ${line?.size()}"
 				return
 			}
 			
@@ -343,7 +343,7 @@ class ImportService {
 		def headerLines = []
 		def structure
 		
-		inputStream?.toCsvReader([skipLines: 0, separatorChar: separatorChar]).eachLine { line ->
+		inputStream?.toCsvReader([skipLines: 0, separatorChar: separatorChar])?.eachLine { String line ->
 			if( !line || line.size() < 2 ) {
 				log.warn "Skipping line as it has not enough columns: " + line?.size()
 				return
@@ -352,7 +352,7 @@ class ImportService {
 			// Combine the first three header lines to be parsed separately
 			if( lineNo++ < 4 ) {
 				headerLines << line
-				return;
+				return
 			}
 			
 			// If we reach this point, we should first parse the header lines
@@ -611,7 +611,7 @@ class ImportService {
 	 * @return
 	 */
 	def loadGenericReferencesFromDirectory( String directory = null ) {
-		log.info "Start loading generic references " + ( directory ? " from " + directory : "" )
+		log.info "Start loading generic references ${directory ? " from $directory" : ""}"
 		
 		// First disable the trigger for advice conditions, as that slows down the import heavily
 		log.info "Disabling trigger on reference_condition"
@@ -721,7 +721,7 @@ class ImportService {
 				log.error "No default directory given to import data from. Please specify the configuration value food4me.importDirectory to a readable directory."
 				return
 			} else {
-				log.info "Importing data from default directory in configuration: " + directory
+				log.info "Importing data from default directory in configuration: $directory"
 			}
 		}
 			
@@ -749,12 +749,12 @@ class ImportService {
 			return
 		} 
 		
-		log.info "Batch saving " + objects.size() + " objects of type " + domainClass?.simpleName 
-		
+		log.info "Batch saving ${objects.size()} objects of type ${domainClass?.simpleName}"
+
 		domainClass.withTransaction {
 			objects.each { object ->
 				if( !object.save() ) {
-					log.error "Unable to save ${domainClass} object in batch: " + object
+					log.error "Unable to save $domainClass object in batch: $object"
 					object?.errors?.allErrors?.each { currentError ->
 						log.error "Error occured on field [${currentError?.field}] - [${currentError?.defaultMessage}] for value [${currentError?.rejectedValue}]"
 					}
@@ -779,12 +779,12 @@ class ImportService {
 	
 	protected def disableTriggers( String table ) {
 		final Sql sql = new Sql(dataSource)
-		sql.execute "ALTER TABLE " + table + " DISABLE TRIGGER USER"
+		sql.execute "ALTER TABLE $table DISABLE TRIGGER USER"
 	}
 	
 	protected def enableTriggers( String table ) {
 		final Sql sql = new Sql(dataSource)
-		sql.execute "ALTER TABLE " + table + " ENABLE TRIGGER USER"
+		sql.execute "ALTER TABLE $table ENABLE TRIGGER USER"
 		
 		// Update rows in the table without changing the data itself
 		// This will execute the trigger

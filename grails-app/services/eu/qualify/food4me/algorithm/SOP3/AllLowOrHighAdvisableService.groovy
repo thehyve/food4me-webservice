@@ -19,7 +19,6 @@ package eu.qualify.food4me.algorithm.SOP3
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.interfaces.Advisable
 import eu.qualify.food4me.interfaces.AdvisableDeterminer
-import eu.qualify.food4me.interfaces.Measurable
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
 import eu.qualify.food4me.measurements.Status
@@ -27,19 +26,11 @@ import grails.transaction.Transactional
 
 @Transactional
 class AllLowOrHighAdvisableService implements AdvisableDeterminer {
+	private static final ADVISABLE_STATUSES = [Status.STATUS_VERY_LOW, Status.STATUS_LOW, Status.STATUS_HIGH, Status.STATUS_VERY_HIGH]
 	@Override
-	public List<Advisable> determineAdvisables(MeasurementStatus measurementStatus, Measurements measurements ) {
-		List<Advisable> advisables = []
-		
-		// Lookup all root properties that have a status VERY_LOW, LOW, HIGH or VERY_HIGH
-		def advisableStatuses = [ Status.STATUS_VERY_LOW, Status.STATUS_LOW, Status.STATUS_HIGH, Status.STATUS_VERY_HIGH ]
-		measurementStatus.all.each { status ->
-			if( status.entity instanceof Property ) {
-				if( status.status in advisableStatuses )
-					advisables << status.entity
-			}
+	List<Advisable> determineAdvisables(MeasurementStatus measurementStatus, Measurements measurements ) {
+		measurementStatus.all.findResults {
+			it.entity instanceof Property && it.status in ADVISABLE_STATUSES ? it.entity : null
 		}
-		
-		advisables
 	}
 }

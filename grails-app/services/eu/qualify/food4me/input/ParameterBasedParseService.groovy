@@ -16,21 +16,15 @@
  */
 package eu.qualify.food4me.input
 
-import java.awt.event.ItemEvent;
-import java.util.List;
-
 import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
-import eu.qualify.food4me.interfaces.Advisable
 import eu.qualify.food4me.interfaces.Measurable
 import eu.qualify.food4me.interfaces.Parser
 import eu.qualify.food4me.measurements.MeasuredValue
 import eu.qualify.food4me.measurements.Measurement
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
-import grails.converters.JSON
-import grails.transaction.Transactional
 
 class ParameterBasedParseService implements Parser {
 	protected final String MODIFIER_TOTAL = "total"
@@ -53,7 +47,7 @@ class ParameterBasedParseService implements Parser {
 	 *      [group].[nutrient].[origin] = value
 	 */
 	@Override
-	public Measurements parseMeasurements(def params) {
+	Measurements parseMeasurements(def params) {
 		def output = new Measurements()
 
 		conversionMap.each { groupName, group ->
@@ -105,7 +99,7 @@ class ParameterBasedParseService implements Parser {
 	 * @param data			Map with keys value and unit
 	 * @return
 	 */
-	protected Measurement parseMeasurement( Measurable measurable, Unit unit, def data ) {
+	protected static Measurement parseMeasurement(Measurable measurable, Unit unit, def data ) {
 		// Check if the value is the correct format { value: ..., unit: "" }
 		if( !data ) {
 			log.info "The value specified for ${measurable} is empty"
@@ -175,17 +169,16 @@ class ParameterBasedParseService implements Parser {
 	 * 		property=[propertyname]
 	 */
 	@Override
-	public List<Measurable> parseEntityList(def params) {
-		params.list( 'property' )?.collect {
+	List<Measurable> parseEntityList(def params) {
+		params.list( 'property' )?.findResults {
 			Property.findByEntityIlike( it )
-		}.findAll().unique()
+		}?.unique() ?: []
 	}
 
-
 	@Override
-	public MeasurementStatus parseStatus(def input) {
+	MeasurementStatus parseStatus(def input) {
 		// TODO Auto-generated method stub
-		return null;
+		null
 	}
 
 }

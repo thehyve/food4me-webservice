@@ -16,8 +16,6 @@
  */
 package eu.qualify.food4me.input
 
-import java.util.List;
-
 import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
@@ -29,7 +27,6 @@ import eu.qualify.food4me.measurements.Measurement
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
 import grails.converters.JSON
-import grails.transaction.Transactional
 
 class JsonParseService implements Parser {
 	
@@ -43,7 +40,7 @@ class JsonParseService implements Parser {
 	]
 
 	@Override
-	public Measurements parseMeasurements(def input) {
+	Measurements parseMeasurements(def input) {
 		def output = new Measurements()
 		def measurementJSON = input.toString()
 		def parsed
@@ -51,7 +48,7 @@ class JsonParseService implements Parser {
 		try {
 			parsed = JSON.parse(measurementJSON)
 		} catch( Exception e ) {
-			log.error "No proper JSON is provided to describe the measurements: " + measurementJSON
+			log.error "No proper JSON is provided to describe the measurements: " + measurementJSON, e
 			return output
 		}
 
@@ -90,7 +87,7 @@ class JsonParseService implements Parser {
 	 * @param data			Map with keys value and unit
 	 * @return
 	 */
-	protected Measurement parseMeasurement( Measurable measurable, Unit unit, def data ) {
+	protected static Measurement parseMeasurement(Measurable measurable, Unit unit, def data ) {
 		// Check if the value is the correct format { value: ..., unit: "" }
 		if( !(data instanceof Map) || !data.containsKey( "value" ) ) {
 			log.warn "The value specified for ${measurable} is invalid. Please specify a value and its unit."
@@ -111,12 +108,11 @@ class JsonParseService implements Parser {
 		new Measurement(property: measurable, value: measuredValue )
 	}
 		
-	protected List<Measurement> parseNutrient( def valueData, Measurable measurable ) {
+	protected static List<Measurement> parseNutrient(def valueData, Measurable measurable ) {
 		List<Measurement> measurements = []
 		
 		// The data is split up into foodgroups. The allowed foodgroups are specified as 
 		// a value in the ModifiedProperty.Modifier enum
-		def allowedFoodGroups
 		valueData.each { modifier, groupData ->
 			// Check if this modifier is supported. If not, skip this measurement
 			if( !ModifiedProperty.Modifier.contains( modifier ) ) {
@@ -133,15 +129,15 @@ class JsonParseService implements Parser {
 	}
 	
 	@Override
-	public MeasurementStatus parseStatus(def input) {
+	MeasurementStatus parseStatus(def input) {
 		// TODO Auto-generated method stub
-		return null;
+		null
 	}
 
 	@Override
-	public List<Advisable> parseEntityList(def input) {
+	List<Advisable> parseEntityList(def input) {
 		// TODO Auto-generated method stub
-		return null;
+		null
 	}
 
 }

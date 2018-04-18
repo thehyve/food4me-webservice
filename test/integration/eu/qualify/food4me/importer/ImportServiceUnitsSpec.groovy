@@ -17,7 +17,6 @@
 package eu.qualify.food4me.importer
 
 import eu.qualify.food4me.Unit
-import grails.test.mixin.*
 
 /**
  * Test for importService.

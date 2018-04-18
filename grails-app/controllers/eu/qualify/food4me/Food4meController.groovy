@@ -16,21 +16,12 @@
  */
 package eu.qualify.food4me
 
-import java.util.List;
-import java.util.Map;
-
 import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.decisiontree.AdviceText
-import eu.qualify.food4me.interfaces.AdviceGenerator
-import eu.qualify.food4me.interfaces.Advisable
-import eu.qualify.food4me.interfaces.AdvisableDeterminer
-import eu.qualify.food4me.interfaces.Measurable
-import eu.qualify.food4me.interfaces.Parser
-import eu.qualify.food4me.interfaces.Serializer
-import eu.qualify.food4me.interfaces.StatusComputer
+import eu.qualify.food4me.interfaces.*
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
-import eu.qualify.food4me.reference.ReferenceValue;
+import eu.qualify.food4me.reference.ReferenceValue
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 

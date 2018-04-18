@@ -16,8 +16,6 @@
  */
 package eu.qualify.food4me.output
 
-import java.util.Collection;
-
 import eu.qualify.food4me.ModifiedProperty
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.Unit
@@ -31,7 +29,6 @@ import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
 
-
 /**
  * Serializes output data in a structured way, to be used when outputting JSON or XML
  * @author robert
@@ -39,7 +36,7 @@ import eu.qualify.food4me.reference.ReferenceValue
 class StructuredSerializationService implements Serializer {
 
 	@Override
-	public List serializeStatus(MeasurementStatus measurementStatus) {
+	List serializeStatus(MeasurementStatus measurementStatus) {
 		if( !measurementStatus ) {
 			return []
 		}
@@ -67,33 +64,27 @@ class StructuredSerializationService implements Serializer {
 	 * @return
 	 */
 	@Override
-	public String serializeEntityList(List<Advisable> advisables) {
+	String serializeEntityList(List<Advisable> advisables) {
 		return null
 	}
 	
 	@Override
-	public List serializeReferences(Map<Property,List<ReferenceValue>> references) {
-		def output  = []
-		references.each { property, referenceValues ->
-			if( !referenceValues ) {
+	List serializeReferences(Map<Property, List<ReferenceValue>> references) {
+		references.findResults { property, referenceValues ->
+			if( referenceValues ) {
+				[
+						property: serializeMeasurable(property),
+						references: referenceValues.collect { serializeReference(it) }
+				]
+			} else {
 				log.warn "No references found when serializing " + property
-				return
+				null
 			}
-			
-			def referenceStructure = [:]
-			referenceStructure.property = serializeMeasurable( property )
-			referenceStructure.references = referenceValues.collect { referenceValue ->
-				serializeReference(referenceValue)
-			}
-			 
-			output << referenceStructure
 		}
-		
-		output
 	}
 
 	@Override
-	public List serializeAdvices(List<Advice> advices, String language = "en") {
+	List serializeAdvices(List<Advice> advices, String language = "en") {
 		if( !advices ) {
 			return []
 		}
@@ -103,9 +94,7 @@ class StructuredSerializationService implements Serializer {
 		def texts = AdviceText.getTranslations( advices, language )
 		
 		// Combine the advices with texts and create a structure to serialize
-		def output = advices.collect { advice -> serializeAdvice(advice, texts[ advice.code ]) }
-		
-		output
+		advices.collect { serializeAdvice(it, texts[ it.code ]) }
 	}
 	
 	public Map serializeAdvice(Advice advice, String translation) {

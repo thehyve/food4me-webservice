@@ -77,7 +77,7 @@ class Advice {
 	 * @param property
 	 * @return
 	 */
-	public static List<Measurable> getConditionProperties(Property p) {
+	public static List<Measurable> getConditionProperties(Advisable p) {
 		// TODO: Find out why I can't retrieve all conditions with it.advice.subject == p
 		def advices = Advice.findAllBySubject(p)
 		

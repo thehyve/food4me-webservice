@@ -10,7 +10,7 @@ can load your own data, or use the example data for testing.
 Installation
 ------------
 For development, a copy of [grails][1] is needed in order to run the application. 
-Currently, version 2.4.4 of grails is used. 
+Currently, version 2.5.6 of grails is used.
 
 For production, you can use a generated WAR file. In order to run the WAR, an 
 application server is required. The only supported one is [Tomcat][2], either 

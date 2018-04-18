@@ -33,46 +33,38 @@ import grails.transaction.Transactional
 class ComputeStatusService implements StatusComputer {
 
 	@Override
-	public MeasurementStatus computeStatus(Measurements measurements) {
+	MeasurementStatus computeStatus(Measurements measurements) {
 		// Return if no values are given
-		if( !measurements )
-			return null;
-	
-		MeasurementStatus measurementStatus = new MeasurementStatus()
-			
-		// Check the status for all properties
-		measurements.all.each { measurement ->
-			Status status = getStatus( measurement, measurements )
-			
-			if( status != null )
-				measurementStatus.addStatus( status.entity, status )
-		}
+		if (!measurements)
+			return null
 
-		
-		// Determine status for supplement intake for all nutrients.
-		measurements.getAllPropertiesForPropertyGroup( Property.PROPERTY_GROUP_NUTRIENT ).each { nutrient ->
-			log.trace "Determine status for supplement intake for " + nutrient
-			Status status = determineStatusForSupplement( new ModifiedProperty( property: nutrient, modifier: ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS.id ), nutrient, measurements )
-			if( status != null )
-				measurementStatus.addStatus( status.entity, status )
-		}
-		
-		return measurementStatus;
+		// Check the status for all properties
+		MeasurementStatus measurementStatus = new MeasurementStatus()
+
+		measurementStatus.putAll measurements.all.findResults {
+			getStatus(it, measurements)
+		}.collectEntries {[(it.entity):it]}
+
+		measurementStatus.putAll measurements.getAllPropertiesForPropertyGroup(Property.PROPERTY_GROUP_NUTRIENT).findResults {
+			log.trace "Determine status for supplement intake for $it"
+			determineStatusForSupplement(new ModifiedProperty(property: it, modifier: ModifiedProperty.Modifier.INTAKE_SUPPLEMENTS.id), measurements)
+		}.collectEntries {[(it.entity):it]}
+
+		return measurementStatus
 	}
 	
-	public Status getStatus( Measurement measurement, Measurements measurements ) {
+	Status getStatus( Measurement measurement, Measurements measurements ) {
 		log.trace "Determine status for " + measurement
-		MeasuredValue value = measurement.value
-		
+
 		// Lookup the reference property for this property
 		def referenceProperty = measurement.property?.referenceProperty
 		
-		if( referenceProperty ) {
-			def status = determineStatusForProperty( measurement.property, referenceProperty, measurements )
-			status?.value = value
+		if (referenceProperty) {
+			def status = determineStatusForProperty(measurement.property, referenceProperty, measurements)
+			status?.value = measurement.value
 			return status
 		}
-		
+
 		return null
 	}
 	
@@ -83,7 +75,7 @@ class ComputeStatusService implements StatusComputer {
 	 * @param measurements		Set of measurements used as input
 	 * @return
 	 */
-	protected Status determineStatusForProperty( Measurable valueProperty, Property referenceProperty, Measurements measurements ) {
+	protected static Status determineStatusForProperty(Measurable valueProperty, Property referenceProperty, Measurements measurements ) {
 		def status = new Status( entity: valueProperty )
 
 		// First determine the conditions applicable for the given property
@@ -144,11 +136,10 @@ class ComputeStatusService implements StatusComputer {
 	/**
 	 * Determines the status for some supplement intake value
 	 * @param valueProperty		Property to retrieve the value for
-	 * @param referenceProperty	Property to determine the reference
 	 * @param measurements		Set of measurements used as input
 	 * @return
 	 */
-	protected Status determineStatusForSupplement( ModifiedProperty valueProperty, Property referenceProperty, Measurements measurements ) {
+	protected static Status determineStatusForSupplement(ModifiedProperty valueProperty, Measurements measurements) {
 		def status = new Status( entity: valueProperty )
 
 		// A very simple check: yes or no
@@ -167,7 +158,7 @@ class ComputeStatusService implements StatusComputer {
 	}
 	
 	
-	protected def generateWhereClause( List<Property> properties, Measurements measurements, int index = 0 ) {
+	protected static def generateWhereClause( List<Property> properties, Measurements measurements, int index = 0 ) {
 		List<String> whereClause = []
 		def whereParams = [:]
 		
@@ -179,7 +170,7 @@ class ComputeStatusService implements StatusComputer {
 		[ whereClause, whereParams ]
 	}
 	
-	protected void extendWhereClauses( List whereClause, Map whereParams, Property property, MeasuredValue measuredValue, int index = 0 ) {
+	protected static void extendWhereClauses( List whereClause, Map whereParams, Property property, MeasuredValue measuredValue, int index = 0 ) {
 		// If no value is provided, we cannot filter on this property. That
 		// may result in no status being determined for this property. Skipping immediately
 		if( !measuredValue ) {

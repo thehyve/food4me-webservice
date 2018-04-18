@@ -41,10 +41,10 @@ class DerivedMeasurementsService {
 	 * Devise detailed measurements from the given values
 	 * @param measurements
 	 */
-	public void deriveMeasurements(Measurements measurements) {
+	void deriveMeasurements(Measurements measurements) {
 		// Return if no values are given
 		if( !measurements )
-			return;
+			return
 	
 		// Determine a list of nutrients, for which we have to derive measurements
 		List<Property> nutrients = measurements.getAllPropertiesForPropertyGroup( Property.PROPERTY_GROUP_NUTRIENT )
@@ -54,7 +54,7 @@ class DerivedMeasurementsService {
 			def nutrientMeasurements = measurements.getValuesFor(nutrient)
 			measurements.addAll deriveMeasurementsForNutrient( nutrient, nutrientMeasurements )
 		}
-		
+
 		// Compute omega3 index and total carotenoids
 		computeOmega3Index(measurements)
 		computeTotalCarotenoids(measurements)
@@ -94,7 +94,7 @@ class DerivedMeasurementsService {
 			
 		// Also compute the total intake from food.
 		def fromFood = computeIntakeFromFoodForNutrient( nutrient, nutrientMeasurements )
-		if( fromFood )
+		if (fromFood)
 			measurements.add(fromFood)
 
 		// Compute the most contributing food groups.
@@ -103,7 +103,7 @@ class DerivedMeasurementsService {
 		measurements
 	}	
 	
-	protected Measurement computeTotalForNutrient( Property nutrient, List<Measurement> nutrientMeasurements ) {
+	protected static Measurement computeTotalForNutrient(Property nutrient, List<Measurement> nutrientMeasurements ) {
 		// Check if the list of measurements already contains a 'total'
 		if( !nutrientMeasurements.find { it.property == nutrient } ) {
 			// Create a new measurement with the total for all nutrient measurements
@@ -112,8 +112,8 @@ class DerivedMeasurementsService {
 				if( it.property instanceof ModifiedProperty && it.property.modifier == ModifiedProperty.Modifier.INTAKE_DIETARY.id ) 
 					0
 				else
-					it.value.type == "numeric" ? it.value.value : 0 
-			}.sum()
+					it.value.type == "numeric" ? it.value.value : 0
+			}.sum() as Number
 			return new Measurement( 
 				property: nutrient, 
 				value: new MeasuredNumericValue( unit: nutrient.unit, value: total ), 
@@ -121,6 +121,7 @@ class DerivedMeasurementsService {
 			)
 		} else {
 			log.info "A total value for " + nutrient + " is already provided, so will not be computed."
+			null
 		}
 	}
 	
@@ -135,7 +136,7 @@ class DerivedMeasurementsService {
 				} else {
 					0
 				}
-			}.sum()
+			}.sum() as Number
 			
 			return new Measurement(
 				property: fromFoodProperty,
@@ -144,9 +145,9 @@ class DerivedMeasurementsService {
 			)
 		} else {
 			log.info "A total value for " + nutrient + " from food is already provided, so will not be computed."
+			null
 		}
 	}
-
 	
 	protected List<Measurement> computeContributingFoodGroupsForNutrient( Property nutrient, List<Measurement> nutrientMeasurements ) {
 		List<Measurement> measurements = []
@@ -188,7 +189,7 @@ class DerivedMeasurementsService {
 	 * @param measurements
 	 * @return
 	 */
-	protected void computeTotalCarotenoids(Measurements measurements) {
+	protected static void computeTotalCarotenoids(Measurements measurements) {
 		def totalCarotenoids = Property.findByEntity( "Carotenoids" )
 		
 		if( !totalCarotenoids ) {
@@ -217,7 +218,7 @@ class DerivedMeasurementsService {
 			return
 		}
 		
-		def totalCarotenoidsValue = inputMeasurements*.value.sum()
+		def totalCarotenoidsValue = inputMeasurements*.value.sum() as Number
 		
 		measurements.add new Measurement(
 			property: totalCarotenoids,
@@ -237,7 +238,7 @@ class DerivedMeasurementsService {
 	 * @param measurements
 	 * @return
 	 */
-	protected void computeOmega3Index(Measurements measurements) {
+	protected static void computeOmega3Index(Measurements measurements) {
 		def n3Index = Property.findByEntity( "Omega-3 index" )
 		
 		if( !n3Index ) {
@@ -266,7 +267,7 @@ class DerivedMeasurementsService {
 			return
 		}
 		
-		def n3IndexValue = 1.4473 + 0.8303 * inputMeasurements*.value.sum()
+		def n3IndexValue = 1.4473 + 0.8303 * (inputMeasurements*.value.sum() as Number).doubleValue()
 		
 		measurements.add new Measurement(
 			property: n3Index,
