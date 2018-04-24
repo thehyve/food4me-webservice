@@ -341,9 +341,9 @@ class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 			
 		and: "the appropriate set of measurements is given"
 			measurements = new Measurements()
-			measurements.add( new Measurement( property: dpa, value: new MeasuredNumericValue( value: new BigDecimal('0.4'), unit: Unit.findByCode( "%" ) ) ) )
-			measurements.add( new Measurement( property: epa, value: new MeasuredNumericValue( value: new BigDecimal('0.85'), unit: Unit.findByCode( "%" ) ) ) )
-			measurements.add( new Measurement( property: dha, value: new MeasuredNumericValue( value: new BigDecimal('0.7'), unit: Unit.findByCode( "%" ) ) ) )
+			measurements.add( new Measurement( property: dpa, value: new MeasuredNumericValue( value: 0.4, unit: Unit.findByCode( "%" ) ) ) )
+			measurements.add( new Measurement( property: epa, value: new MeasuredNumericValue( value: 0.85, unit: Unit.findByCode( "%" ) ) ) )
+			measurements.add( new Measurement( property: dha, value: new MeasuredNumericValue( value: 0.7, unit: Unit.findByCode( "%" ) ) ) )
 			
 			assert !measurements.getValueFor( n3Index )
 			
