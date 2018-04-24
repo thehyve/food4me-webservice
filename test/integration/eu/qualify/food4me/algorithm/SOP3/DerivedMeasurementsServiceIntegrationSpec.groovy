@@ -25,6 +25,7 @@ import eu.qualify.food4me.measurements.MeasuredTextValue
 import eu.qualify.food4me.measurements.Measurement
 import eu.qualify.food4me.measurements.Measurements
 import grails.test.spock.IntegrationSpec
+import org.hibernate.type.descriptor.java.BigDecimalTypeDescriptor
 
 class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 	def derivedMeasurementsService
@@ -340,9 +341,9 @@ class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 			
 		and: "the appropriate set of measurements is given"
 			measurements = new Measurements()
-			measurements.add( new Measurement( property: dpa, value: new MeasuredNumericValue( value: 0.4, unit: Unit.findByCode( "%" ) ) ) )
-			measurements.add( new Measurement( property: epa, value: new MeasuredNumericValue( value: 0.85, unit: Unit.findByCode( "%" ) ) ) )
-			measurements.add( new Measurement( property: dha, value: new MeasuredNumericValue( value: 0.7, unit: Unit.findByCode( "%" ) ) ) )
+			measurements.add( new Measurement( property: dpa, value: new MeasuredNumericValue( value: new BigDecimal('0.4'), unit: Unit.findByCode( "%" ) ) ) )
+			measurements.add( new Measurement( property: epa, value: new MeasuredNumericValue( value: new BigDecimal('0.85'), unit: Unit.findByCode( "%" ) ) ) )
+			measurements.add( new Measurement( property: dha, value: new MeasuredNumericValue( value: new BigDecimal('0.7'), unit: Unit.findByCode( "%" ) ) ) )
 			
 			assert !measurements.getValueFor( n3Index )
 			

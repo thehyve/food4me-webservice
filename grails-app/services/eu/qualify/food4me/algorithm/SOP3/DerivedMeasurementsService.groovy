@@ -269,7 +269,7 @@ class DerivedMeasurementsService {
 			return
 		}
 		
-		def n3IndexValue = 1.4473 + 0.8303 * (inputMeasurements*.value.sum() as Number).doubleValue()
+		def n3IndexValue = 1.4473 + 0.8303 * (inputMeasurements*.value.sum() as BigDecimal)
 		
 		measurements.add new Measurement(
 			property: n3Index,

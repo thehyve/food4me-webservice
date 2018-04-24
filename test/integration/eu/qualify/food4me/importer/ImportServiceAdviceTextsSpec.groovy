@@ -53,6 +53,10 @@ class ImportServiceAdviceTextsSpec extends ImportServiceIntegrationSpec {
 		
 		then: "texts for both advices are imported"
 			AdviceText.count == 2
+			AdviceText.findAll() == [
+					new AdviceText(code: 'L0.0.1', text: 'Jetzt geht loss', language: 'de'),
+					new AdviceText(code: 'L0.2.5', text: 'Gutentag', language: 'de')
+			]
 			AdviceText.countByCode( "L0.0.1" ) == 1
 			AdviceText.countByCode( "L0.2.5" ) == 1
 			

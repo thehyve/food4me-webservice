@@ -16,7 +16,11 @@
  */
 package eu.qualify.food4me.decisiontree
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
+@ToString(includeFields = true)
+@EqualsAndHashCode
 class AdviceText {
 	/**
 	 * Unique code of the advice.

@@ -29,3 +29,11 @@ file can be found in `example-settings.groovy`
 
   [1]: http://grails.org/
   [2]: http://tomcat.apache.org/
+
+## Development
+
+Test the app with
+
+```
+./grailsw test-app
+```

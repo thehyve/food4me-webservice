@@ -70,19 +70,16 @@ class ReferenceValue {
 	 */
 	static List getConditionProperties(Property p) {
 		// TODO: Find out why I can't retrieve all referenceconditions with it.referenceValue.subject == p
-		def referenceValues = ReferenceValue.findAllBySubject(p)
-		
+		def referenceValues = findAllBySubject(p)
+
 		if( !referenceValues )
 			return []
-			
-		def criteria = ReferenceCondition.createCriteria()
-		def referenceConditions = criteria.list {
+
+		return ReferenceCondition.createCriteria().list {
 			referenceValue {
 				'in'( 'id', referenceValues*.id )
 			}
-		}
-		
-		referenceConditions.collect { it.subject }.unique() as List
+		}.collect { it.subject }.unique() as List
 	}
 
 	/**
@@ -90,10 +87,10 @@ class ReferenceValue {
 	 * @return
 	 */
 	static int getSubjectCount() {
-		createCriteria().list {
+		createCriteria().get {
 			projections {
 				countDistinct("subject")
 			}
-		}[0]
+		} as int
 	}
 }

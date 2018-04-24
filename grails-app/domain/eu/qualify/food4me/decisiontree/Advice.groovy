@@ -81,28 +81,33 @@ class Advice {
 	static List<Measurable> getConditionProperties(Property p) {
 		// TODO: Find out why I can't retrieve all conditions with it.advice.subject == p
 		def advices = findAllBySubject(p)
-		
+
+		if( !advices )
+			return []
+
 		AdviceCondition.createCriteria().list {
-			'in'( 'id', advices*.id)
+			advice {
+				'in'('id', advices*.id)
+			}
 		}.collect {
 			// If the advice condition related to a modified property, return a modified property object
 			if( it.modifier ) {
 				new ModifiedProperty( property: it.subject, modifier: it.modifier )
 			} else {
 				it.subject
-			} 
+			}
 		}.unique()
 	}
 
 	static int getSubjectCount() {
-		createCriteria().list {
+		createCriteria().get {
 			projections {
 				countDistinct("subject")
 			}
-		}[0]
+		} as int
 	}
 	
-	public String getTranslation( String language = "en" ) {
+	String getTranslation( String language = "en" ) {
 		AdviceText.findByCodeAndLanguage( this.code, language )?.text
 	}
 
