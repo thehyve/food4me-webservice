@@ -48,19 +48,9 @@ class Food4meController {
 	 */
 	def form() {
 		// Find all properties grouped by propertygroup
-		def groupedProperties = [:]
-		def nutrients = []
-		Property.list( sort: 'entity' ).each {
-			if( it.propertyGroup == Property.PROPERTY_GROUP_NUTRIENT ) {
-				nutrients << it
-			} else {
-				if(!groupedProperties[it.propertyGroup])
-					groupedProperties[it.propertyGroup] = []
-					
-				groupedProperties[it.propertyGroup] << it
-			}
-		}
-		
+		def groupedProperties = Property.list( sort: 'entity' ).groupBy { it.propertyGroup }
+		def nutrients = groupedProperties.remove(Property.PROPERTY_GROUP_NUTRIENT)
+
 		// Determine the modifiers to allow the user to enter through the form
 		def nutrientModifiers = [
 			ModifiedProperty.Modifier.INTAKE_MEAT_FISH,
@@ -165,9 +155,7 @@ class Food4meController {
 		def criteria = Unit.createCriteria()
 		
 		def units = criteria.list {
-			and {
-				order('name')
-			}
+			order('name')
 		}
 		
 		// Use content negotiation to output the data

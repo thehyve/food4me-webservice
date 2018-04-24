@@ -78,7 +78,7 @@ class DerivedMeasurementsService {
 		List<Measurement> measurements = []
 		
 		if( !nutrientMeasurements ) {
-			log.warn "No measurements given for " + nutrient + ", so no derived measurements are computed."
+			log.warn "No measurements given for $nutrient, so no derived measurements are computed."
 			return []
 		} 
 		
@@ -122,7 +122,7 @@ class DerivedMeasurementsService {
 				derived: true 
 			)
 		} else {
-			log.info "A total value for " + nutrient + " is already provided, so will not be computed."
+			log.info "A total value for $nutrient is already provided, so will not be computed."
 			null
 		}
 	}
@@ -146,7 +146,7 @@ class DerivedMeasurementsService {
 				derived: true
 			)
 		} else {
-			log.info "A total value for " + nutrient + " from food is already provided, so will not be computed."
+			log.info "A total value for $nutrient from food is already provided, so will not be computed."
 			null
 		}
 	}
@@ -208,7 +208,7 @@ class DerivedMeasurementsService {
 		def inputProperties = inputs.collect { Property.findByEntity(it) }
 		
 		if( inputProperties.findAll().size() < inputs.size() ) {
-			log.warn "Not all properties to compute the total carotenoids could be found. The needed properties are: " + inputs
+			log.warn "Not all properties to compute the total carotenoids could be found. The needed properties are: $inputs"
 			return
 		}
 		
@@ -216,7 +216,7 @@ class DerivedMeasurementsService {
 		def inputMeasurements = inputProperties.collect { measurements.getValueFor(it) }.findAll { it && it.type == "numeric" }
 		
 		if( inputMeasurements.findAll().size() < inputProperties.size() ) {
-			log.warn "Not enough information to compute the total carotenoids. The computation needs numeric measurements for " + inputs
+			log.warn "Not enough information to compute the total carotenoids. The computation needs numeric measurements for $inputs"
 			return
 		}
 		
@@ -258,14 +258,14 @@ class DerivedMeasurementsService {
 		def inputProperties = inputs.collect { Property.findByEntity(it) }
 		
 		if( inputProperties.findAll().size() < inputs.size() ) {
-			log.warn "Not all properties to compute the omega-3 index could be found. The needed properties are: " + inputs
+			log.warn "Not all properties to compute the omega-3 index could be found. The needed properties are: $inputs"
 			return
 		}
 		
 		def inputMeasurements = inputProperties.collect { measurements.getValueFor(it) }.findAll { it && it.type == "numeric" }
 		
 		if( inputMeasurements.findAll().size() < inputProperties.size() ) {
-			log.warn "Not enough information to compute the omega-3 index. The computation needs numeric values for " + inputs
+			log.warn "Not enough information to compute the omega-3 index. The computation needs numeric values for $inputs"
 			return
 		}
 		

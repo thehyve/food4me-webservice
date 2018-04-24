@@ -61,13 +61,17 @@ class Status {
 	 * @author robert
 	 *
 	 */
-	static enum Color {
+	enum Color {
 		GREEN(10), AMBER(20), RED(30)
 		
-		private final int id
+		private final int value
 		
 		Color(int value) {
-			this.id = value
+			this.value = value
+		}
+
+		int getId() {
+			value
 		}
 
 		static Color fromString(String value) {

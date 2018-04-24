@@ -21,7 +21,6 @@ import eu.qualify.food4me.interfaces.Measurable
 import eu.qualify.food4me.measurements.MeasuredNumericValue
 import eu.qualify.food4me.measurements.MeasuredValue
 import eu.qualify.food4me.measurements.Measurements
-import eu.qualify.food4me.measurements.Status
 import eu.qualify.food4me.reference.ReferenceValue
 import grails.transaction.Transactional
 import groovy.util.logging.Log4j
@@ -38,7 +37,7 @@ class ReferenceService {
 	 * @param measurements
 	 * @return
 	 */
-	Map<Measurable, List<ReferenceValue>> getReferences(List<Measurable> entities, Measurements measurements ) {
+	Map<Property, List<ReferenceValue>> getReferences(List<Measurable> entities, Measurements measurements ) {
 		def age = Property.findByEntity( 'Age' )
 		def gender = Property.findByEntity( 'Gender' )
 		
@@ -154,71 +153,6 @@ class ReferenceService {
 		} 
 		
 		references
-	}
-	
-	/**
-	 * Determines the status for some referenceproperty
-	 * @param valueProperty		Property to retrieve the value for
-	 * @param referenceProperty	Property to determine the reference
-	 * @param measurements		Set of measurements used as input
-	 * @return
-	 */
-	protected Status determineStatusForProperty( Measurable valueProperty, Property referenceProperty, Measurements measurements ) {
-		def status = new Status( entity: valueProperty )
-
-		// First determine the conditions applicable for the given property
-		// Most probably that includes the property value itself, but it could
-		// be dependent on age or gender as well
-		def properties = ReferenceValue.getConditionProperties( referenceProperty )
-		
-		// If no properties are found, no reference values are known. Returning immediately
-		if( !properties ) {
-			log.warn "No references apply for any value of ${referenceProperty}. Please check the database"
-			status.status = Status.STATUS_UNKNOWN
-			return status
-		}
-		
-		// Create a query that includes all values and retrieve the id and status
-		def hql = "SELECT reference.id, reference.status, reference.color FROM ReferenceValue as reference INNER JOIN reference.conditions as condition"
-		hql += " WHERE reference.subject = :referenceProperty "
-		
-		// First determine the whereclause for all properties, except for the referenceproperty
-		// because the value for this property could be determined by another property (e.g. a ModifiedProperty)
-		def (whereClause, hqlParams) = generateWhereClause( properties - referenceProperty, measurements )
-		extendWhereClauses( whereClause, hqlParams, referenceProperty, measurements.getValueFor( valueProperty ), whereClause.size() + 1 )
-		
-		if( whereClause ) {
-			hql += " AND ( " + whereClause.join( " OR " ) + " )"
-		}
-			
-		hql += " GROUP BY reference.id, reference.status, reference.color HAVING COUNT(*) = reference.numConditions"
-		
-		hqlParams[ "referenceProperty" ] = referenceProperty
-		
-		def statuses = ReferenceValue.executeQuery( hql, hqlParams )
-		
-		if( statuses.size() == 0 ) {
-			log.warn "No references apply for ${referenceProperty}. Retrieval parameters are " + hqlParams
-			status.status = Status.STATUS_UNKNOWN
-			return status
-		}
-			
-		if( statuses.size() > 1 ) {
-			log.warn "Multiple references apply for ${referenceProperty}. Retrieval parameters are " + hqlParams
-			
-			if( log.traceEnabled ) {
-				log.trace "  HQL: " + hql
-				log.trace "  params: " + hqlParams
-				statuses.each {
-					log.trace "  Reference: " + it 
-				}
-			}
-		}
-		
-		// Return the first status found
-		status.status = statuses[0][1]
-		status.color = statuses[0][2]
-		return status
 	}
 	
 	protected static def generateWhereClause(List<Property> properties, Measurements measurements, int index = 0 ) {

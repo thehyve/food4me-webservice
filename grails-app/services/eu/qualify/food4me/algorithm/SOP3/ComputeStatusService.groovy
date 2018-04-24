@@ -176,21 +176,21 @@ class ComputeStatusService implements StatusComputer {
 		// If no value is provided, we cannot filter on this property. That
 		// may result in no status being determined for this property. Skipping immediately
 		if( !measuredValue ) {
-			log.warn "No value provided for " + property + ", which may be needed to determine the status"
+			log.warn "No value provided for $property, which may be needed to determine the status"
 			return
 		}
 		
-		String condition = " ( condition.subject = :property" + index + " AND "
+		String condition = " ( condition.subject = :property$index AND "
 		
 		// There is a difference between text and numeric values
 		if( measuredValue instanceof MeasuredNumericValue )
-			condition += "( condition_type = 'numeric' AND ( low IS NULL or low < :value" + index + " ) AND ( high IS NULL OR high >= :value" + index + " ) )"
+			condition += "( condition_type = 'numeric' AND ( low IS NULL or low < :value$index ) AND ( high IS NULL OR high >= :value$index ) )"
 		 else
-			 condition += "( condition_type = 'text' AND ( value IS NULL or lower(value) = lower(:value" + index + ") ) )"
+			 condition += "( condition_type = 'text' AND ( value IS NULL or lower(value) = lower(:value$index) ) )"
 		 
-		whereClause << condition + " )"
+		whereClause << "$condition )"
 		
-		whereParams[ "property" + index ] = property
-		whereParams[ "value" + index ] = measuredValue.value
+		whereParams["property$index"] = property
+		whereParams["value$index"] = measuredValue.value
 	}
 }
