@@ -15,16 +15,12 @@
 	</bean>
 
 	<bean id="grailsConfigurator" class="org.codehaus.groovy.grails.commons.spring.GrailsRuntimeConfigurator">
-		<constructor-arg>
-			<ref bean="grailsApplication" />
-		</constructor-arg>
+		<constructor-arg ref="grailsApplication"/>
 		<property name="pluginManager" ref="pluginManager" />
 	</bean>
 
 	<bean id="characterEncodingFilter" class="org.springframework.web.filter.CharacterEncodingFilter">
-		<property name="encoding">
-			<value>utf-8</value>
-		</property>
+		<property name="encoding" value="utf-8"/>
 	</bean>
 
 	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean" />

@@ -37,17 +37,12 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 	].findAll() }()
 	
 	@Override
-	public List<Advisable> determineAdvisables(MeasurementStatus measurementStatus, Measurements measurements ) {
-		List<Advisable> advisables = []
-		
+	List<Advisable> determineAdvisables(MeasurementStatus measurementStatus, Measurements measurements ) {
 		// Get the highest priority property from each of the groups
-		for( int group = 1; group <= 3; group++ ) {
-			def advisable = getAdvisableFromGroup( measurementStatus, group )
-			log.trace "Advisable for group " + group + ": " + advisable
-			if( advisable )
-				advisables << advisable
+		List<Measurable> advisables = (1..3).findResults {
+			getAdvisableFromGroup( measurementStatus, it )
 		}
-		
+
 		// If no properties are found, return immediately
 		if( !advisables )
 			return advisables
@@ -55,7 +50,7 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 		// If non-gene-risk nutrients have a higher colour priority (red) than 
 		// gene-risk nutrients, you prioritise 2 red non-gene-risk nutrients 
 		// then a third advice will be based on a gene-risk nutrient
-		if( !advisables.findAll { isGeneRiskProperty( it ) } ) {
+		if( !advisables.any { isGeneRiskProperty( it ) } ) {
 			addGeneRiskPropertyToAdvisables( advisables, measurementStatus )
 		}
 		
@@ -111,7 +106,7 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 	 * @param group
 	 * @return
 	 */
-	protected Measurable getAdvisableFromGroup( MeasurementStatus measurementStatus, int group ) {
+	protected static Measurable getAdvisableFromGroup(MeasurementStatus measurementStatus, int group ) {
 		// Retrieve the properties within this group
 		def groupProperties = getGroupProperties( group )	
 		
@@ -142,7 +137,7 @@ class DetermineAdvisableService implements AdvisableDeterminer {
 	 * @param group
 	 * @return
 	 */
-	protected List<Measurable> getGroupProperties( int group ) {
+	protected static List<Measurable> getGroupProperties(int group ) {
 		switch( group ) {
 			case 1:
 				return [

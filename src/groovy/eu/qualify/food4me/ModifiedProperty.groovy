@@ -29,7 +29,7 @@ class ModifiedProperty implements Measurable {
 	 * Returns the root property for this measurable
 	 * @return
 	 */
-	public Property getRootProperty() {
+	Property getRootProperty() {
 		property
 	}
 
@@ -39,33 +39,25 @@ class ModifiedProperty implements Measurable {
 	 * Can be used on modified properties to use the references of the root property
 	 * @return
 	 */
-	public Property getReferenceProperty() {
+	Property getReferenceProperty() {
 		// Only use the root property for the intake from food, not on other modifiers
-		if( modifier == Modifier.INTAKE_DIETARY.id )
-			rootProperty
-		else
-			null
+		modifier == Modifier.INTAKE_DIETARY.id ? rootProperty : null
 	}
 	
-	public String toString() {
-		String description = property.toString()
-		
-		if( modifier )
-			description += " [" + modifier + "]"
-		 
-		description
+	String toString() {
+		modifier ? "${property} [${modifier}]" : property.toString()
 	}
 	
 	/**
 	 * Returns a list of allowed modifiers for the given property
 	 */
-	public static List<Modifier> getAllowedModifiers(Property property) {
+	static List<Modifier> getAllowedModifiers(Property property) {
 		List<Modifier> modifiers = []
 		
 		if(property.propertyGroup == Property.PROPERTY_GROUP_NUTRIENT) {
 			// Modifiers that can be specified on nutrients
 			modifiers += [ 
-				Modifier.INTAKE_MEAT_FISH, 
+				Modifier.INTAKE_MEAT_FISH,
 				Modifier.INTAKE_DAIRY, 
 				Modifier.INTAKE_SOUP_SAUCES, 
 				Modifier.INTAKE_SWEETS_SNACKS,
@@ -81,10 +73,10 @@ class ModifiedProperty implements Measurable {
 			}
 		}
 		
-		modifiers
+		return modifiers
 	}
-	
-	public enum Modifier {
+
+	static enum Modifier {
 		// Modifiers with respect to nutrient intake
 		INTAKE_MEAT_FISH("Meat and fish"),
 		INTAKE_DAIRY("Dairy"),
@@ -93,41 +85,31 @@ class ModifiedProperty implements Measurable {
 		INTAKE_FATS_SPREADS("Fats and spreads"),
 		INTAKE_POTATOES_RICE_PASTA("Potatoes, rice and pasta"),
 		INTAKE_EGGS("Eggs"),
-		
+
 		INTAKE_DIETARY("From food"),
 		INTAKE_SUPPLEMENTS("From supplements"),
-		
+
 		// Modifiers used for food groups that contribute to nutrient intake
 		FIRST_CONTRIBUTING_FOOD_GROUP("First contributing food group"),
 		SECOND_CONTRIBUTING_FOOD_GROUP("Second contributing food group"),
-		
+
 		// Special modifiers used for salt intake
 		SALT_ON_TABLE( "Add at the table" ),
 		SALT_WHEN_COOKING( "Add when cooking" )
-		
-		private final String value
-		
+
+		final String id
+
 		Modifier(String value) {
-			this.value = value
+			this.id = value
 		}
-		
-		String getId(){
-			value
-		}
-		
+
 		/**
 		 * Checks whether this enum contains an item with the given string as value
 		 * @param test
 		 * @return
 		 */
-		public static boolean contains(String test) {
-			for (Modifier m : Modifier.values()) {
-				if (m.id == test) {
-					return true;
-				}
-			}
-		
-			return false;
+		static boolean contains(String test) {
+			values().any { it.id == test }
 		}
 	}
 }

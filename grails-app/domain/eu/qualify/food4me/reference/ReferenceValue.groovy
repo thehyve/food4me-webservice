@@ -16,10 +16,8 @@
  */
 package eu.qualify.food4me.reference
 
-import java.util.List;
-
-import eu.qualify.food4me.Property;
-import eu.qualify.food4me.measurements.Status;
+import eu.qualify.food4me.Property
+import eu.qualify.food4me.measurements.Status
 
 /**
  * Reference value for a given property
@@ -59,7 +57,7 @@ class ReferenceValue {
 	 * Returns the condition for the subject itself, if any  
 	 * @return
 	 */
-	public ReferenceCondition getSubjectCondition() {
+	ReferenceCondition getSubjectCondition() {
 		conditions.find { it.subject == subject }
 	}
 	
@@ -70,35 +68,29 @@ class ReferenceValue {
 	 * @param property
 	 * @return
 	 */
-	public static List getConditionProperties(Property p) {
+	static List getConditionProperties(Property p) {
 		// TODO: Find out why I can't retrieve all referenceconditions with it.referenceValue.subject == p
-		def referenceValues = ReferenceValue.findAllBySubject(p)
-		
+		def referenceValues = findAllBySubject(p)
+
 		if( !referenceValues )
 			return []
-			
-		def criteria = ReferenceCondition.createCriteria()
-		def referenceConditions = criteria.list {
+
+		return ReferenceCondition.createCriteria().list {
 			referenceValue {
 				'in'( 'id', referenceValues*.id )
 			}
-		}
-		
-		referenceConditions.collect { it.subject }.unique() as List
+		}.collect { it.subject }.unique() as List
 	}
-	
+
 	/**
 	 * Counts the number of subjects for which the database contains a reference.
 	 * @return
 	 */
-	public static int getSubjectCount() {
-		def criteria = ReferenceValue.createCriteria()
-		def referenceSubjectCount = criteria.list {
+	static int getSubjectCount() {
+		createCriteria().get {
 			projections {
 				countDistinct("subject")
 			}
-		}
-		
-		referenceSubjectCount[0]
+		} as int
 	}
 }

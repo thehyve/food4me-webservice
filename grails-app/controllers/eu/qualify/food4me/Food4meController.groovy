@@ -16,27 +16,48 @@
  */
 package eu.qualify.food4me
 
-import java.util.List;
-import java.util.Map;
-
 import eu.qualify.food4me.decisiontree.Advice
 import eu.qualify.food4me.decisiontree.AdviceText
-import eu.qualify.food4me.interfaces.AdviceGenerator
-import eu.qualify.food4me.interfaces.Advisable
-import eu.qualify.food4me.interfaces.AdvisableDeterminer
-import eu.qualify.food4me.interfaces.Measurable
-import eu.qualify.food4me.interfaces.Parser
-import eu.qualify.food4me.interfaces.Serializer
-import eu.qualify.food4me.interfaces.StatusComputer
+import eu.qualify.food4me.interfaces.*
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
-import eu.qualify.food4me.reference.ReferenceValue;
+import eu.qualify.food4me.reference.ReferenceValue
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(['IS_AUTHENTICATED_ANONYMOUSLY'])
 class Food4meController {
-	
+
+	def beforeInterceptor = [action: this.&auth]
+
+	// defined with private scope, so it's not considered an action
+	private auth() {
+		def token = grailsApplication.config.food4me.access_token
+		if (!token) {
+			return
+		}
+
+		def authHeader = request.getHeader('Authorization')?.trim()
+
+		if (authHeader == null) {
+			response.status = 401
+			response.setHeader('WWW-Authenticate', 'Bearer realm="food4me webservice"')
+			return false
+		} else if (!authHeader.toLowerCase(Locale.ENGLISH).startsWith('bearer ')) {
+			response.status = 400
+			response.setHeader('WWW-Authenticate', 'Bearer realm="food4me webservice"' +
+					', error="invalid_request"' +
+					', error_description="Bearer token required."')
+			return false
+		} else if (authHeader.substring(6).trim() != token) {
+			response.status = 401
+			response.setHeader('WWW-Authenticate', 'Bearer realm="food4me webservice"' +
+					', error="invalid_token"' +
+					', error_description="Bearer token invalid."')
+			return false
+		}
+	}
+
 	// Services where the real action happens. See conf/spring/resources.groovy
 	StatusComputer statusComputer
 	AdvisableDeterminer advisableDeterminer
@@ -57,19 +78,9 @@ class Food4meController {
 	 */
 	def form() {
 		// Find all properties grouped by propertygroup
-		def groupedProperties = [:]
-		def nutrients = []
-		Property.list( sort: 'entity' ).each {
-			if( it.propertyGroup == Property.PROPERTY_GROUP_NUTRIENT ) {
-				nutrients << it
-			} else {
-				if(!groupedProperties[it.propertyGroup])
-					groupedProperties[it.propertyGroup] = []
-					
-				groupedProperties[it.propertyGroup] << it
-			}
-		}
-		
+		def groupedProperties = Property.list( sort: 'entity' ).groupBy { it.propertyGroup }
+		def nutrients = groupedProperties.remove(Property.PROPERTY_GROUP_NUTRIENT) ?: []
+
 		// Determine the modifiers to allow the user to enter through the form
 		def nutrientModifiers = [
 			ModifiedProperty.Modifier.INTAKE_MEAT_FISH,
@@ -174,9 +185,7 @@ class Food4meController {
 		def criteria = Unit.createCriteria()
 		
 		def units = criteria.list {
-			and {
-				order('name')
-			}
+			order('name')
 		}
 		
 		// Use content negotiation to output the data

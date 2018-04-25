@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.qualify.food4me.measurements;
+package eu.qualify.food4me.measurements
 
-import eu.qualify.food4me.Unit
 import groovy.transform.EqualsAndHashCode
 
 @EqualsAndHashCode
@@ -27,7 +26,7 @@ class MeasuredNumericValue extends MeasuredValue {
 	 * Returns the type of the value: numeric or text
 	 * @return
 	 */
-	public String getType() {
+	String getType() {
 		"numeric"
 	}
 }

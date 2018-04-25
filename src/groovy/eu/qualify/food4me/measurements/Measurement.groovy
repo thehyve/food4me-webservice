@@ -30,8 +30,8 @@ class Measurement {
 	 * provided by the user or derived by the application
 	 */
 	boolean derived = false
-	
-	public String toString() {
+
+	String toString() {
 		"Measurement for " + property + ": " + value
 	} 
 }

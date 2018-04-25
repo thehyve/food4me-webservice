@@ -47,10 +47,10 @@ class DetermineAdvisableServiceIntegrationSpec extends IntegrationSpec {
 			def cholesterol = Property.findByEntity( "Cholesterol" )
 			
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( protein, new Status( entity: protein, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
-			measurementStatus.addStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( vitaminA, new Status( entity: vitaminA, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
-			measurementStatus.addStatus( cholesterol, new Status( entity: cholesterol, status: Status.STATUS_LOW, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( protein, new Status( entity: protein, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( vitaminA, new Status( entity: vitaminA, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
+			measurementStatus.putStatus( cholesterol, new Status( entity: cholesterol, status: Status.STATUS_LOW, color: Status.Color.AMBER ) )
 			
 		when: "the advisables are determined"
 			List<Advisable> advisables = determineAdvisableService.determineAdvisables( measurementStatus, new Measurements() )
@@ -69,8 +69,8 @@ class DetermineAdvisableServiceIntegrationSpec extends IntegrationSpec {
 			def cholesterol = Property.findByEntity( "Cholesterol" )
 			
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( protein, new Status( entity: protein, status: Status.STATUS_VERY_LOW, color: Status.Color.RED ) )
-			measurementStatus.addStatus( cholesterol, new Status( entity: cholesterol, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
+			measurementStatus.putStatus( protein, new Status( entity: protein, status: Status.STATUS_VERY_LOW, color: Status.Color.RED ) )
+			measurementStatus.putStatus( cholesterol, new Status( entity: cholesterol, status: Status.STATUS_OK, color: Status.Color.GREEN ) )
 			
 		when: "the advisables are determined"
 			List<Advisable> advisables = determineAdvisableService.determineAdvisables( measurementStatus, new Measurements() )
@@ -99,8 +99,8 @@ class DetermineAdvisableServiceIntegrationSpec extends IntegrationSpec {
 			def carbohydrate = Property.findByEntity( "Carbohydrate" )
 			
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( protein, new Status( entity: protein, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
+			measurementStatus.putStatus( protein, new Status( entity: protein, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
 			
 		when: "the advisables are determined"
 			List<Advisable> advisables = determineAdvisableService.determineAdvisables( measurementStatus, new Measurements() )
@@ -117,8 +117,8 @@ class DetermineAdvisableServiceIntegrationSpec extends IntegrationSpec {
 			def carbohydrate = Property.findByEntity( "Carbohydrate" )
 			
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( protein, new Status( entity: protein, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( protein, new Status( entity: protein, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
 			
 		when: "the advisables are determined"
 			List<Advisable> advisables = determineAdvisableService.determineAdvisables( measurementStatus, new Measurements() )
@@ -137,9 +137,9 @@ class DetermineAdvisableServiceIntegrationSpec extends IntegrationSpec {
 			def folate = Property.findByEntity( "Folate" )
 			
 			measurementStatus = new MeasurementStatus()
-			measurementStatus.addStatus( protein, new Status( entity: protein, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
-			measurementStatus.addStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
-			measurementStatus.addStatus( folate, new Status( entity: folate, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( protein, new Status( entity: protein, status: Status.STATUS_VERY_HIGH, color: Status.Color.RED ) )
+			measurementStatus.putStatus( carbohydrate, new Status( entity: carbohydrate, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
+			measurementStatus.putStatus( folate, new Status( entity: folate, status: Status.STATUS_HIGH, color: Status.Color.AMBER ) )
 			
 		when: "the advisables are determined"
 			List<Advisable> advisables = determineAdvisableService.determineAdvisables( measurementStatus, new Measurements() )

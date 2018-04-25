@@ -27,26 +27,28 @@ abstract class MeasuredValue {
 	 * Returns the type of the value: numeric or text
 	 * @return
 	 */
-	public abstract String getType();
+	abstract String getType()
 	
 	/**
 	 * Returns the actual value. If type == text, than this should return String. BigDecimal otherwise
 	 * @return
 	 */
-	public abstract def getValue();
-	
-	public String toString() {
-		value + ( unit ? " " + unit.code : "" )
+	abstract def getValue()
+
+	String toString() {
+		value + (unit ? " " + unit.code : "")
 	}
 	
 	/**
 	 * Factory method to create a measuredValue object
 	 */
-	public static MeasuredValue fromValue( def value ) {
-		if( value instanceof String ) {
-			new MeasuredTextValue( value: value )
-		} else if( value instanceof Number ) {
-			new MeasuredNumericValue( value: value )
+	static MeasuredValue fromValue(def value) {
+		if (value instanceof String) {
+			new MeasuredTextValue(value: value)
+		} else if (value instanceof Number) {
+			new MeasuredNumericValue(value: value)
+		} else {
+			throw new IllegalArgumentException("Unknown value $value of type ${value.class}")
 		}
 	}
 }

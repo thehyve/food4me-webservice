@@ -25,6 +25,7 @@ import eu.qualify.food4me.measurements.MeasuredTextValue
 import eu.qualify.food4me.measurements.Measurement
 import eu.qualify.food4me.measurements.Measurements
 import grails.test.spock.IntegrationSpec
+import org.hibernate.type.descriptor.java.BigDecimalTypeDescriptor
 
 class DerivedMeasurementsServiceIntegrationSpec extends IntegrationSpec {
 	def derivedMeasurementsService

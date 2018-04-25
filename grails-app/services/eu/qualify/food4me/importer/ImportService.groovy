@@ -25,16 +25,20 @@ import eu.qualify.food4me.measurements.Status
 import eu.qualify.food4me.reference.ReferenceCondition
 import eu.qualify.food4me.reference.ReferenceValue
 import groovy.sql.Sql
+import groovy.util.logging.Log4j
+import org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin
 
+import javax.sql.DataSource
 
+@Log4j
 class ImportService {
 	static transactional = false
 	
 	def sessionFactory
-	def propertyInstanceMap = org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
+	def propertyInstanceMap = DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
 	def grailsApplication
-	def dataSource
-	
+	DataSource dataSource
+
 	int batchSize = 50
 	String separatorChar = "\t"
 	
@@ -55,7 +59,7 @@ class ImportService {
 		def units = []
 		def alreadyImportedIds = []
 		
-		inputStream.toCsvReader([skipLines: 1, separatorChar: separatorChar]).eachLine { line ->
+		inputStream.toCsvReader([skipLines: 1, separatorChar: separatorChar]).eachLine { String[] line ->
 			if( !line || line.size() < 3 ) {
 				log.warn "Skipping line as it has not enough columns: " + line?.size()
 				return
@@ -95,7 +99,7 @@ class ImportService {
 		def properties = []
 		def alreadyImportedIds = []
 		
-		inputStream.toCsvReader([skipLines: 1, separatorChar: separatorChar]).eachLine { line ->
+		inputStream.toCsvReader([skipLines: 1, separatorChar: separatorChar]).eachLine { String[] line ->
 			if( !line || line.size() < 3 ) {
 				log.warn "Skipping line as it has not enough columns: " + line?.size()
 				return
@@ -126,8 +130,10 @@ class ImportService {
 					unit = Unit.findByCode( unitCode )
 					if( !unit ) {
 						log.warn "Unit " + unitCode + " for property " + line[0] + " can not be found. Consider importing units first."
-						return;
+						return
 					}
+				} else {
+					unit = null
 				}
 				
 				properties << new Property( entity: line[0], propertyGroup: line[1], externalId: externalId, unit: unit )
@@ -157,7 +163,7 @@ class ImportService {
 		def references = []
 		
 		// The first 2 lines contain the headers
-		inputStream.toCsvReader([skipLines: 2, separatorChar: separatorChar]).eachLine { line ->
+		inputStream.toCsvReader([skipLines: 2, separatorChar: separatorChar]).eachLine { String[] line ->
 			if( !line || line.size() < 5 ) {
 				log.warn "Skipping line as it has not enough columns: " + line?.size()
 				return
@@ -178,20 +184,20 @@ class ImportService {
 			
 			// Check whether an age and/or gender are given (in columns 4, 5, 6)
 			// TODO generalize this method to support more and other conditions
-			def age = null
-			def gender = null
-			if( line[3] || line[4] ) {
-				age = [ line[3] ?: null, line[4] ?: null ]
+			BigDecimal[] age = []
+			if (line[3] || line[4]) {
+				age = [ line[3], line[4] ]*.toBigDecimal()
 			}
-			gender = line[5] ?: null
-			
+
 			// Check whether we have the properties for the requested conditions
 			if( age && !ageProperty ) {
-				log.error "Trying to add a reference condition on age for property " + property + " but the age property doesn't exist"
+				log.error "Trying to add a reference condition on age for property $property but the age property doesn't exist"
 				return
 			}
+
+			def gender = line[5] ?: null
 			if( gender && !genderProperty ) {
-				log.error "Trying to add a reference condition on age for property " + property + " but the age property doesn't exist"
+				log.error "Trying to add a reference condition on age for property $property but the age property doesn't exist"
 				return
 			}
 			
@@ -200,8 +206,8 @@ class ImportService {
 			//		the lower boundary of the next
 			def statusses = [ Status.STATUS_VERY_LOW, Status.STATUS_LOW, Status.STATUS_OK, Status.STATUS_HIGH, Status.STATUS_VERY_HIGH ]
 			def currentLowerBoundary = null
-			def currentColumnIndex = 6
-			def color
+			int currentColumnIndex = 6
+			String color
 			
 			statusses.each { status ->
 				// If no status color is given for this status, we skip this status
@@ -256,9 +262,9 @@ class ImportService {
 		// The first 2 lines
 		def lineNo = 1
 		def columnStatus = [:]
-		inputStream.toCsvReader([separatorChar: separatorChar]).eachLine { line ->
+		inputStream.toCsvReader([separatorChar: separatorChar]).eachLine { String[] line ->
 			if( !line || line.size() < 2 ) {
-				log.warn "Skipping line as it has not enough columns: " + line?.size()
+				log.warn "Skipping line as it has not enough columns: ${line?.size()}"
 				return
 			}
 			
@@ -335,15 +341,12 @@ class ImportService {
 	 */
 	def loadDecisionTrees( InputStream inputStream ) {
 		def adviceObjects = []
-		
-		def adviceSubject
-		def conditionSubjects = []
-		
+
 		def lineNo = 1
-		def headerLines = []
+		List<String[]> headerLines = []
 		def structure
 		
-		inputStream?.toCsvReader([skipLines: 0, separatorChar: separatorChar]).eachLine { line ->
+		inputStream?.toCsvReader([skipLines: 0, separatorChar: separatorChar])?.eachLine { String[] line ->
 			if( !line || line.size() < 2 ) {
 				log.warn "Skipping line as it has not enough columns: " + line?.size()
 				return
@@ -352,13 +355,13 @@ class ImportService {
 			// Combine the first three header lines to be parsed separately
 			if( lineNo++ < 4 ) {
 				headerLines << line
-				return;
+				return
 			}
 			
 			// If we reach this point, we should first parse the header lines
 			if( headerLines ) {
 				structure = parseDecisionTreeHeaderLines( headerLines )
-				headerLines = null
+				headerLines = []
 			}
 			
 			// If the header lines could not be properly parsed, there is no need
@@ -424,14 +427,14 @@ class ImportService {
 			
 			// Generate objects for all advices
 			adviceConditions.each { conditionSet ->
-				def advice = new Advice( code: toAdviceCode(line[0]), subject: structure.adviceSubject ) 
+				def advice = new Advice( code: line[0], subject: structure.adviceSubject )
 				
 				log.trace "  Generating advice with conditions + " + conditionSet
 				
 				conditionSet.eachWithIndex { conditionValue, index ->
 					if( conditionValue ) {
 						// Retrieve the parameters for this column
-						def conditionParams = structure.conditionSubjects[index+1]
+						def conditionParams = structure.conditionSubjects[index + 1]
 						
 						def condition = new AdviceCondition( subject: conditionParams.property, modifier: conditionParams.modifier )
 						if( conditionParams.filterOnStatus ) {
@@ -458,10 +461,10 @@ class ImportService {
 		saveBatch( Advice, adviceObjects )
 	}
 	
-	protected def parseDecisionTreeHeaderLines( def headerLines ) {
+	protected static def parseDecisionTreeHeaderLines(List<String[]> headerLines ) {
 		def decisionTreeStructure = [
-			adviceSubject: null,
-			conditionSubjects: [:]
+			adviceSubject: null as Property,
+			conditionSubjects: []
 		]
 		
 		if( headerLines.size() != 3 ) {
@@ -526,9 +529,9 @@ class ImportService {
 	def loadAdviceTexts( InputStream inputStream, String language = "en" ) {
 		def objects = []
 		
-		inputStream.toCsvReader([skipLines: 0, separatorChar: separatorChar]).eachLine { line ->
+		inputStream.toCsvReader([skipLines: 0, separatorChar: separatorChar]).eachLine { String[] line ->
 			if( !line || line.size() < 2 ) {
-				log.warn "Skipping line as it has not enough columns: " + line?.size()
+				log.warn "Skipping line as it has not enough columns: ${line?.size()}"
 				return
 			}
 			
@@ -553,7 +556,7 @@ class ImportService {
 				adviceText.text = line[1]
 			} else {
 				log.trace "Importing new for " + adviceCode + " in " + language
-				adviceText = new AdviceText( code: toAdviceCode(adviceCode), language: language, text: line[1] )
+				adviceText = new AdviceText( code: adviceCode, language: language, text: line[1] )
 			}
 			
 			objects << adviceText
@@ -577,7 +580,7 @@ class ImportService {
 		log.info "Start loading units " + ( directory ? " from " + directory : "" )
 		
 		importData( directory, ~/units.*\.txt/, { file ->
-			log.info( "Loading units from " + file )
+			log.info("Loading units from $file")
 			file.withInputStream { is -> loadUnits( is ) }
 		})
 	}
@@ -611,7 +614,7 @@ class ImportService {
 	 * @return
 	 */
 	def loadGenericReferencesFromDirectory( String directory = null ) {
-		log.info "Start loading generic references " + ( directory ? " from " + directory : "" )
+		log.info "Start loading generic references ${directory ? " from $directory" : ""}"
 		
 		// First disable the trigger for advice conditions, as that slows down the import heavily
 		log.info "Disabling trigger on reference_condition"
@@ -667,10 +670,10 @@ class ImportService {
 				return
 			}
 			
-			def language = match[0][1]
+			String language = match[0][1 as String]
 			
 			log.info( "Loading advice texts from " + file + " in language " + language )
-			file.withInputStream { is -> loadAdviceTexts(is, language) }
+			file.withInputStream { InputStream is -> loadAdviceTexts(is, language) }
 		})
 	}
 
@@ -703,7 +706,7 @@ class ImportService {
 	 * Returns the default import directory to import from
 	 * @return
 	 */
-	public String getDefaultImportDirectory() {
+	String getDefaultImportDirectory() {
 		grailsApplication.config.food4me.importDirectory
 	}
 			
@@ -721,7 +724,7 @@ class ImportService {
 				log.error "No default directory given to import data from. Please specify the configuration value food4me.importDirectory to a readable directory."
 				return
 			} else {
-				log.info "Importing data from default directory in configuration: " + directory
+				log.info "Importing data from default directory in configuration: $directory"
 			}
 		}
 			
@@ -742,19 +745,19 @@ class ImportService {
 	 * @return
 	 */
 	protected def saveBatch( def domainClass, def objects ) {
-		def numSaves = 0;
+		def numSaves = 0
 		
 		if( !objects ) {
-			log.warn "No objects of type " + domainClass?.simpleName + " to store"
+			log.warn "No objects of type ${domainClass?.simpleName} to store"
 			return
 		} 
 		
-		log.info "Batch saving " + objects.size() + " objects of type " + domainClass?.simpleName 
-		
+		log.info "Batch saving ${objects.size()} objects of type ${domainClass?.simpleName}"
+
 		domainClass.withTransaction {
 			objects.each { object ->
 				if( !object.save() ) {
-					log.error "Unable to save ${domainClass} object in batch: " + object
+					log.error "Unable to save $domainClass object in batch: $object"
 					object?.errors?.allErrors?.each { currentError ->
 						log.error "Error occured on field [${currentError?.field}] - [${currentError?.defaultMessage}] for value [${currentError?.rejectedValue}]"
 					}
@@ -767,24 +770,15 @@ class ImportService {
 		cleanUpGORM()
 		return numSaves
 	}
-	
-	/**
-	 * Prepares an advice code for storage in the database
-	 * @param code
-	 * @return
-	 */
-	protected String toAdviceCode(code) {
-		code.replaceAll( /\./, "_" )
-	}
-	
+
 	protected def disableTriggers( String table ) {
 		final Sql sql = new Sql(dataSource)
-		sql.execute "ALTER TABLE " + table + " DISABLE TRIGGER USER"
+		sql.execute "ALTER TABLE $table DISABLE TRIGGER USER"
 	}
 	
 	protected def enableTriggers( String table ) {
 		final Sql sql = new Sql(dataSource)
-		sql.execute "ALTER TABLE " + table + " ENABLE TRIGGER USER"
+		sql.execute "ALTER TABLE $table ENABLE TRIGGER USER"
 		
 		// Update rows in the table without changing the data itself
 		// This will execute the trigger

@@ -47,11 +47,11 @@ class Status {
 	 * A status which is unknown should result in a boolean false
 	 * @return
 	 */
-	public boolean asBoolean() {
+	boolean asBoolean() {
 		return status && status != STATUS_UNKNOWN
 	}
-	
-	public String toString() {
+
+	String toString() {
 		return "" + entity + " = " + status
 	}
 	
@@ -61,19 +61,19 @@ class Status {
 	 * @author robert
 	 *
 	 */
-	public enum Color { 
+	enum Color {
 		GREEN(10), AMBER(20), RED(30)
 		
-		private final Integer value
+		private final int value
 		
-		Color(Integer value) {
+		Color(int value) {
 			this.value = value
 		}
-		
-		Integer getId(){
+
+		int getId() {
 			value
 		}
-		
+
 		static Color fromString(String value) {
 			value.toUpperCase() as Color
 		}

@@ -19,10 +19,8 @@ package eu.qualify.food4me.algorithm.SOP3
 import eu.qualify.food4me.Property
 import eu.qualify.food4me.interfaces.Advisable
 import eu.qualify.food4me.interfaces.AdvisableDeterminer
-import eu.qualify.food4me.interfaces.Measurable
 import eu.qualify.food4me.measurements.MeasurementStatus
 import eu.qualify.food4me.measurements.Measurements
-import eu.qualify.food4me.measurements.Status
 import grails.transaction.Transactional
 
 /**
@@ -34,17 +32,9 @@ import grails.transaction.Transactional
 @Transactional
 class AllParametersAdvisableService implements AdvisableDeterminer {
 	@Override
-	public List<Advisable> determineAdvisables(MeasurementStatus measurementStatus, Measurements measurements ) {
-		List<Advisable> advisables = []
-		
-		measurementStatus.all.each { status ->
-			if( status.entity instanceof Property ) {
-				// If the status has been determined, add the entity
-				if( status.status )
-					advisables << status.entity
-			}
+	List<Advisable> determineAdvisables(MeasurementStatus measurementStatus, Measurements measurements ) {
+		measurementStatus.all.findResults {
+			it.entity instanceof Property && it.status ? it.entity : null
 		}
-		
-		advisables
 	}
 }
