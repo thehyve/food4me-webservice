@@ -50,12 +50,6 @@ paths:
           description: "ISO 639-1 language code of the language to return."
           required: true
           enum: [en,nl]
-        - name: format
-          in: path
-          type: string
-          description: "Format in which the data should be returned"
-          required: true
-          enum: [html,json]
         - name: generic.age
           in: query
           description: Age in years
@@ -104,12 +98,6 @@ paths:
         provided in the form {group}.{propertyname}(.{modifier}). Some examples
         are shown below.
       parameters:
-        - name: format
-          in: path
-          type: string
-          description: "Format in which the data should be returned"
-          required: true
-          enum: [html,json]
         - name: generic.age
           in: query
           description: Age in years
@@ -149,12 +137,6 @@ paths:
         For those values, age and gender are required. If no age and gender values
         are given, these reference values will not be returned.
       parameters:
-        - name: format
-          in: path
-          type: string
-          description: "Format in which the data should be returned"
-          required: true
-          enum: [html,json]
         - name: generic.age
           in: query
           description: Age in years
@@ -197,13 +179,6 @@ paths:
         A list of properties that are supported by the current implementation is returned.
         This can be used to determine the full set of parameters for the /advices or /status
         webservice calls.
-      parameters:
-        - name: format
-          in: path
-          type: string
-          description: "Format in which the data should be returned"
-          required: true
-          enum: [html,json]
       security:
        - api_key: []
       responses:

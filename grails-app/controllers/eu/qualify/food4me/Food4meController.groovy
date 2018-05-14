@@ -320,7 +320,7 @@ class Food4meController {
 	
 	
 	def advice() {
-		def advice = Advice.findByCode(params.id)
+		def advice = Advice.findByCode(((String)params.id).replaceAll('[-_]', '.'))
 		
 		log.debug "Finding advice for code [" + params.id + "]: " + advice
 		
