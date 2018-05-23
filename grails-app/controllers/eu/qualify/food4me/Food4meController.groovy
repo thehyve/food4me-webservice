@@ -29,6 +29,7 @@ import grails.plugin.springsecurity.annotation.Secured
 class Food4meController {
 
 	def beforeInterceptor = [action: this.&auth]
+	def afterInterceptor = [action: this.&cors]
 
 	// defined with private scope, so it's not considered an action
 	private auth() {
@@ -56,6 +57,10 @@ class Food4meController {
 					', error_description="Bearer token invalid."')
 			return false
 		}
+	}
+
+	private cors() {
+		response.setHeader("Access-Control-Allow-Origin", "*")
 	}
 
 	// Services where the real action happens. See conf/spring/resources.groovy
