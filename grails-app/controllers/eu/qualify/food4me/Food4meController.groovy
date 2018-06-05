@@ -28,14 +28,16 @@ import grails.plugin.springsecurity.annotation.Secured
 @Secured(['IS_AUTHENTICATED_ANONYMOUSLY'])
 class Food4meController {
 
-	def beforeInterceptor = [action: this.&auth]
-	def afterInterceptor = [action: this.&cors]
+	def beforeInterceptor = {
+		cors()
+		return auth()
+	}
 
 	// defined with private scope, so it's not considered an action
 	private auth() {
 		def token = grailsApplication.config.food4me.access_token
 		if (!token) {
-			return
+			return true
 		}
 
 		def authHeader = request.getHeader('Authorization')?.trim()
@@ -57,6 +59,7 @@ class Food4meController {
 					', error_description="Bearer token invalid."')
 			return false
 		}
+		return true
 	}
 
 	private cors() {
