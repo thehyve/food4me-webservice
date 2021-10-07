@@ -49,7 +49,9 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
         // runtime 'mysql:mysql-connector-java:5.1.29'
-        runtime 'org.postgresql:postgresql:9.4.1212'
+        compile 'org.codehaus.groovy:groovy-all:2.4.21'
+        runtime 'org.postgresql:postgresql:42.2.24'
+        runtime 'javax.xml.bind:jaxb-api:2.3.1'
         test "org.grails:grails-datastore-test-support:1.0.2-grails-2.4"
     }
 
@@ -63,7 +65,7 @@ grails.project.dependency.resolution = {
         compile ":asset-pipeline:1.9.9"
         compile ":spring-security-core:2.0.0"
 		compile ":csv:0.3.1"
-		
+
         // plugins needed at runtime but not for compilation
         runtime ":hibernate4:4.3.6.1"
         runtime ":database-migration:1.4.0"

@@ -2,7 +2,8 @@
 // config files can be ConfigSlurper scripts, Java properties files, or classes
 // in the classpath in ConfigSlurper format
 
- grails.config.locations = [ "file:/var/lib/tomcat8/conf/Catalina/localhost/${appName}-config.groovy",
+ grails.config.locations = [
+         "file:/var/lib/tomcat9/conf/Catalina/localhost/${appName}-config.groovy",
                              "file:${userHome}/.grails/${appName}-config.groovy",
                              "classpath:${appName}-config.groovy"]
 
@@ -86,13 +87,13 @@ grails.hibernate.pass.readonly = false
 // configure passing read-only to OSIV session by default, requires "singleSession = false" OSIV mode
 grails.hibernate.osiv.readonly = false
 
-// Settings to handle database migrations. 
+// Settings to handle database migrations.
 grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
 grails.plugin.databasemigration.autoMigrateScripts = [ 'RunApp', 'TestApp' ]
 environments {
     development {
         grails.logging.jul.usebridge = true
-		
+
 		grails.plugin.databasemigration.dropOnStart = false
 		grails.plugin.databasemigration.updateOnStart = true
     }
@@ -126,7 +127,7 @@ log4j.main = {
            'org.springframework',
            'org.hibernate',
            'net.sf.ehcache.hibernate'
-		   
+
 }
 
 
@@ -137,7 +138,7 @@ grails.plugin.springsecurity.authority.className = 'eu.qualify.food4me.auth.Role
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/':                       		  ['permitAll'],
 	'/advices':                       ['permitAll'],
-	
+
 	'/assets/**':                     ['permitAll'],
 	'/**/js/**':                      ['permitAll'],
 	'/**/css/**':                     ['permitAll'],
